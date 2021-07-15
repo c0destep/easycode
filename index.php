@@ -1,18 +1,19 @@
 <?php
+
 define("ENVIRONMENT", "development"); //production, development
 
 define("ROOT_PATH", __DIR__);
-define("BASE_PATH", __DIR__."/App/");
-define("BASE_PATH_CACHE", __DIR__."/App/Cache/");
-define("BASE_PATH_THIRD", __DIR__."/App/Third/");
-define("BASE_PATH_MODELS", __DIR__."/App/Models/");
-define("BASE_PATH_VIEWS", __DIR__."/App/Views/");
-define("BASE_PATH_MODULES", __DIR__."/App/Modules/");
+define("BASE_PATH", __DIR__ . "/App/");
+define("BASE_PATH_CACHE", __DIR__ . "/App/Cache/");
+define("BASE_PATH_THIRD", __DIR__ . "/App/Third/");
+define("BASE_PATH_MODELS", __DIR__ . "/App/Models/");
+define("BASE_PATH_VIEWS", __DIR__ . "/App/Views/");
+define("BASE_PATH_MODULES", __DIR__ . "/App/Modules/");
 
-define("TEMPLATE_ENGINE_SMARTY","smarty");
-define("TEMPLATE_WITHOUT_ENGINE","without");
+define("TEMPLATE_ENGINE_SMARTY", "smarty");
+define("TEMPLATE_WITHOUT_ENGINE", "without");
 
-switch (ENVIRONMENT){
+switch (ENVIRONMENT) {
     case 'development':
         error_reporting(-1);
         ini_set('display_errors', 1);
