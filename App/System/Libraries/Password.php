@@ -1,11 +1,14 @@
 <?php
+
 namespace System\Libraries;
 
-class Password {
+class Password
+{
 
     protected static $cost = 10;
 
-    public static function checkCost(){
+    public static function checkCost()
+    {
         $timeTarget = 0.05;
         $cost = 8;
         do {
@@ -21,7 +24,8 @@ class Password {
      * @param $passworld
      * @return false|string
      */
-    public static function getPassworld($passworld){
+    public static function getPassworld($passworld)
+    {
         return password_hash($passworld, PASSWORD_BCRYPT, [
             "cost" => self::$cost
         ]);
@@ -32,20 +36,22 @@ class Password {
      * @param $hash
      * @return bool
      */
-    public static function verifyPassworld($passworld, $hash){
+    public static function verifyPassworld($passworld, $hash)
+    {
         return password_verify($passworld, $hash);
     }
 
     /**
      * @return string
      */
-    public static function generateUuid() {
-        return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-            mt_rand( 0, 0xffff ),
-            mt_rand( 0, 0x0C2f ) | 0x4000,
-            mt_rand( 0, 0x3fff ) | 0x8000,
-            mt_rand( 0, 0x2Aff ), mt_rand( 0, 0xffD3 ), mt_rand( 0, 0xff4B )
+    public static function generateUuid()
+    {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0C2f) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0x2Aff), mt_rand(0, 0xffD3), mt_rand(0, 0xff4B)
         );
     }
 }

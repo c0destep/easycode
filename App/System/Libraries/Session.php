@@ -1,13 +1,16 @@
 <?php
+
 namespace System\Libraries;
 
 use System\FastApp;
 
-class Session {
+class Session
+{
     protected static $instance;
 
-    public static function getInstance(){
-        if (self::$instance ==  null){
+    public static function getInstance()
+    {
+        if (self::$instance == null) {
             self::$instance = new Session();
             self::$instance->init();
         }
@@ -17,7 +20,8 @@ class Session {
     /**
      * Init a session
      */
-    public function init(){
+    public function init()
+    {
         session_name(FastApp::getInstance()->getConfig("session_id"));
         session_start();
     }
@@ -28,15 +32,16 @@ class Session {
      * @param $key string
      * @param $message string|mixed
      */
-    public function setFlash($key, $message){
+    public function setFlash($key, $message)
+    {
         $Flash = $this->get("flash_data");
 
         if (isset($Flash[$key]))
             unset($Flash[$key]);
 
-        $data = array_merge( is_array($Flash) ? $Flash : [] , [ $key => $message ] );
+        $data = array_merge(is_array($Flash) ? $Flash : [], [$key => $message]);
 
-        $this->set("flash_data",$data);
+        $this->set("flash_data", $data);
     }
 
     /**
@@ -45,7 +50,8 @@ class Session {
      * @param $key string
      * @return null|string|mixed
      */
-    public function getFlash($key){
+    public function getFlash($key)
+    {
         $FlashData = $this->get("flash_data");
         $Return = isset($FlashData[$key]) ? $FlashData[$key] : null;
         if (isset($FlashData[$key])) {
@@ -59,11 +65,12 @@ class Session {
      * Get a session variable.
      *
      * @param string $key
-     * @param mixed  $default
+     * @param mixed $default
      *
      * @return mixed
      */
-    public function get($key, $default = null){
+    public function get($key, $default = null)
+    {
         return $this->exists($key)
             ? $_SESSION[$key]
             : $default;
@@ -73,11 +80,12 @@ class Session {
      * Set a session variable.
      *
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      */
-    public function set($key, $value){
+    public function set($key, $value)
+    {
         $_SESSION[$key] = $value;
         return $this;
     }
@@ -86,11 +94,12 @@ class Session {
      * Merge values recursively.
      *
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      */
-    public function merge($key, $value){
+    public function merge($key, $value)
+    {
         if (is_array($value) && is_array($old = $this->get($key))) {
             $value = array_merge_recursive($old, $value);
         }
@@ -104,7 +113,8 @@ class Session {
      *
      * @return $this
      */
-    public function delete($key){
+    public function delete($key)
+    {
         if ($this->exists($key)) {
             unset($_SESSION[$key]);
         }
@@ -116,7 +126,8 @@ class Session {
      *
      * @return $this
      */
-    public function clear(){
+    public function clear()
+    {
         $_SESSION = [];
         return $this;
     }
@@ -128,7 +139,8 @@ class Session {
      *
      * @return bool
      */
-    public function exists($key){
+    public function exists($key)
+    {
         return array_key_exists($key, $_SESSION);
     }
 
@@ -139,7 +151,8 @@ class Session {
      *
      * @return string
      */
-    public static function id($new = false){
+    public static function id($new = false)
+    {
         if ($new && session_id()) {
             session_regenerate_id(true);
         }
@@ -149,7 +162,8 @@ class Session {
     /**
      * Destroy the session.
      */
-    public static function destroy(){
+    public static function destroy()
+    {
         if (self::id()) {
             session_unset();
             session_destroy();
@@ -176,7 +190,8 @@ class Session {
      *
      * @return mixed
      */
-    public function __get($key){
+    public function __get($key)
+    {
         return $this->get($key);
     }
 
@@ -184,9 +199,10 @@ class Session {
      * Magic method for set.
      *
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      */
-    public function __set($key, $value){
+    public function __set($key, $value)
+    {
         $this->set($key, $value);
     }
 
@@ -195,7 +211,8 @@ class Session {
      *
      * @param string $key
      */
-    public function __unset($key){
+    public function __unset($key)
+    {
         $this->delete($key);
     }
 
@@ -206,7 +223,8 @@ class Session {
      *
      * @return bool
      */
-    public function __isset($key){
+    public function __isset($key)
+    {
         return $this->exists($key);
     }
 
@@ -215,7 +233,8 @@ class Session {
      *
      * @return int
      */
-    public function count(){
+    public function count()
+    {
         return count($_SESSION);
     }
 
@@ -224,7 +243,8 @@ class Session {
      *
      * @return \Traversable
      */
-    public function getIterator(){
+    public function getIterator()
+    {
         return new \ArrayIterator($_SESSION);
     }
 
@@ -235,7 +255,8 @@ class Session {
      *
      * @return boolean
      */
-    public function offsetExists($offset){
+    public function offsetExists($offset)
+    {
         return $this->exists($offset);
     }
 
@@ -246,7 +267,8 @@ class Session {
      *
      * @return mixed
      */
-    public function offsetGet($offset){
+    public function offsetGet($offset)
+    {
         return $this->get($offset);
     }
 
@@ -256,7 +278,8 @@ class Session {
      * @param mixed $offset
      * @param mixed $value
      */
-    public function offsetSet($offset, $value){
+    public function offsetSet($offset, $value)
+    {
         $this->set($offset, $value);
     }
 
@@ -265,7 +288,8 @@ class Session {
      *
      * @param mixed $offset
      */
-    public function offsetUnset($offset){
+    public function offsetUnset($offset)
+    {
         $this->delete($offset);
     }
 }

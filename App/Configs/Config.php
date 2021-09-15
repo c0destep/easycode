@@ -1,28 +1,32 @@
 <?php
+
+use System\Database\EloquentDriver;
+use System\ResponseType;
+
 $Config = array();
 
 $Config['name_project'] = "CodeInsight";
 
 $Config['base_dir'] = "/";
-$Config['base_url'] = "https://potato.codeinsight.com.br/";
-$Config['https_enable'] = true;
+$Config['base_url'] = "http://localhost/";
+$Config['https_enable'] = false;
 $Config['ssl_verify'] = false; //redir ssl
 
 /**
  * Load Files Route
  * Put the name of file on folder App/Config/Routes
  */
-$Config["files_route"] = [ "Default" ];
+$Config["files_route"] = ["Default"];
 
 /**
- * Configs Rotas
+ * Config Route
  */
 $Config['default_route'] = "Home";
 
 /**
  *
  */
-$Config['error_content_type'] = \System\ResponseType::CONTENT_HTML;
+$Config['error_content_type'] = ResponseType::CONTENT_HTML;
 $Config['error_extra_headers'] = [];
 
 $Config['enable_query_strings'] = true;
@@ -33,19 +37,19 @@ $Config['encrypt_key'] = "default";
  */
 $Config['db_driver'] = [
     "isActive" => false,
-    "class" => \System\Database\EloquentDriver::class, //Class Driver para setup de conexão com banco de dados
+    "class" => EloquentDriver::class, //Class Driver for Database Connection Setup
     "config" => [
         "db_hostname" => "localhost",
         "db_database" => "",
-        "db_username" => "",
+        "db_username" => "root",
         "db_password" => "",
     ]
 ];
 
 /**
- * SESSÃO CONFIG
+ * SESSION CONFIG
  */
-$Config['session_id'] = "sphap"; //Nome da Sessão
+$Config['session_id'] = "sphap"; // Name Session
 
 
 /**
@@ -54,7 +58,7 @@ $Config['session_id'] = "sphap"; //Nome da Sessão
 $Config['base_dir_assets'] = "public/";
 
 /**
- * Diretorios de Uploads
+ * Upload Directory
  */
 $Config['upload']['image'] = "/public/uploads/img/";
 $Config['upload']['docs'] = "/public/uploads/docs/";
@@ -80,7 +84,7 @@ $Config['timezone'] = "America/Sao_Paulo";
 
 /**
  * Autoloads Helpers
- * Verifica se existe o arquivo e o inclui antes de iniciar o controlador
+ * Checks if the file exists and includes it before starting the controller
  * Ex: Session, Pagination, Text, Upload
  */
 $Config['helpersLoad'] = ["Session", "Text", "Upload"];

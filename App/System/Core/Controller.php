@@ -1,4 +1,5 @@
 <?php
+
 namespace System\Core;
 
 use System\FastApp;
@@ -8,7 +9,8 @@ use System\Libraries\Session as Session;
 use System\Libraries\Smarty as Smarty;
 use System\Response;
 
-class Controller {
+class Controller
+{
 
     private $hasEngine = null;
     private $smarty = null;
@@ -18,7 +20,8 @@ class Controller {
      * Construtor do controlador
      * Controller constructor.
      */
-    public function __construct(){
+    public function __construct()
+    {
         $this->hasEngine = FastApp::getInstance()->getConfig("template");
         if ($this->hasEngine == TEMPLATE_ENGINE_SMARTY) {
             $this->smarty = Smarty::getInstance();
@@ -31,7 +34,8 @@ class Controller {
      * Obter a instancia do Framework
      * @return null|FastApp Get app instance
      */
-    public function getApp(){
+    public function getApp()
+    {
         return FastApp::getInstance();
     }
 
@@ -39,7 +43,8 @@ class Controller {
      * Obter Sessão
      * @return null|Session get session instance system Librarie
      */
-    public function getSession(){
+    public function getSession()
+    {
         return Session::getInstance();
     }
 
@@ -47,7 +52,8 @@ class Controller {
      * Set Content-Type of header
      * @param $type string Type of Response
      */
-    public function setResponseType($type){
+    public function setResponseType($type)
+    {
         Response::getInstance()->setHeaderType($type);
     }
 
@@ -56,7 +62,8 @@ class Controller {
      * @param $file string Name of Helper File
      * @throws \Exception
      */
-    public function loadHelper($file){
+    public function loadHelper($file)
+    {
         FastApp::getInstance()->loadHelper($file);
     }
 
@@ -67,11 +74,12 @@ class Controller {
      * @param bool $return bool true para retornar o HTML
      * @return null|string
      */
-    public function setView($file, $data = array(), $return = false){
+    public function setView($file, $data = array(), $return = false)
+    {
         if ($this->hasEngine == TEMPLATE_ENGINE_SMARTY) {
-            return $this->smarty->view($file.".tpl", $data, $return);
-        }else{
-            return $this->setViewWithoutTemplate($file,$data, $return);
+            return $this->smarty->view($file . ".tpl", $data, $return);
+        } else {
+            return $this->setViewWithoutTemplate($file, $data, $return);
         }
     }
 
@@ -82,14 +90,15 @@ class Controller {
      * @param bool $return
      * @return null|string
      */
-    public function setViewWithoutTemplate($_file_, $data = array(), $return = false){
-        if ($return){
+    public function setViewWithoutTemplate($_file_, $data = array(), $return = false)
+    {
+        if ($return) {
             extract($data);
             HtmlBlocks::getInstance()->initBlock();
-                include BASE_PATH . "Views/" . $_file_ . ".php";
+            include BASE_PATH . "Views/" . $_file_ . ".php";
             HtmlBlocks::getInstance()->endBlock("GetTemplate");
             return HtmlBlocks::getInstance()->getBlocks("GetTemplate", 0);
-        }else{
+        } else {
             extract($data);
             include BASE_PATH . "Views/" . $_file_ . ".php";
             return null;

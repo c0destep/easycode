@@ -1,8 +1,10 @@
 <?php
+
 namespace System\Database;
 
-interface DriverImplements {
+interface DriverImplements
+{
 
-	public function createConnection($Config);
+    public function createConnection($Config);
 
 }

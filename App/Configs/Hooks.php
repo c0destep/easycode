@@ -1,15 +1,16 @@
 <?php
+
 use System\Libraries\Hooks;
 
 /**
- * Eventos para executar antes das execução dos controladores
+ * Events to run before the controllers run
  */
 Hooks::registerCallsBefore([
     //[CLASS, METHOD],
 ]);
 
 /**
- * Eventos para executar depois da execução dos controladores
+ * Events to run after controllers run
  */
 Hooks::registerCallsAfter([
     //[CLASS, METHOD],

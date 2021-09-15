@@ -9,7 +9,8 @@ if (!function_exists("uploadImage")) {
      * @param array $mimes enviar array com os mimetype Ex: ['image/png', 'image/gif']
      * @return String|array retorna nome do arquivo ou array com erros
      */
-    function uploadImage($input, $size = "5M", $pixels = null, $mimes = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']){
+    function uploadImage($input, $size = "5M", $pixels = null, $mimes = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg'])
+    {
 
         $Config = getConfig("upload");
         $storage = new \Upload\Storage\FileSystem(ROOT_PATH . $Config['image']);
@@ -42,12 +43,13 @@ if (!function_exists("imageCache")) {
      * @param $height
      * @return string
      */
-    function imageCache($filename, $width, $height){
+    function imageCache($filename, $width, $height)
+    {
         $Config = getConfig('upload');
         $filename = str_replace(getConfig('base_url'), "/", $filename);
         $filename = str_replace($Config['image'], "", $filename);
 
-        if (!is_file(ROOT_PATH. $Config['image'] . $filename)) {
+        if (!is_file(ROOT_PATH . $Config['image'] . $filename)) {
             return $filename;
         }
 
@@ -56,32 +58,32 @@ if (!function_exists("imageCache")) {
         $image_old = $filename;
         $image_new = utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $extension;
 
-        if (!is_file(ROOT_PATH. getConfig('cache_image') . $image_new) || (filectime(ROOT_PATH. $Config['image'] . $image_old) > filectime(ROOT_PATH. getConfig('cache_image') . $image_new))) {
-            list($width_orig, $height_orig, $image_type) = getimagesize(ROOT_PATH. $Config['image'] . $image_old);
+        if (!is_file(ROOT_PATH . getConfig('cache_image') . $image_new) || (filectime(ROOT_PATH . $Config['image'] . $image_old) > filectime(ROOT_PATH . getConfig('cache_image') . $image_new))) {
+            list($width_orig, $height_orig, $image_type) = getimagesize(ROOT_PATH . $Config['image'] . $image_old);
 
             if (!in_array($image_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
-                return ROOT_PATH. $Config['image'] . $image_old;
+                return ROOT_PATH . $Config['image'] . $image_old;
             }
 
             $path = '';
             $directories = explode('/', dirname($image_new));
             foreach ($directories as $directory) {
                 $path = $path . '/' . $directory;
-                if (!is_dir(ROOT_PATH. getConfig('cache_image') . $path)) {
-                    @mkdir(ROOT_PATH. getConfig('cache_image')  . $path, 0777);
+                if (!is_dir(ROOT_PATH . getConfig('cache_image') . $path)) {
+                    @mkdir(ROOT_PATH . getConfig('cache_image') . $path, 0777);
                 }
             }
 
             if ($width_orig != $width || $height_orig != $height) {
-                $image = new \System\Libraries\Images(ROOT_PATH. $Config['image'] . $image_old);
+                $image = new \System\Libraries\Images(ROOT_PATH . $Config['image'] . $image_old);
                 $image->resize($width, $height);
-                $image->save(ROOT_PATH. getConfig('cache_image'). $image_new);
+                $image->save(ROOT_PATH . getConfig('cache_image') . $image_new);
             } else {
-                copy(ROOT_PATH. $Config['image'] . $image_old, ROOT_PATH. getConfig('cache_image') . $image_new);
+                copy(ROOT_PATH . $Config['image'] . $image_old, ROOT_PATH . getConfig('cache_image') . $image_new);
             }
         }
 
         $image_new = str_replace(' ', '%20', $image_new);
-        return getConfig('cache_image').$image_new;
+        return getConfig('cache_image') . $image_new;
     }
 }

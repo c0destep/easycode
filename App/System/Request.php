@@ -1,7 +1,9 @@
 <?php
+
 namespace System;
 
-class Request {
+class Request
+{
 
     protected static $instance = null;
 
@@ -20,8 +22,9 @@ class Request {
      * Obter instancia da class
      * @return null|Request
      */
-    public static function getInstance(){
-        if (is_null(self::$instance)){
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
             self::$instance = new Request();
         }
         return self::$instance;
@@ -30,7 +33,8 @@ class Request {
     /**
      * Response constructor.
      */
-    public function __construct(){
+    public function __construct()
+    {
         self::$paramJson = getJsonPost();
         $this->allHeaders = getallheaders();
     }
@@ -38,9 +42,10 @@ class Request {
     /**
      * XSS clear
      */
-    public static function xssClear(){
-        $_GET   = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
-        $_POST  = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+    public static function xssClear()
+    {
+        $_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
     }
 
     /**
@@ -49,7 +54,8 @@ class Request {
      * @param int $xss
      * @return mixed|null
      */
-    public static function get($key, $xss = 0){
+    public static function get($key, $xss = 0)
+    {
         if (!isset($_GET[$key]))
             return null;
 
@@ -64,7 +70,8 @@ class Request {
      * @param $defult
      * @return mixed
      */
-    public static function getDefault($key, $defult){
+    public static function getDefault($key, $defult)
+    {
         if (!isset($_GET[$key]))
             return $defult;
         return $_GET[$key];
@@ -76,7 +83,8 @@ class Request {
      * @param int $xss
      * @return mixed|null
      */
-    public static function post($key, $xss = 0){
+    public static function post($key, $xss = 0)
+    {
         if (!isset($_POST[$key]))
             return null;
 
@@ -92,7 +100,8 @@ class Request {
      * @param $default
      * @return mixed
      */
-    public static function postDefault($key, $default){
+    public static function postDefault($key, $default)
+    {
         if (!isset($_POST[$key]))
             return $default;
 
@@ -105,8 +114,9 @@ class Request {
      * @param int $xss
      * @return mixed|null
      */
-    public static function json($key = null, $xss = 0){
-        if ($key == null){
+    public static function json($key = null, $xss = 0)
+    {
+        if ($key == null) {
             return self::$paramJson;
         }
         if (!isset(self::$paramJson[$key]))
@@ -124,8 +134,9 @@ class Request {
      * @param int $xss
      * @return mixed|null
      */
-    public static function request($key = null, $xss = 0){
-        if (is_null($key)){
+    public static function request($key = null, $xss = 0)
+    {
+        if (is_null($key)) {
             return $_REQUEST;
         }
 
@@ -143,8 +154,9 @@ class Request {
      * @param null $key
      * @return mixed
      */
-    public static function extra($key = null){
-        if ($key == null){
+    public static function extra($key = null)
+    {
+        if ($key == null) {
             return self::$extra;
         }
         return self::$extra[$key];
@@ -154,7 +166,8 @@ class Request {
      * Definir parametros extras
      * @param $array
      */
-    public static function setExtra($array){
+    public static function setExtra($array)
+    {
         self::$extra = $array;
     }
 
@@ -163,7 +176,8 @@ class Request {
      * @param $key string
      * @return mixed
      */
-    public static function find($key){
+    public static function find($key)
+    {
         if (is_null($key))
             return null;
 
@@ -190,8 +204,9 @@ class Request {
      * @param null $key
      * @return array|false|null
      */
-    public function getHeader($key = null){
-        if ($key == null){
+    public function getHeader($key = null)
+    {
+        if ($key == null) {
             return $this->allHeaders;
         }
 
@@ -201,7 +216,8 @@ class Request {
         return null;
     }
 
-    public function __get($key){
+    public function __get($key)
+    {
         return self::find($key);
     }
 

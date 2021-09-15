@@ -1,2 +1,3 @@
 <?php
-//put routes here
+
+// Your routes here

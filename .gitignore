@@ -6,6 +6,3 @@
 vendor/
 bower_components/
 node_modules/
-
-## Files
-composer.lock

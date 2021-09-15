@@ -1,10 +1,12 @@
 <?php
+
 namespace System;
 
 use System\Libraries\View;
 use System\ResponseType as ResponseType;
 
-class Response {
+class Response
+{
 
     protected static $instance = null;
     protected $responseHeader = [];
@@ -23,8 +25,9 @@ class Response {
      * Obter instancia da class
      * @return null|Response
      */
-    public static function getInstance(){
-        if (is_null(self::$instance)){
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
             self::$instance = new Response();
         }
         return self::$instance;
@@ -33,14 +36,16 @@ class Response {
     /**
      * @param \System\Core\Controller $controller
      */
-    public function setController($controller){
+    public function setController($controller)
+    {
         $this->controller = $controller;
     }
 
     /**
      * @param \System\Core\Controller $controller
      */
-    public function getController(){
+    public function getController()
+    {
         return $this->controller;
     }
 
@@ -49,12 +54,13 @@ class Response {
      * @param $key
      * @param null $value
      */
-    public function setHeader($key,$value = null){
+    public function setHeader($key, $value = null)
+    {
         if (is_null($value)) {
             $Get = explode(":", $key);
             $this->responseHeader[$Get[0]] = isset($Get[1]) ? $Get[1] : null;
             header($key);
-        }else{
+        } else {
             $this->responseHeader[$key] = $value;
             header("{$key}:{$value}");
         }
@@ -65,7 +71,8 @@ class Response {
      * @param $key
      * @return mixed
      */
-    public function getResponseHeader($key){
+    public function getResponseHeader($key)
+    {
         return $this->responseHeader[$key];
     }
 
@@ -73,14 +80,16 @@ class Response {
      * Definir o tipo do conteudo da página
      * @param $type
      */
-    public function setHeaderType($type){
+    public function setHeaderType($type)
+    {
         $this->setHeader("Content-Type", $type);
     }
 
     /**
      * @return \System\Libraries\ViewJson
      */
-    public function json(){
+    public function json()
+    {
         $this->setHeaderType(ResponseType::CONTENT_JSON);
         return View::getJson();
     }
@@ -88,7 +97,8 @@ class Response {
     /**
      * @return \System\Libraries\ViewHtml
      */
-    public function html(){
+    public function html()
+    {
         $this->setHeaderType(ResponseType::CONTENT_HTML);
         return View::getHtml();
     }
@@ -98,9 +108,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultHtml($Merge = []){
+    public static function getDefaultHtml($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_HTML,
+            "Content-Type:" . ResponseType::CONTENT_HTML,
         ]);
     }
 
@@ -109,9 +120,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultJson($Merge = []){
+    public static function getDefaultJson($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_JSON,
+            "Content-Type:" . ResponseType::CONTENT_JSON,
         ]);
     }
 
@@ -120,9 +132,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultJs($Merge = []){
+    public static function getDefaultJs($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_JS,
+            "Content-Type:" . ResponseType::CONTENT_JS,
         ]);
     }
 
@@ -131,9 +144,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultCss($Merge = []){
+    public static function getDefaultCss($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_CSS,
+            "Content-Type:" . ResponseType::CONTENT_CSS,
         ]);
     }
 
@@ -142,9 +156,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultXml($Merge = []){
+    public static function getDefaultXml($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_XML,
+            "Content-Type:" . ResponseType::CONTENT_XML,
         ]);
     }
 
@@ -153,9 +168,10 @@ class Response {
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultOctetStream($Merge = []){
+    public static function getDefaultOctetStream($Merge = [])
+    {
         return array_merge($Merge, [
-            "Content-Type:".ResponseType::CONTENT_OCTETSTREAM,
+            "Content-Type:" . ResponseType::CONTENT_OCTETSTREAM,
         ]);
     }
 }

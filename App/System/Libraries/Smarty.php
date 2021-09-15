@@ -1,14 +1,17 @@
 <?php
+
 namespace System\Libraries;
 
 use System\FastApp;
 
-class Smarty extends \Smarty {
+class Smarty extends \Smarty
+{
 
     protected static $instance;
     public $debug = false;
 
-    public static function getInstance(){
+    public static function getInstance()
+    {
         if (is_null(self::$instance)) {
             self::$instance = new Smarty();
         }
@@ -18,7 +21,8 @@ class Smarty extends \Smarty {
     /**
      * Smarty constructor.
      */
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
         $this->template_dir = BASE_PATH . "Views/";
         $this->compile_dir = BASE_PATH_CACHE . "/Template";
@@ -32,15 +36,17 @@ class Smarty extends \Smarty {
         }
     }
 
-    public function setDefaultTemplate(){
-       $this->setTemplateDir(BASE_PATH . "Views/");
+    public function setDefaultTemplate()
+    {
+        $this->setTemplateDir(BASE_PATH . "Views/");
     }
 
     /**
      * Set debug true or false
      * @param bool $debug
      */
-    public function setDebug($debug = true){
+    public function setDebug($debug = true)
+    {
         $this->debug = $debug;
     }
 
@@ -51,7 +57,8 @@ class Smarty extends \Smarty {
      * @param bool $return
      * @return null|string
      */
-    function view($template, $data = array(), $return = false){
+    function view($template, $data = array(), $return = false)
+    {
         if (!$this->debug) {
             $this->error_reporting = false;
         }
@@ -67,14 +74,14 @@ class Smarty extends \Smarty {
         if ($return == false) {
             try {
                 echo $this->fetch($template);
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 echo $e->getMessage();
             }
             return null;
-        }else{
+        } else {
             try {
                 return $this->fetch($template);
-            }catch(\Exception $e){
+            } catch (\Exception $e) {
                 return $e->getMessage();
             }
         }

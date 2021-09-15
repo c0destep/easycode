@@ -1,9 +1,11 @@
 <?php
+
 namespace System\Libraries;
 
 use System\FastApp;
 
-class Lang {
+class Lang
+{
     private static $instance = null;
 
     protected $language = [];
@@ -12,22 +14,26 @@ class Lang {
     protected $dir_lang = [];
     protected $set_dir = null;
 
-    public function __construct() {
+    public function __construct()
+    {
         self::$instance = $this;
     }
 
-    public static function getInstance() {
-        if (is_null(self::$instance)){
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
             self::$instance = new Lang();
         }
         return self::$instance;
     }
 
-    public function addDir($name, $dir){
+    public function addDir($name, $dir)
+    {
         $this->dir_lang[$name] = $dir;
     }
 
-    public function setDir($name){
+    public function setDir($name)
+    {
         $this->set_dir = isset($this->dir_lang[$name]) ? $this->dir_lang[$name] : null;
     }
 
@@ -39,7 +45,8 @@ class Lang {
      * @param string $alt_path
      * @return array|bool|null
      */
-    public function load($langfile, $idiom = '', $return = false, $add_suffix = true, $alt_path = '') {
+    public function load($langfile, $idiom = '', $return = false, $add_suffix = true, $alt_path = '')
+    {
         if (is_array($langfile)) {
             foreach ($langfile as $value) {
                 $this->load($value, $idiom, $return, $add_suffix, $alt_path);
@@ -63,13 +70,13 @@ class Lang {
             include($basepath);
         }
 
-        if ($alt_path !== ''){
+        if ($alt_path !== '') {
             $alt_path .= 'Lang/' . $idiom . '/' . $langfile;
             if (file_exists($alt_path)) {
                 include($alt_path);
             }
         }
-        if (!is_null($this->set_dir)){
+        if (!is_null($this->set_dir)) {
             $basepath = $this->set_dir . $idiom . '/' . $langfile;
             if (($found = file_exists($basepath)) === true) {
                 include($basepath);
@@ -80,7 +87,7 @@ class Lang {
             exit('Unable to load the requested language file: language/' . $idiom . '/' . $langfile);
         }
 
-        if (!isset($lang) OR !is_array($lang)) {
+        if (!isset($lang) or !is_array($lang)) {
             if ($return === true) {
                 return array();
             }
@@ -101,7 +108,8 @@ class Lang {
      * @param $line
      * @return bool
      */
-    public function line($line) {
+    public function line($line)
+    {
         $value = isset($this->language[$line]) ? $this->language[$line] : false;
         if ($value === false) {
             return $line;
@@ -115,7 +123,8 @@ class Lang {
      * @param $replace
      * @return mixed
      */
-    public function line_replace($line, $find, $replace) {
+    public function line_replace($line, $find, $replace)
+    {
         $value = isset($this->language[$line]) ? $this->language[$line] : false;
         if ($value === false) {
             return $line;
@@ -129,10 +138,11 @@ class Lang {
      * @param null $replace
      * @return bool|mixed
      */
-    public static function get($line, $find = null, $replace = null) {
-        if (is_null($find) && is_null($replace)){
+    public static function get($line, $find = null, $replace = null)
+    {
+        if (is_null($find) && is_null($replace)) {
             return self::getInstance()->line($line);
-        }else{
+        } else {
             return self::getInstance()->line_replace($line, $find, $replace);
         }
     }

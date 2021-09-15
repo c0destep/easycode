@@ -6,4 +6,3 @@ RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^(.+) - [PT,L]
 
 RewriteRule ^(.*)$ index\.php [QSA,L]
-
