@@ -5,12 +5,12 @@ use System\ResponseType;
 
 $Config = array();
 
-$Config['name_project'] = "CodeInsight";
+$Config['name_project'] = "Potato";
 
-$Config['base_dir'] = "/";
-$Config['base_url'] = "http://localhost/";
+$Config['base_dir'] = "/Codingstep/potato-framework-codingstep/";
+$Config['base_url'] = "http://localhost/Codingstep/potato-framework-codingstep/";
 $Config['https_enable'] = false;
-$Config['ssl_verify'] = false; //redir ssl
+$Config['ssl_verify'] = false;
 
 /**
  * Load Files Route
@@ -21,7 +21,7 @@ $Config["files_route"] = ["Default"];
 /**
  * Config Route
  */
-$Config['default_route'] = "Home";
+$Config['default_route'] = "/";
 
 /**
  *
@@ -55,14 +55,14 @@ $Config['session_id'] = "sphap"; // Name Session
 /**
  * Default assets dir
  */
-$Config['base_dir_assets'] = "public/";
+$Config['base_dir_assets'] = "Public/";
 
 /**
  * Upload Directory
  */
-$Config['upload']['image'] = "/public/uploads/img/";
-$Config['upload']['docs'] = "/public/uploads/docs/";
-$Config['cache_image'] = "/public/cache/img/";
+$Config['upload']['image'] = "/Public/uploads/image/";
+$Config['upload']['docs'] = "/Public/uploads/documents/";
+$Config['cache_image'] = "/Public/cache/image/";
 
 /**
  * Default Lang

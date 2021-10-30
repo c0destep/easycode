@@ -70,7 +70,7 @@ class Email
     /**
      * Initialize preferences
      *
-     * @access    public
+     * @access    Public
      * @param array
      * @return    void
      */
@@ -98,7 +98,7 @@ class Email
     /**
      * Initialize the Email Data
      *
-     * @access    public
+     * @access    Public
      * @return    void
      */
     public function clear($clear_attachments = FALSE)
@@ -127,9 +127,38 @@ class Email
     }
 
     /**
+     * Add a Header Item
+     *
+     * @access    protected
+     * @param string
+     * @param string
+     * @return    void
+     */
+    protected function _set_header($header, $value)
+    {
+        $this->_headers[$header] = $value;
+    }
+
+    /**
+     * Set RFC 822 Date
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _set_date()
+    {
+        $timezone = date("Z");
+        $operator = (strncmp($timezone, '-', 1) == 0) ? '-' : '+';
+        $timezone = abs($timezone);
+        $timezone = floor($timezone / 3600) * 100 + ($timezone % 3600) / 60;
+
+        return sprintf("%s %s%04d", date("D, j M Y H:i:s"), $operator, $timezone);
+    }
+
+    /**
      * Set FROM
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @param string
      * @return    void
@@ -162,41 +191,152 @@ class Email
     }
 
     /**
-     * Set Reply-to
+     * Validate Email Address
      *
-     * @access    public
+     * @access    Public
      * @param string
-     * @param string
-     * @return    void
+     * @return    bool
      */
-    public function reply_to($replyto, $name = '')
+    public function validate_email($email)
     {
-        if (preg_match('/\<(.*)\>/', $replyto, $match)) {
-            $replyto = $match['1'];
+        if (!is_array($email)) {
+            $this->_set_error_message('lang:email_must_be_array');
+            return FALSE;
         }
 
-        if ($this->validate) {
-            $this->validate_email($this->_str_to_array($replyto));
+        foreach ($email as $val) {
+            if (!$this->valid_email($val)) {
+                $this->_set_error_message('lang:email_invalid_address', $val);
+                return FALSE;
+            }
         }
 
-        if ($name == '') {
-            $name = $replyto;
+        return TRUE;
+    }
+
+    /**
+     * Set Message
+     *
+     * @access    protected
+     * @param string
+     * @return    string
+     */
+    protected function _set_error_message($msg, $val = '')
+    {
+        $this->_debug_msg[] = $msg . "<br />";
+    }
+
+    /**
+     * Email Validation
+     *
+     * @access    Public
+     * @param string
+     * @return    bool
+     */
+    public function valid_email($address)
+    {
+        return (!preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $address)) ? FALSE : TRUE;
+    }
+
+    /**
+     * Convert a String to an Array
+     *
+     * @access    protected
+     * @param string
+     * @return    array
+     */
+    protected function _str_to_array($email)
+    {
+        if (!is_array($email)) {
+            if (strpos($email, ',') !== FALSE) {
+                $email = preg_split('/[\s,]/', $email, -1, PREG_SPLIT_NO_EMPTY);
+            } else {
+                $email = trim($email);
+                settype($email, "array");
+            }
+        }
+        return $email;
+    }
+
+    /**
+     * Prep Q Encoding
+     *
+     * Performs "Q Encoding" on a string for use in email headers.  It's related
+     * but not identical to quoted-printable, so it has its own method
+     *
+     * @access    Public
+     * @param str
+     * @param bool    // set to TRUE for processing From: headers
+     * @return    str
+     */
+    protected function _prep_q_encoding($str, $from = FALSE)
+    {
+        $str = str_replace(array(
+            "\r",
+            "\n"
+        ), array(
+            '',
+            ''
+        ), $str);
+
+        // Line length must not exceed 76 characters, so we adjust for
+        // a space, 7 extra characters =??Q??=, and the charset that we will add to each line
+        $limit = 75 - 7 - strlen($this->charset);
+
+        // these special characters must be converted too
+        $convert = array(
+            '_',
+            '=',
+            '?'
+        );
+
+        if ($from === TRUE) {
+            $convert[] = ',';
+            $convert[] = ';';
         }
 
-        if (strncmp($name, '"', 1) != 0) {
-            $name = '"' . $name . '"';
+        $output = '';
+        $temp = '';
+
+        for ($i = 0, $length = strlen($str); $i < $length; $i++) {
+            // Grab the next character
+            $char = substr($str, $i, 1);
+            $ascii = ord($char);
+
+            // convert ALL non-printable ASCII characters and our specials
+            if ($ascii < 32 or $ascii > 126 or in_array($char, $convert)) {
+                $char = '=' . dechex($ascii);
+            }
+
+            // handle regular spaces a bit more compactly than =20
+            if ($ascii == 32) {
+                $char = '_';
+            }
+
+            // If we're at the character limit, add the line to the output,
+            // reset our temp variable, and keep on chuggin'
+            if ((strlen($temp) + strlen($char)) >= $limit) {
+                $output .= $temp . $this->crlf;
+                $temp = '';
+            }
+
+            // Add the character to our temporary line
+            $temp .= $char;
         }
 
-        $this->_set_header('Reply-To', $name . ' <' . $replyto . '>');
-        $this->_replyto_flag = TRUE;
+        $str = $output . $temp;
 
-        return $this;
+        // wrap each line with the shebang, charset, and transfer encoding
+        // the preceding space on successive lines is required for header "folding"
+        $str = trim(preg_replace('/^(.*)$/m', ' =?' . $this->charset . '?Q?$1?=', $str));
+
+        return $str;
     }
 
     /**
      * Set Recipients
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -227,9 +367,69 @@ class Email
     }
 
     /**
+     * Clean Extended Email Address: Joe Smith <joe@smith.com>
+     *
+     * @access    Public
+     * @param string
+     * @return    string
+     */
+    public function clean_email($email)
+    {
+        if (!is_array($email)) {
+            if (preg_match('/\<(.*)\>/', $email, $match)) {
+                return $match['1'];
+            } else {
+                return $email;
+            }
+        }
+
+        $clean_email = array();
+
+        foreach ($email as $addy) {
+            if (preg_match('/\<(.*)\>/', $addy, $match)) {
+                $clean_email[] = $match['1'];
+            } else {
+                $clean_email[] = $addy;
+            }
+        }
+
+        return $clean_email;
+    }
+
+    /**
+     * Get Mail Protocol
+     *
+     * @access    protected
+     * @param bool
+     * @return    string
+     */
+    protected function _get_protocol($return = TRUE)
+    {
+        $this->protocol = strtolower($this->protocol);
+        $this->protocol = (!in_array($this->protocol, $this->_protocols, TRUE)) ? 'mail' : $this->protocol;
+
+        if ($return == TRUE) {
+            return $this->protocol;
+        }
+    }
+
+    /**
+     * Set Protocol
+     *
+     * @access    Public
+     * @param string
+     * @return    void
+     */
+    public function set_protocol($protocol = 'mail')
+    {
+        $this->protocol = (!in_array($protocol, $this->_protocols, TRUE)) ? 'mail' : strtolower($protocol);
+        return $this;
+    }
+
+    /**
      * Set CC
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -254,7 +454,7 @@ class Email
     /**
      * Set BCC
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @param string
      * @return    void
@@ -285,7 +485,7 @@ class Email
     /**
      * Set Email Subject
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -299,7 +499,7 @@ class Email
     /**
      * Set Body
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -312,7 +512,7 @@ class Email
     /**
      * Assign file attachments
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -325,55 +525,110 @@ class Email
     }
 
     /**
-     * Add a Header Item
+     * Mime Types
      *
      * @access    protected
      * @param string
-     * @param string
-     * @return    void
+     * @return    string
      */
-    protected function _set_header($header, $value)
+    protected function _mime_types($ext = "")
     {
-        $this->_headers[$header] = $value;
-    }
-
-    /**
-     * Convert a String to an Array
-     *
-     * @access    protected
-     * @param string
-     * @return    array
-     */
-    protected function _str_to_array($email)
-    {
-        if (!is_array($email)) {
-            if (strpos($email, ',') !== FALSE) {
-                $email = preg_split('/[\s,]/', $email, -1, PREG_SPLIT_NO_EMPTY);
-            } else {
-                $email = trim($email);
-                settype($email, "array");
-            }
-        }
-        return $email;
-    }
-
-    /**
-     * Set Multipart Value
-     *
-     * @access    public
-     * @param string
-     * @return    void
-     */
-    public function set_alt_message($str = '')
-    {
-        $this->alt_message = $str;
-        return $this;
+        $mimes = array(
+            'hqx' => 'application/mac-binhex40',
+            'cpt' => 'application/mac-compactpro',
+            'doc' => 'application/msword',
+            'bin' => 'application/macbinary',
+            'dms' => 'application/octet-stream',
+            'lha' => 'application/octet-stream',
+            'lzh' => 'application/octet-stream',
+            'exe' => 'application/octet-stream',
+            'class' => 'application/octet-stream',
+            'psd' => 'application/octet-stream',
+            'so' => 'application/octet-stream',
+            'sea' => 'application/octet-stream',
+            'dll' => 'application/octet-stream',
+            'oda' => 'application/oda',
+            'pdf' => 'application/pdf',
+            'ai' => 'application/postscript',
+            'eps' => 'application/postscript',
+            'ps' => 'application/postscript',
+            'smi' => 'application/smil',
+            'smil' => 'application/smil',
+            'mif' => 'application/vnd.mif',
+            'xls' => 'application/vnd.ms-excel',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'wbxml' => 'application/vnd.wap.wbxml',
+            'wmlc' => 'application/vnd.wap.wmlc',
+            'dcr' => 'application/x-director',
+            'dir' => 'application/x-director',
+            'dxr' => 'application/x-director',
+            'dvi' => 'application/x-dvi',
+            'gtar' => 'application/x-gtar',
+            'php' => 'application/x-httpd-php',
+            'php4' => 'application/x-httpd-php',
+            'php3' => 'application/x-httpd-php',
+            'phtml' => 'application/x-httpd-php',
+            'phps' => 'application/x-httpd-php-source',
+            'js' => 'application/x-javascript',
+            'swf' => 'application/x-shockwave-flash',
+            'sit' => 'application/x-stuffit',
+            'tar' => 'application/x-tar',
+            'tgz' => 'application/x-tar',
+            'xhtml' => 'application/xhtml+xml',
+            'xht' => 'application/xhtml+xml',
+            'zip' => 'application/zip',
+            'mid' => 'audio/midi',
+            'midi' => 'audio/midi',
+            'mpga' => 'audio/mpeg',
+            'mp2' => 'audio/mpeg',
+            'mp3' => 'audio/mpeg',
+            'aif' => 'audio/x-aiff',
+            'aiff' => 'audio/x-aiff',
+            'aifc' => 'audio/x-aiff',
+            'ram' => 'audio/x-pn-realaudio',
+            'rm' => 'audio/x-pn-realaudio',
+            'rpm' => 'audio/x-pn-realaudio-plugin',
+            'ra' => 'audio/x-realaudio',
+            'rv' => 'video/vnd.rn-realvideo',
+            'wav' => 'audio/x-wav',
+            'bmp' => 'image/bmp',
+            'gif' => 'image/gif',
+            'jpeg' => 'image/jpeg',
+            'jpg' => 'image/jpeg',
+            'jpe' => 'image/jpeg',
+            'png' => 'image/png',
+            'tiff' => 'image/tiff',
+            'tif' => 'image/tiff',
+            'css' => 'text/css',
+            'html' => 'text/html',
+            'htm' => 'text/html',
+            'shtml' => 'text/html',
+            'txt' => 'text/plain',
+            'text' => 'text/plain',
+            'log' => 'text/plain',
+            'rtx' => 'text/richtext',
+            'rtf' => 'text/rtf',
+            'xml' => 'text/xml',
+            'xsl' => 'text/xml',
+            'mpeg' => 'video/mpeg',
+            'mpg' => 'video/mpeg',
+            'mpe' => 'video/mpeg',
+            'qt' => 'video/quicktime',
+            'mov' => 'video/quicktime',
+            'avi' => 'video/x-msvideo',
+            'movie' => 'video/x-sgi-movie',
+            'doc' => 'application/msword',
+            'word' => 'application/msword',
+            'xl' => 'application/excel',
+            'eml' => 'message/rfc822'
+        );
+        return (!isset($mimes[strtolower($ext)])) ? "application/x-unknown-content-type" : $mimes[strtolower($ext)];
     }
 
     /**
      * Set Mailtype
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -386,7 +641,7 @@ class Email
     /**
      * Set Wordwrap
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -397,22 +652,9 @@ class Email
     }
 
     /**
-     * Set Protocol
-     *
-     * @access    public
-     * @param string
-     * @return    void
-     */
-    public function set_protocol($protocol = 'mail')
-    {
-        $this->protocol = (!in_array($protocol, $this->_protocols, TRUE)) ? 'mail' : strtolower($protocol);
-        return $this;
-    }
-
-    /**
      * Set Priority
      *
-     * @access    public
+     * @access    Public
      * @param integer
      * @return    void
      */
@@ -435,7 +677,7 @@ class Email
     /**
      * Set Newline Character
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -454,7 +696,7 @@ class Email
     /**
      * Set CRLF
      *
-     * @access    public
+     * @access    Public
      * @param string
      * @return    void
      */
@@ -471,305 +713,68 @@ class Email
     }
 
     /**
-     * Set Message Boundary
+     * Send Email
      *
-     * @access    protected
-     * @return    void
-     */
-    protected function _set_boundaries()
-    {
-        $this->_alt_boundary = "B_ALT_" . uniqid(''); // multipart/alternative
-        $this->_atc_boundary = "B_ATC_" . uniqid(''); // attachment boundary
-    }
-
-    /**
-     * Get the Message ID
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _get_message_id()
-    {
-        $from = $this->_headers['Return-Path'];
-        $from = str_replace(">", "", $from);
-        $from = str_replace("<", "", $from);
-
-        return "<" . uniqid('') . strstr($from, '@') . ">";
-    }
-
-    /**
-     * Get Mail Protocol
-     *
-     * @access    protected
-     * @param bool
-     * @return    string
-     */
-    protected function _get_protocol($return = TRUE)
-    {
-        $this->protocol = strtolower($this->protocol);
-        $this->protocol = (!in_array($this->protocol, $this->_protocols, TRUE)) ? 'mail' : $this->protocol;
-
-        if ($return == TRUE) {
-            return $this->protocol;
-        }
-    }
-
-    /**
-     * Get Mail Encoding
-     *
-     * @access    protected
-     * @param bool
-     * @return    string
-     */
-    protected function _get_encoding($return = TRUE)
-    {
-        $this->_encoding = (!in_array($this->_encoding, $this->_bit_depths)) ? '8bit' : $this->_encoding;
-
-        foreach ($this->_base_charsets as $charset) {
-            if (strncmp($charset, $this->charset, strlen($charset)) == 0) {
-                $this->_encoding = '7bit';
-            }
-        }
-
-        if ($return == TRUE) {
-            return $this->_encoding;
-        }
-    }
-
-    /**
-     * Get content type (text/html/attachment)
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _get_content_type()
-    {
-        if ($this->mailtype == 'html' && count($this->_attach_name) == 0) {
-            return 'html';
-        } elseif ($this->mailtype == 'html' && count($this->_attach_name) > 0) {
-            return 'html-attach';
-        } elseif ($this->mailtype == 'text' && count($this->_attach_name) > 0) {
-            return 'plain-attach';
-        } else {
-            return 'plain';
-        }
-    }
-
-    /**
-     * Set RFC 822 Date
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _set_date()
-    {
-        $timezone = date("Z");
-        $operator = (strncmp($timezone, '-', 1) == 0) ? '-' : '+';
-        $timezone = abs($timezone);
-        $timezone = floor($timezone / 3600) * 100 + ($timezone % 3600) / 60;
-
-        return sprintf("%s %s%04d", date("D, j M Y H:i:s"), $operator, $timezone);
-    }
-
-    /**
-     * Mime message
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _get_mime_message()
-    {
-        return "This is a multi-part message in MIME format." . $this->newline . "Your email application may not support this format.";
-    }
-
-    /**
-     * Validate Email Address
-     *
-     * @access    public
-     * @param string
+     * @access    Public
      * @return    bool
      */
-    public function validate_email($email)
+    public function send()
     {
-        if (!is_array($email)) {
-            $this->_set_error_message('lang:email_must_be_array');
+        if ($this->_replyto_flag == FALSE) {
+            $this->reply_to($this->_headers['From']);
+        }
+
+        if ((!isset($this->_recipients) and !isset($this->_headers['To'])) and (!isset($this->_bcc_array) and !isset($this->_headers['Bcc'])) and (!isset($this->_headers['Cc']))) {
+            $this->_set_error_message('lang:email_no_recipients');
             return FALSE;
         }
 
-        foreach ($email as $val) {
-            if (!$this->valid_email($val)) {
-                $this->_set_error_message('lang:email_invalid_address', $val);
-                return FALSE;
-            }
+        $this->_build_headers();
+
+        if ($this->bcc_batch_mode and count($this->_bcc_array) > 0) {
+            if (count($this->_bcc_array) > $this->bcc_batch_size)
+                return $this->batch_bcc_send();
         }
 
-        return TRUE;
-    }
+        $this->_build_message();
 
-    /**
-     * Email Validation
-     *
-     * @access    public
-     * @param string
-     * @return    bool
-     */
-    public function valid_email($address)
-    {
-        return (!preg_match("/^([a-z0-9\+_\-]+)(\.[a-z0-9\+_\-]+)*@([a-z0-9\-]+\.)+[a-z]{2,6}$/ix", $address)) ? FALSE : TRUE;
-    }
-
-    /**
-     * Clean Extended Email Address: Joe Smith <joe@smith.com>
-     *
-     * @access    public
-     * @param string
-     * @return    string
-     */
-    public function clean_email($email)
-    {
-        if (!is_array($email)) {
-            if (preg_match('/\<(.*)\>/', $email, $match)) {
-                return $match['1'];
-            } else {
-                return $email;
-            }
-        }
-
-        $clean_email = array();
-
-        foreach ($email as $addy) {
-            if (preg_match('/\<(.*)\>/', $addy, $match)) {
-                $clean_email[] = $match['1'];
-            } else {
-                $clean_email[] = $addy;
-            }
-        }
-
-        return $clean_email;
-    }
-
-    /**
-     * Build alternative plain text message
-     *
-     * This public function provides the raw message for use
-     * in plain-text headers of HTML-formatted emails.
-     * If the user hasn't specified his own alternative message
-     * it creates one by stripping the HTML
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _get_alt_message()
-    {
-        if ($this->alt_message != "") {
-            return $this->word_wrap($this->alt_message, '76');
-        }
-
-        if (preg_match('/\<body.*?\>(.*)\<\/body\>/si', $this->_body, $match)) {
-            $body = $match['1'];
+        if (!$this->_spool_email()) {
+            return FALSE;
         } else {
-            $body = $this->_body;
+            return TRUE;
         }
-
-        $body = trim(strip_tags($body));
-        $body = preg_replace('#<!--(.*)--\>#', "", $body);
-        $body = str_replace("\t", "", $body);
-
-        for ($i = 20; $i >= 3; $i--) {
-            $n = "";
-
-            for ($x = 1; $x <= $i; $x++) {
-                $n .= "\n";
-            }
-
-            $body = str_replace($n, "\n\n", $body);
-        }
-
-        return $this->word_wrap($body, '76');
     }
 
     /**
-     * Word Wrap
+     * Set Reply-to
      *
-     * @access    public
+     * @access    Public
      * @param string
-     * @param integer
-     * @return    string
+     * @param string
+     * @return    void
      */
-    public function word_wrap($str, $charlim = '')
+    public function reply_to($replyto, $name = '')
     {
-        // Se the character limit
-        if ($charlim == '') {
-            $charlim = ($this->wrapchars == "") ? "76" : $this->wrapchars;
+        if (preg_match('/\<(.*)\>/', $replyto, $match)) {
+            $replyto = $match['1'];
         }
 
-        // Reduce multiple spaces
-        $str = preg_replace("| +|", " ", $str);
-
-        // Standardize newlines
-        if (strpos($str, "\r") !== FALSE) {
-            $str = str_replace(array(
-                "\r\n",
-                "\r"
-            ), "\n", $str);
+        if ($this->validate) {
+            $this->validate_email($this->_str_to_array($replyto));
         }
 
-        // If the current word is surrounded by {unwrap} tags we'll
-        // strip the entire chunk and replace it with a marker.
-        $unwrap = array();
-        if (preg_match_all("|(\{unwrap\}.+?\{/unwrap\})|s", $str, $matches)) {
-            for ($i = 0; $i < count($matches['0']); $i++) {
-                $unwrap[] = $matches['1'][$i];
-                $str = str_replace($matches['1'][$i], "{{unwrapped" . $i . "}}", $str);
-            }
+        if ($name == '') {
+            $name = $replyto;
         }
 
-        // Use PHP's native public function to do the initial wordwrap.
-        // We set the cut flag to FALSE so that any individual words that are
-        // too long get left alone.  In the next step we'll deal with them.
-        $str = wordwrap($str, $charlim, "\n", FALSE);
-
-        // Split the string into individual lines of text and cycle through them
-        $output = "";
-        foreach (explode("\n", $str) as $line) {
-            // Is the line within the allowed character count?
-            // If so we'll join it to the output and continue
-            if (strlen($line) <= $charlim) {
-                $output .= $line . $this->newline;
-                continue;
-            }
-
-            $temp = '';
-            while ((strlen($line)) > $charlim) {
-                // If the over-length word is a URL we won't wrap it
-                if (preg_match("!\[url.+\]|://|wwww.!", $line)) {
-                    break;
-                }
-
-                // Trim the word down
-                $temp .= substr($line, 0, $charlim - 1);
-                $line = substr($line, $charlim - 1);
-            }
-
-            // If $temp contains data it means we had to split up an over-length
-            // word into smaller chunks so we'll add it back to our current line
-            if ($temp != '') {
-                $output .= $temp . $this->newline . $line;
-            } else {
-                $output .= $line;
-            }
-
-            $output .= $this->newline;
+        if (strncmp($name, '"', 1) != 0) {
+            $name = '"' . $name . '"';
         }
 
-        // Put our markers back
-        if (count($unwrap) > 0) {
-            foreach ($unwrap as $key => $val) {
-                $output = str_replace("{{unwrapped" . $key . "}}", $val, $output);
-            }
-        }
+        $this->_set_header('Reply-To', $name . ' <' . $replyto . '>');
+        $this->_replyto_flag = TRUE;
 
-        return $output;
+        return $this;
     }
 
     /**
@@ -789,31 +794,65 @@ class Email
     }
 
     /**
-     * Write Headers as a string
+     * Get the Message ID
      *
      * @access    protected
-     * @return    void
+     * @return    string
      */
-    protected function _write_headers()
+    protected function _get_message_id()
     {
-        if ($this->protocol == 'mail') {
-            $this->_subject = $this->_headers['Subject'];
-            unset($this->_headers['Subject']);
-        }
+        $from = $this->_headers['Return-Path'];
+        $from = str_replace(">", "", $from);
+        $from = str_replace("<", "", $from);
 
-        reset($this->_headers);
-        $this->_header_str = "";
+        return "<" . uniqid('') . strstr($from, '@') . ">";
+    }
 
-        foreach ($this->_headers as $key => $val) {
-            $val = trim($val);
+    /**
+     * Batch Bcc Send.  Sends groups of BCCs in batches
+     *
+     * @access    Public
+     * @return    bool
+     */
+    public function batch_bcc_send()
+    {
+        $float = $this->bcc_batch_size - 1;
 
-            if ($val != "") {
-                $this->_header_str .= $key . ": " . $val . $this->newline;
+        $set = "";
+
+        $chunk = array();
+
+        for ($i = 0; $i < count($this->_bcc_array); $i++) {
+            if (isset($this->_bcc_array[$i])) {
+                $set .= ", " . $this->_bcc_array[$i];
+            }
+
+            if ($i == $float) {
+                $chunk[] = substr($set, 1);
+                $float = $float + $this->bcc_batch_size;
+                $set = "";
+            }
+
+            if ($i == count($this->_bcc_array) - 1) {
+                $chunk[] = substr($set, 1);
             }
         }
 
-        if ($this->_get_protocol() == 'mail') {
-            $this->_header_str = rtrim($this->_header_str);
+        for ($i = 0; $i < count($chunk); $i++) {
+            unset($this->_headers['Bcc']);
+            unset($bcc);
+
+            $bcc = $this->_str_to_array($chunk[$i]);
+            $bcc = $this->clean_email($bcc);
+
+            if ($this->protocol != 'smtp') {
+                $this->_set_header('Bcc', implode(", ", $bcc));
+            } else {
+                $this->_bcc_array = $bcc;
+            }
+
+            $this->_build_message();
+            $this->_spool_email();
         }
     }
 
@@ -976,6 +1015,236 @@ class Email
     }
 
     /**
+     * Word Wrap
+     *
+     * @access    Public
+     * @param string
+     * @param integer
+     * @return    string
+     */
+    public function word_wrap($str, $charlim = '')
+    {
+        // Se the character limit
+        if ($charlim == '') {
+            $charlim = ($this->wrapchars == "") ? "76" : $this->wrapchars;
+        }
+
+        // Reduce multiple spaces
+        $str = preg_replace("| +|", " ", $str);
+
+        // Standardize newlines
+        if (strpos($str, "\r") !== FALSE) {
+            $str = str_replace(array(
+                "\r\n",
+                "\r"
+            ), "\n", $str);
+        }
+
+        // If the current word is surrounded by {unwrap} tags we'll
+        // strip the entire chunk and replace it with a marker.
+        $unwrap = array();
+        if (preg_match_all("|(\{unwrap\}.+?\{/unwrap\})|s", $str, $matches)) {
+            for ($i = 0; $i < count($matches['0']); $i++) {
+                $unwrap[] = $matches['1'][$i];
+                $str = str_replace($matches['1'][$i], "{{unwrapped" . $i . "}}", $str);
+            }
+        }
+
+        // Use PHP's native Public function to do the initial wordwrap.
+        // We set the cut flag to FALSE so that any individual words that are
+        // too long get left alone.  In the next step we'll deal with them.
+        $str = wordwrap($str, $charlim, "\n", FALSE);
+
+        // Split the string into individual lines of text and cycle through them
+        $output = "";
+        foreach (explode("\n", $str) as $line) {
+            // Is the line within the allowed character count?
+            // If so we'll join it to the output and continue
+            if (strlen($line) <= $charlim) {
+                $output .= $line . $this->newline;
+                continue;
+            }
+
+            $temp = '';
+            while ((strlen($line)) > $charlim) {
+                // If the over-length word is a URL we won't wrap it
+                if (preg_match("!\[url.+\]|://|wwww.!", $line)) {
+                    break;
+                }
+
+                // Trim the word down
+                $temp .= substr($line, 0, $charlim - 1);
+                $line = substr($line, $charlim - 1);
+            }
+
+            // If $temp contains data it means we had to split up an over-length
+            // word into smaller chunks so we'll add it back to our current line
+            if ($temp != '') {
+                $output .= $temp . $this->newline . $line;
+            } else {
+                $output .= $line;
+            }
+
+            $output .= $this->newline;
+        }
+
+        // Put our markers back
+        if (count($unwrap) > 0) {
+            foreach ($unwrap as $key => $val) {
+                $output = str_replace("{{unwrapped" . $key . "}}", $val, $output);
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * Set Message Boundary
+     *
+     * @access    protected
+     * @return    void
+     */
+    protected function _set_boundaries()
+    {
+        $this->_alt_boundary = "B_ALT_" . uniqid(''); // multipart/alternative
+        $this->_atc_boundary = "B_ATC_" . uniqid(''); // attachment boundary
+    }
+
+    /**
+     * Write Headers as a string
+     *
+     * @access    protected
+     * @return    void
+     */
+    protected function _write_headers()
+    {
+        if ($this->protocol == 'mail') {
+            $this->_subject = $this->_headers['Subject'];
+            unset($this->_headers['Subject']);
+        }
+
+        reset($this->_headers);
+        $this->_header_str = "";
+
+        foreach ($this->_headers as $key => $val) {
+            $val = trim($val);
+
+            if ($val != "") {
+                $this->_header_str .= $key . ": " . $val . $this->newline;
+            }
+        }
+
+        if ($this->_get_protocol() == 'mail') {
+            $this->_header_str = rtrim($this->_header_str);
+        }
+    }
+
+    /**
+     * Get content type (text/html/attachment)
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _get_content_type()
+    {
+        if ($this->mailtype == 'html' && count($this->_attach_name) == 0) {
+            return 'html';
+        } elseif ($this->mailtype == 'html' && count($this->_attach_name) > 0) {
+            return 'html-attach';
+        } elseif ($this->mailtype == 'text' && count($this->_attach_name) > 0) {
+            return 'plain-attach';
+        } else {
+            return 'plain';
+        }
+    }
+
+    /**
+     * Get Mail Encoding
+     *
+     * @access    protected
+     * @param bool
+     * @return    string
+     */
+    protected function _get_encoding($return = TRUE)
+    {
+        $this->_encoding = (!in_array($this->_encoding, $this->_bit_depths)) ? '8bit' : $this->_encoding;
+
+        foreach ($this->_base_charsets as $charset) {
+            if (strncmp($charset, $this->charset, strlen($charset)) == 0) {
+                $this->_encoding = '7bit';
+            }
+        }
+
+        if ($return == TRUE) {
+            return $this->_encoding;
+        }
+    }
+
+    /**
+     * Mime message
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _get_mime_message()
+    {
+        return "This is a multi-part message in MIME format." . $this->newline . "Your email application may not support this format.";
+    }
+
+    /**
+     * Build alternative plain text message
+     *
+     * This Public function provides the raw message for use
+     * in plain-text headers of HTML-formatted emails.
+     * If the user hasn't specified his own alternative message
+     * it creates one by stripping the HTML
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _get_alt_message()
+    {
+        if ($this->alt_message != "") {
+            return $this->word_wrap($this->alt_message, '76');
+        }
+
+        if (preg_match('/\<body.*?\>(.*)\<\/body\>/si', $this->_body, $match)) {
+            $body = $match['1'];
+        } else {
+            $body = $this->_body;
+        }
+
+        $body = trim(strip_tags($body));
+        $body = preg_replace('#<!--(.*)--\>#', "", $body);
+        $body = str_replace("\t", "", $body);
+
+        for ($i = 20; $i >= 3; $i--) {
+            $n = "";
+
+            for ($x = 1; $x <= $i; $x++) {
+                $n .= "\n";
+            }
+
+            $body = str_replace($n, "\n\n", $body);
+        }
+
+        return $this->word_wrap($body, '76');
+    }
+
+    /**
+     * Set Multipart Value
+     *
+     * @access    Public
+     * @param string
+     * @return    void
+     */
+    public function set_alt_message($str = '')
+    {
+        $this->alt_message = $str;
+        return $this;
+    }
+
+    /**
      * Prep Quoted Printable
      *
      * Prepares string for Quoted-Printable Content-Transfer-Encoding
@@ -1066,195 +1335,6 @@ class Email
     }
 
     /**
-     * Prep Q Encoding
-     *
-     * Performs "Q Encoding" on a string for use in email headers.  It's related
-     * but not identical to quoted-printable, so it has its own method
-     *
-     * @access    public
-     * @param str
-     * @param bool    // set to TRUE for processing From: headers
-     * @return    str
-     */
-    protected function _prep_q_encoding($str, $from = FALSE)
-    {
-        $str = str_replace(array(
-            "\r",
-            "\n"
-        ), array(
-            '',
-            ''
-        ), $str);
-
-        // Line length must not exceed 76 characters, so we adjust for
-        // a space, 7 extra characters =??Q??=, and the charset that we will add to each line
-        $limit = 75 - 7 - strlen($this->charset);
-
-        // these special characters must be converted too
-        $convert = array(
-            '_',
-            '=',
-            '?'
-        );
-
-        if ($from === TRUE) {
-            $convert[] = ',';
-            $convert[] = ';';
-        }
-
-        $output = '';
-        $temp = '';
-
-        for ($i = 0, $length = strlen($str); $i < $length; $i++) {
-            // Grab the next character
-            $char = substr($str, $i, 1);
-            $ascii = ord($char);
-
-            // convert ALL non-printable ASCII characters and our specials
-            if ($ascii < 32 or $ascii > 126 or in_array($char, $convert)) {
-                $char = '=' . dechex($ascii);
-            }
-
-            // handle regular spaces a bit more compactly than =20
-            if ($ascii == 32) {
-                $char = '_';
-            }
-
-            // If we're at the character limit, add the line to the output,
-            // reset our temp variable, and keep on chuggin'
-            if ((strlen($temp) + strlen($char)) >= $limit) {
-                $output .= $temp . $this->crlf;
-                $temp = '';
-            }
-
-            // Add the character to our temporary line
-            $temp .= $char;
-        }
-
-        $str = $output . $temp;
-
-        // wrap each line with the shebang, charset, and transfer encoding
-        // the preceding space on successive lines is required for header "folding"
-        $str = trim(preg_replace('/^(.*)$/m', ' =?' . $this->charset . '?Q?$1?=', $str));
-
-        return $str;
-    }
-
-    /**
-     * Send Email
-     *
-     * @access    public
-     * @return    bool
-     */
-    public function send()
-    {
-        if ($this->_replyto_flag == FALSE) {
-            $this->reply_to($this->_headers['From']);
-        }
-
-        if ((!isset($this->_recipients) and !isset($this->_headers['To'])) and (!isset($this->_bcc_array) and !isset($this->_headers['Bcc'])) and (!isset($this->_headers['Cc']))) {
-            $this->_set_error_message('lang:email_no_recipients');
-            return FALSE;
-        }
-
-        $this->_build_headers();
-
-        if ($this->bcc_batch_mode and count($this->_bcc_array) > 0) {
-            if (count($this->_bcc_array) > $this->bcc_batch_size)
-                return $this->batch_bcc_send();
-        }
-
-        $this->_build_message();
-
-        if (!$this->_spool_email()) {
-            return FALSE;
-        } else {
-            return TRUE;
-        }
-    }
-
-    /**
-     * Batch Bcc Send.  Sends groups of BCCs in batches
-     *
-     * @access    public
-     * @return    bool
-     */
-    public function batch_bcc_send()
-    {
-        $float = $this->bcc_batch_size - 1;
-
-        $set = "";
-
-        $chunk = array();
-
-        for ($i = 0; $i < count($this->_bcc_array); $i++) {
-            if (isset($this->_bcc_array[$i])) {
-                $set .= ", " . $this->_bcc_array[$i];
-            }
-
-            if ($i == $float) {
-                $chunk[] = substr($set, 1);
-                $float = $float + $this->bcc_batch_size;
-                $set = "";
-            }
-
-            if ($i == count($this->_bcc_array) - 1) {
-                $chunk[] = substr($set, 1);
-            }
-        }
-
-        for ($i = 0; $i < count($chunk); $i++) {
-            unset($this->_headers['Bcc']);
-            unset($bcc);
-
-            $bcc = $this->_str_to_array($chunk[$i]);
-            $bcc = $this->clean_email($bcc);
-
-            if ($this->protocol != 'smtp') {
-                $this->_set_header('Bcc', implode(", ", $bcc));
-            } else {
-                $this->_bcc_array = $bcc;
-            }
-
-            $this->_build_message();
-            $this->_spool_email();
-        }
-    }
-
-    /**
-     * Unwrap special elements
-     *
-     * @access    protected
-     * @return    void
-     */
-    protected function _unwrap_specials()
-    {
-        $this->_finalbody = preg_replace_callback("/\{unwrap\}(.*?)\{\/unwrap\}/si", array(
-            $this,
-            '_remove_nl_callback'
-        ), $this->_finalbody);
-    }
-
-    /**
-     * Strip line-breaks via callback
-     *
-     * @access    protected
-     * @return    string
-     */
-    protected function _remove_nl_callback($matches)
-    {
-        if (strpos($matches[1], "\r") !== FALSE or strpos($matches[1], "\n") !== FALSE) {
-            $matches[1] = str_replace(array(
-                "\r\n",
-                "\r",
-                "\n"
-            ), '', $matches[1]);
-        }
-
-        return $matches[1];
-    }
-
-    /**
      * Spool mail to the mail server
      *
      * @access    protected
@@ -1291,6 +1371,20 @@ class Email
 
         $this->_set_error_message('lang:email_sent', $this->_get_protocol());
         return TRUE;
+    }
+
+    /**
+     * Unwrap special elements
+     *
+     * @access    protected
+     * @return    void
+     */
+    protected function _unwrap_specials()
+    {
+        $this->_finalbody = preg_replace_callback("/\{unwrap\}(.*?)\{\/unwrap\}/si", array(
+            $this,
+            '_remove_nl_callback'
+        ), $this->_finalbody);
     }
 
     /**
@@ -1441,6 +1535,27 @@ class Email
     }
 
     /**
+     * Get SMTP data
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _get_smtp_data()
+    {
+        $data = "";
+
+        while ($str = fgets($this->_smtp_connect, 512)) {
+            $data .= $str;
+
+            if (substr($str, 3, 1) == " ") {
+                break;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
      * Send SMTP command
      *
      * @access    protected
@@ -1509,6 +1624,33 @@ class Email
     }
 
     /**
+     * Send SMTP data
+     *
+     * @access    protected
+     * @return    bool
+     */
+    protected function _send_data($data)
+    {
+        if (!fwrite($this->_smtp_connect, $data . $this->newline)) {
+            $this->_set_error_message('lang:email_smtp_data_failure', $data);
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    }
+
+    /**
+     * Get Hostname
+     *
+     * @access    protected
+     * @return    string
+     */
+    protected function _get_hostname()
+    {
+        return (isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : 'localhost.localdomain';
+    }
+
+    /**
      *  SMTP Authenticate
      *
      * @access    protected
@@ -1556,51 +1698,40 @@ class Email
     }
 
     /**
-     * Send SMTP data
+     * Get Debug Message
      *
-     * @access    protected
-     * @return    bool
-     */
-    protected function _send_data($data)
-    {
-        if (!fwrite($this->_smtp_connect, $data . $this->newline)) {
-            $this->_set_error_message('lang:email_smtp_data_failure', $data);
-            return FALSE;
-        } else {
-            return TRUE;
-        }
-    }
-
-    /**
-     * Get SMTP data
-     *
-     * @access    protected
+     * @access    Public
      * @return    string
      */
-    protected function _get_smtp_data()
+    public function print_debugger()
     {
-        $data = "";
-
-        while ($str = fgets($this->_smtp_connect, 512)) {
-            $data .= $str;
-
-            if (substr($str, 3, 1) == " ") {
-                break;
+        $msg = '';
+        if (count($this->_debug_msg) > 0) {
+            foreach ($this->_debug_msg as $val) {
+                $msg .= $val;
             }
         }
-
-        return $data;
+        $msg .= "<pre>" . htmlspecialchars($this->_header_str) . "\n" . htmlspecialchars($this->_subject) . "\n" . htmlspecialchars($this->_finalbody) . '</pre>';
+        return $msg;
     }
 
     /**
-     * Get Hostname
+     * Strip line-breaks via callback
      *
      * @access    protected
      * @return    string
      */
-    protected function _get_hostname()
+    protected function _remove_nl_callback($matches)
     {
-        return (isset($_SERVER['SERVER_NAME'])) ? $_SERVER['SERVER_NAME'] : 'localhost.localdomain';
+        if (strpos($matches[1], "\r") !== FALSE or strpos($matches[1], "\n") !== FALSE) {
+            $matches[1] = str_replace(array(
+                "\r\n",
+                "\r",
+                "\n"
+            ), '', $matches[1]);
+        }
+
+        return $matches[1];
     }
 
     /**
@@ -1642,137 +1773,6 @@ class Email
         unset($fip);
 
         return $this->_IP;
-    }
-
-    /**
-     * Get Debug Message
-     *
-     * @access    public
-     * @return    string
-     */
-    public function print_debugger()
-    {
-        $msg = '';
-        if (count($this->_debug_msg) > 0) {
-            foreach ($this->_debug_msg as $val) {
-                $msg .= $val;
-            }
-        }
-        $msg .= "<pre>" . htmlspecialchars($this->_header_str) . "\n" . htmlspecialchars($this->_subject) . "\n" . htmlspecialchars($this->_finalbody) . '</pre>';
-        return $msg;
-    }
-
-    /**
-     * Set Message
-     *
-     * @access    protected
-     * @param string
-     * @return    string
-     */
-    protected function _set_error_message($msg, $val = '')
-    {
-        $this->_debug_msg[] = $msg . "<br />";
-    }
-
-    /**
-     * Mime Types
-     *
-     * @access    protected
-     * @param string
-     * @return    string
-     */
-    protected function _mime_types($ext = "")
-    {
-        $mimes = array(
-            'hqx' => 'application/mac-binhex40',
-            'cpt' => 'application/mac-compactpro',
-            'doc' => 'application/msword',
-            'bin' => 'application/macbinary',
-            'dms' => 'application/octet-stream',
-            'lha' => 'application/octet-stream',
-            'lzh' => 'application/octet-stream',
-            'exe' => 'application/octet-stream',
-            'class' => 'application/octet-stream',
-            'psd' => 'application/octet-stream',
-            'so' => 'application/octet-stream',
-            'sea' => 'application/octet-stream',
-            'dll' => 'application/octet-stream',
-            'oda' => 'application/oda',
-            'pdf' => 'application/pdf',
-            'ai' => 'application/postscript',
-            'eps' => 'application/postscript',
-            'ps' => 'application/postscript',
-            'smi' => 'application/smil',
-            'smil' => 'application/smil',
-            'mif' => 'application/vnd.mif',
-            'xls' => 'application/vnd.ms-excel',
-            'ppt' => 'application/vnd.ms-powerpoint',
-            'wbxml' => 'application/vnd.wap.wbxml',
-            'wmlc' => 'application/vnd.wap.wmlc',
-            'dcr' => 'application/x-director',
-            'dir' => 'application/x-director',
-            'dxr' => 'application/x-director',
-            'dvi' => 'application/x-dvi',
-            'gtar' => 'application/x-gtar',
-            'php' => 'application/x-httpd-php',
-            'php4' => 'application/x-httpd-php',
-            'php3' => 'application/x-httpd-php',
-            'phtml' => 'application/x-httpd-php',
-            'phps' => 'application/x-httpd-php-source',
-            'js' => 'application/x-javascript',
-            'swf' => 'application/x-shockwave-flash',
-            'sit' => 'application/x-stuffit',
-            'tar' => 'application/x-tar',
-            'tgz' => 'application/x-tar',
-            'xhtml' => 'application/xhtml+xml',
-            'xht' => 'application/xhtml+xml',
-            'zip' => 'application/zip',
-            'mid' => 'audio/midi',
-            'midi' => 'audio/midi',
-            'mpga' => 'audio/mpeg',
-            'mp2' => 'audio/mpeg',
-            'mp3' => 'audio/mpeg',
-            'aif' => 'audio/x-aiff',
-            'aiff' => 'audio/x-aiff',
-            'aifc' => 'audio/x-aiff',
-            'ram' => 'audio/x-pn-realaudio',
-            'rm' => 'audio/x-pn-realaudio',
-            'rpm' => 'audio/x-pn-realaudio-plugin',
-            'ra' => 'audio/x-realaudio',
-            'rv' => 'video/vnd.rn-realvideo',
-            'wav' => 'audio/x-wav',
-            'bmp' => 'image/bmp',
-            'gif' => 'image/gif',
-            'jpeg' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'jpe' => 'image/jpeg',
-            'png' => 'image/png',
-            'tiff' => 'image/tiff',
-            'tif' => 'image/tiff',
-            'css' => 'text/css',
-            'html' => 'text/html',
-            'htm' => 'text/html',
-            'shtml' => 'text/html',
-            'txt' => 'text/plain',
-            'text' => 'text/plain',
-            'log' => 'text/plain',
-            'rtx' => 'text/richtext',
-            'rtf' => 'text/rtf',
-            'xml' => 'text/xml',
-            'xsl' => 'text/xml',
-            'mpeg' => 'video/mpeg',
-            'mpg' => 'video/mpeg',
-            'mpe' => 'video/mpeg',
-            'qt' => 'video/quicktime',
-            'mov' => 'video/quicktime',
-            'avi' => 'video/x-msvideo',
-            'movie' => 'video/x-sgi-movie',
-            'doc' => 'application/msword',
-            'word' => 'application/msword',
-            'xl' => 'application/excel',
-            'eml' => 'message/rfc822'
-        );
-        return (!isset($mimes[strtolower($ext)])) ? "application/x-unknown-content-type" : $mimes[strtolower($ext)];
     }
 
 }

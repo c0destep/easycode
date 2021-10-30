@@ -4,31 +4,16 @@ namespace System;
 
 class Request
 {
-
-    protected static $instance = null;
-
-    protected $allHeaders;
-    protected static $paramJson = null;
-
     const GET = "GET";
     const POST = "POST";
     const REQUEST = "REQUEST";
     const JSON = "JSON";
     const EXTRA = "EXTRA";
 
+    protected static Request $instance;
+    protected static mixed $paramJson;
     protected static $extra;
-
-    /**
-     * Obter instancia da class
-     * @return null|Request
-     */
-    public static function getInstance()
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new Request();
-        }
-        return self::$instance;
-    }
+    protected $allHeaders;
 
     /**
      * Response constructor.
@@ -37,6 +22,16 @@ class Request
     {
         self::$paramJson = getJsonPost();
         $this->allHeaders = getallheaders();
+    }
+
+    /**
+     * Obter instancia da class
+     * @return Request
+     */
+    public static function getInstance(): Request
+    {
+        self::$instance = new Request();
+        return self::$instance;
     }
 
     /**
@@ -172,6 +167,28 @@ class Request
     }
 
     /**
+     * Obter um cabeçalho especifico passado na requisição
+     * @param null $key
+     * @return array|false|null
+     */
+    public function getHeader($key = null)
+    {
+        if ($key == null) {
+            return $this->allHeaders;
+        }
+
+        if (isset($this->allHeaders[$key]))
+            return $this->allHeaders[$key];
+
+        return null;
+    }
+
+    public function __get($key)
+    {
+        return self::find($key);
+    }
+
+    /**
      * Verifica em todos os paramêtos e retorna o que achar primeiro
      * @param $key string
      * @return mixed
@@ -197,28 +214,6 @@ class Request
             return filter_var($_REQUEST[$key], FILTER_SANITIZE_STRING);
 
         return null;
-    }
-
-    /**
-     * Obter um cabeçalho especifico passado na requisição
-     * @param null $key
-     * @return array|false|null
-     */
-    public function getHeader($key = null)
-    {
-        if ($key == null) {
-            return $this->allHeaders;
-        }
-
-        if (isset($this->allHeaders[$key]))
-            return $this->allHeaders[$key];
-
-        return null;
-    }
-
-    public function __get($key)
-    {
-        return self::find($key);
     }
 
 }

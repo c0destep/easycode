@@ -8,7 +8,7 @@ class ThemeManager
     public static $isBlocked = false;
 
     /**
-     * Set public assets folder (function asset($file))
+     * Set Public assets folder (function asset($file))
      * @param $dir_assets string path to assets
      */
     public static function setAssets($dir_assets)

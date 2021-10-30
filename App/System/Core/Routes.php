@@ -1,12 +1,10 @@
 <?php
-
 namespace System\Core;
 
 use System\Request;
 use System\Response;
 
-class Routes
-{
+class Routes {
 
     protected static $Routes = [];
     protected static $DynamicRoutes = [];
@@ -21,8 +19,7 @@ class Routes
      * @param array $onCallAfter Call on After method controller
      * @param array $onCallFinish Call on Finish controller
      */
-    public static function simple($type, $route, $class, $Headers = [], $RequireHeader = [], $onCallBefore = [], $onCallAfter = [], $onCallFinish = [])
-    {
+    public static function simple($type, $route, $class, $Headers = [], $RequireHeader = [], $onCallBefore = [], $onCallAfter = [], $onCallFinish = []){
         self::setRoute($type, $route, [
             'Controller' => $class[0],
             "Method" => $class[1],
@@ -38,8 +35,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function all($route, $configs)
-    {
+    public static function all($route, $configs){
         self::setRoute(Response::ALL, $route, $configs);
     }
 
@@ -47,8 +43,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function get($route, $configs)
-    {
+    public static function get($route, $configs){
         self::setRoute(Response::GET, $route, $configs);
     }
 
@@ -56,8 +51,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function post($route, $configs)
-    {
+    public static function post($route, $configs){
         self::setRoute(Response::POST, $route, $configs);
     }
 
@@ -65,8 +59,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function put($route, $configs)
-    {
+    public static function put($route, $configs){
         self::setRoute(Response::PUT, $route, $configs);
     }
 
@@ -74,8 +67,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function delete($route, $configs)
-    {
+    public static function delete($route, $configs){
         self::setRoute(Response::DELETE, $route, $configs);
     }
 
@@ -83,8 +75,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function patch($route, $configs)
-    {
+    public static function patch($route, $configs){
         self::setRoute(Response::PATCH, $route, $configs);
     }
 
@@ -92,8 +83,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function options($route, $configs)
-    {
+    public static function options($route, $configs){
         self::setRoute(Response::OPTIONS, $route, $configs);
     }
 
@@ -101,8 +91,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function head($route, $configs)
-    {
+    public static function head($route, $configs){
         self::setRoute(Response::HEAD, $route, $configs);
     }
 
@@ -111,8 +100,7 @@ class Routes
      * @param $route
      * @param $configs
      */
-    public static function other($type, $route, $configs)
-    {
+    public static function other($type, $route, $configs){
         self::setRoute($type, $route, $configs);
     }
 
@@ -122,17 +110,17 @@ class Routes
      * @param $controllers
      * @param array $config
      */
-    public static function group($type, $base, $controllers, array $config = [])
-    {
-        foreach ($controllers as $route => $controller) {
+    public static function group($type, $base, $controllers, array $config = []){
+        foreach ($controllers as $route => $controller){
             $configs = array_merge($config, $controller);
             if (!empty($route)) {
                 $route = "{$base}/{$route}";
-            } else {
+            }else{
                 $route = $base;
             }
 
             $finalRoute = str_replace("//", "/", $route);
+
             self::other($type, $finalRoute, $configs);
         }
     }
@@ -142,12 +130,11 @@ class Routes
      * @param $method
      * @return mixed|null
      */
-    public static function getRoute($route, $method)
-    {
-        if (isset(self::$Routes[$method][$route])) {
+    public static function getRoute($route, $method){
+        if (isset(self::$Routes[$method][$route])){
             return self::$Routes[$method][$route];
         }
-        if (isset(self::$Routes[Response::ALL][$route])) {
+        if (isset(self::$Routes[Response::ALL][$route])){
             return self::$Routes[Response::ALL][$route];
         }
         return null;
@@ -158,47 +145,47 @@ class Routes
      * @param $method
      * @return bool
      */
-    public static function verifyRoute($route, $method)
-    {
-        if (isset(self::$Routes[$method][$route])) {
+    public static function verifyRoute($route, $method){
+        if (isset(self::$Routes[$method][$route])){
             return true;
         }
-        if (isset(self::$Routes[Response::ALL][$route])) {
+        if (isset(self::$Routes[Response::ALL][$route])){
             return true;
         }
 
-        foreach (self::$DynamicRoutes as $dRoute => $nRoute) {
-            foreach ($nRoute as $type => $args) {
+        if (isset(self::$DynamicRoutes[$method])){
+            foreach (self::$DynamicRoutes[$method] as $type => $args){
                 preg_match_all("/{(.*?)}/", $type, $vars);
                 $key = str_replace($vars[0], '([^/]+)', $type);
-                if (preg_match('#^' . $key . '$#', $route, $matches)) {
+                if (preg_match('#^'.$key.'$#', $route, $matches)){
                     $attrs = [];
-                    foreach ($vars[1] as $k => $var) {
-                        $attrs[$var] = $matches[$k + 1];
+                    foreach ($vars[1] as $k=>$var){
+                        $attrs[$var] = $matches[$k+1];
                     }
                     $args['Attrs'] = $attrs;
 
-                    self::$Routes[$dRoute][$matches[0]] = $args;
+                    self::$Routes[$method][$matches[0]] = $args;
+
                     return true;
                 }
             }
         }
+
         return false;
     }
 
     /**
      * @param $Route
      */
-    public static function validateRoute($Route)
-    {
-        if (isset($Route['Headers']) && is_array($Route['Headers'])) {
-            foreach ($Route['Headers'] as $header) {
+    public static function validateRoute($Route){
+        if (isset($Route['Headers']) && is_array($Route['Headers'])){
+            foreach ($Route['Headers'] as $header){
                 Response::getInstance()->setHeader($header);
             }
         }
-        if (isset($Route['RequireHeader']) && is_array($Route['RequireHeader'])) {
-            foreach ($Route['RequireHeader'] as $key => $header) {
-                if (Request::getInstance()->getHeader($key) !== $header) {
+        if (isset($Route['RequireHeader']) && is_array($Route['RequireHeader'])){
+            foreach ($Route['RequireHeader'] as $key=>$header){
+                if (Request::getInstance()->getHeader($key) !== $header){
                     HooksRoutes::getInstance()->onCallError("No have \"{$key}\" in request header");
                 }
             }
@@ -210,18 +197,16 @@ class Routes
      * @param $route
      * @param $configs
      */
-    protected static function setRoute($method, $route, $configs)
-    {
+    protected static function setRoute($method, $route, $configs){
         preg_match_all("/{(.*?)}/", $route, $matches);
-        if (count($matches[0]) > 0) {
+        if (count($matches[0]) > 0){
             self::$DynamicRoutes[$method][$route] = $configs;
             return;
         }
         self::$Routes[$method][$route] = $configs;
     }
 
-    public static function clearRoutes()
-    {
+    public static function clearRoutes(){
         self::$DynamicRoutes = [];
         self::$Routes = [];
     }

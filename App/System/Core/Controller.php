@@ -4,7 +4,6 @@ namespace System\Core;
 
 use System\FastApp;
 use System\Libraries\HtmlBlocks;
-use System\Libraries\Lang as Lang;
 use System\Libraries\Session as Session;
 use System\Libraries\Smarty as Smarty;
 use System\Response;
@@ -14,7 +13,6 @@ class Controller
 
     private $hasEngine = null;
     private $smarty = null;
-    private $lang = null;
 
     /**
      * Construtor do controlador
@@ -23,18 +21,14 @@ class Controller
     public function __construct()
     {
         $this->hasEngine = FastApp::getInstance()->getConfig("template");
-        if ($this->hasEngine == TEMPLATE_ENGINE_SMARTY) {
-            $this->smarty = Smarty::getInstance();
-        }
-
-        $this->lang = Lang::getInstance();
+        if ($this->hasEngine == TEMPLATE_ENGINE_SMARTY) $this->smarty = Smarty::getInstance();
     }
 
     /**
      * Obter a instancia do Framework
      * @return null|FastApp Get app instance
      */
-    public function getApp()
+    public function getApp(): ?FastApp
     {
         return FastApp::getInstance();
     }
@@ -43,7 +37,7 @@ class Controller
      * Obter Sessão
      * @return null|Session get session instance system Librarie
      */
-    public function getSession()
+    public function getSession(): ?Session
     {
         return Session::getInstance();
     }

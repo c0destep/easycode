@@ -26,19 +26,6 @@ class FastApp
     protected $Params;
 
     /**
-     * Obter instancia do framework
-     * @return FastApp
-     */
-    public static function getInstance()
-    {
-        if (is_null(self::$instance)) {
-            self::$instance = new FastApp(true);
-        }
-        return self::$instance;
-
-    }
-
-    /**
      * Setups de configurações, rotas e bibliotecas
      * FastApp constructor.
      * @param bool $onlyLoad
@@ -85,14 +72,15 @@ class FastApp
         $this->RequestURI = getUriPatch();
         $RequestMethod = $_SERVER['REQUEST_METHOD'];
 
-
         $this->rePatch($this->RequestURI);
         if (empty($this->Patch[0]) && !empty(getConfig("default_route"))) {
             $this->RequestURI = getConfig("default_route");
             $this->rePatch($this->RequestURI);
         }
 
+
         if (!Routes::verifyRoute($this->RequestURI, $RequestMethod)) {
+
             $nController = "\\Controller\\" . $this->Patch[0];
             $nMethod = $this->Patch[1] ?? "index";
 
@@ -101,12 +89,14 @@ class FastApp
             }
         } else {
             $this->Route = Routes::getRoute($this->RequestURI, $RequestMethod);
+
             Routes::validateRoute($this->Route);
             Routes::clearRoutes();
 
-            execute_callbacks($this->Route, 'onCallBefore');
+
+            execute_callbacks($this->Route, 'onCallBefore', $this->Route['Attrs'] ?? []);
             if (execute_class($this->Route['Controller'], $this->Route['Method'], $this->Route['Attrs'] ?? [])) {
-                execute_callbacks($this->Route, 'onCallAfter');
+                execute_callbacks($this->Route, 'onCallAfter', $this->Route['Attrs'] ?? []);
                 return;
             }
 
@@ -122,12 +112,81 @@ class FastApp
     }
 
     /**
+     * Incluir helpers
+     * @param $file
+     * @throws null
+     */
+    public function loadHelper($file)
+    {
+        $isFind = false;
+
+        if (file_exists(BASE_PATH . "Helpers/" . $file . ".php")) {
+            require(BASE_PATH . "Helpers/" . $file . ".php");
+            $isFind = true;
+        }
+        if (file_exists(BASE_PATH . "System/Helpers/" . $file . ".php")) {
+            require(BASE_PATH . "System/Helpers/" . $file . ".php");
+            $isFind = true;
+        }
+        if (!$isFind) {
+            throw new \Exception("File Helper {$file} not found");
+        }
+    }
+
+    /**
+     * Redirecionamento HTTPS
+     */
+    private function sslRedirect()
+    {
+        if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off") {
+            $location = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . $location);
+            exit;
+        }
+    }
+
+    /**
+     * Inicia as configurações de banco de dados
+     */
+    private function initDatabase()
+    {
+        $Config = getConfig("db_driver");
+        if ($Config["isActive"] && (
+                !is_null($Config['class']) ||
+                !empty($Config['class'])
+            )) {
+            if (class_exists($Config['class'])) {
+                $DriverClass = $Config['class'];
+                /**
+                 * @var $Driver \System\Database\DriverImplements
+                 */
+                $Driver = new $DriverClass();
+                $Driver->createConnection($Config["config"]);
+            }
+        }
+    }
+
+    /**
      * Explode nos paths do URL
      * @param $Folder
      */
     public function rePatch($Folder)
     {
         $this->Patch = explode("/", $Folder);
+    }
+
+    /**
+     * Obter instancia do framework
+     * @return FastApp
+     */
+    public static function getInstance()
+    {
+        if (is_null(self::$instance)) {
+            self::$instance = new FastApp(true);
+        }
+        return self::$instance;
+
     }
 
     /**
@@ -176,67 +235,11 @@ class FastApp
     }
 
     /**
-     * Incluir helpers
-     * @param $file
-     * @throws null
-     */
-    public function loadHelper($file)
-    {
-        $isFind = false;
-
-        if (file_exists(BASE_PATH . "Helpers/" . $file . ".php")) {
-            require(BASE_PATH . "Helpers/" . $file . ".php");
-            $isFind = true;
-        }
-        if (file_exists(BASE_PATH . "System/Helpers/" . $file . ".php")) {
-            require(BASE_PATH . "System/Helpers/" . $file . ".php");
-            $isFind = true;
-        }
-        if (!$isFind) {
-            throw new \Exception("File Helper {$file} not found");
-        }
-    }
-
-    /**
-     * Inicia as configurações de banco de dados
-     */
-    private function initDatabase()
-    {
-        $Config = getConfig("db_driver");
-        if ($Config["isActive"] && (
-                !is_null($Config['class']) ||
-                !empty($Config['class'])
-            )) {
-            if (class_exists($Config['class'])) {
-                $DriverClass = $Config['class'];
-                /**
-                 * @var $Driver \System\Database\DriverImplements
-                 */
-                $Driver = new $DriverClass();
-                $Driver->createConnection($Config["config"]);
-            }
-        }
-    }
-
-    /**
      * Destruc, executado no final de tudo
      */
     public function __destruct()
     {
         execute_callbacks($this->Route, 'onCallFinish');
-    }
-
-    /**
-     * Redirecionamento HTTPS
-     */
-    private function sslRedirect()
-    {
-        if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off") {
-            $location = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            header('HTTP/1.1 301 Moved Permanently');
-            header('Location: ' . $location);
-            exit;
-        }
     }
 
     /**

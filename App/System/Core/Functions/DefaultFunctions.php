@@ -1,27 +1,30 @@
 <?php
+
+use System\Core\DefaultErrors;
+
 if (!function_exists('handler_exception')) {
     /**
      * Handler Error
-     * @param $errno
-     * @param $errstr
-     * @param $errfile
-     * @param $errline
+     * @param $errorNo
+     * @param $errorStr
+     * @param $errorFile
+     * @param $errorLine
      */
 
-    function handler_error($errno, $errstr, $errfile, $errline)
+    function handler_error($errorNo, $errorStr, $errorFile, $errorLine): void
     {
-        \System\Core\DefaultErrors::getInstance()->handlerError($errno, $errstr, $errfile, $errline);
+        DefaultErrors::getInstance()->handlerError($errorNo, $errorStr, $errorFile, $errorLine);
     }
 }
 
 if (!function_exists('handler_exception')) {
     /**
      * Handler Error
-     * @param Exception $Execption
+     * @param $exception
      */
-    function handler_exception($Execption)
+    function handler_exception($exception): void
     {
-        \System\Core\DefaultErrors::getInstance()->ErrorXXX($Execption->getCode(), $Execption);
+        DefaultErrors::getInstance()->ErrorXXX($exception->getCode(), $exception);
     }
 }
 
@@ -29,11 +32,12 @@ if (!function_exists('shutdownHandler')) {
     /**
      * Handler Parse Error
      */
-    function shutdownHandler()
+    function shutdownHandler(): void
     {
-        $lasterror = error_get_last();
-        if (isset($lasterror['type']))
-            switch ($lasterror['type']) {
+        $lastError = error_get_last();
+
+        if (isset($lastError['type']))
+            switch ($lastError['type']) {
                 case E_ERROR:
                 case E_CORE_ERROR:
                 case E_COMPILE_ERROR:
@@ -42,7 +46,7 @@ if (!function_exists('shutdownHandler')) {
                 case E_CORE_WARNING:
                 case E_COMPILE_WARNING:
                 case E_PARSE:
-                    handler_error($lasterror['type'], $lasterror['message'], $lasterror['file'], $lasterror['line']);
+                    handler_error($lastError['type'], $lastError['message'], $lastError['file'], $lastError['line']);
             }
     }
 }
@@ -50,9 +54,10 @@ if (!function_exists('shutdownHandler')) {
 if (!function_exists('loaderFastApp')) {
     /**
      * Autoload Class
-     * @param $class
+     * @param string $class
+     * @return void
      */
-    function loaderFastApp($class)
+    function loaderFastApp(string $class): void
     {
         $filename = BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
         $filename = str_replace("//", "/", $filename);
@@ -61,21 +66,19 @@ if (!function_exists('loaderFastApp')) {
             require_once($filename);
         } else {
             $filename = BASE_PATH_THIRD . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
-            if (file_exists($filename)) {
-                require_once($filename);
-            }
+            if (file_exists($filename)) require_once($filename);
         }
     }
 }
 
 if (!function_exists('getJsonPost')) {
     /**
-     * Obter dados em JSON envidos bo Body de um requisição
+     * Get JSON data sent in the Body of a request
      * @return mixed
      */
-    function getJsonPost()
+    function getJsonPost(): mixed
     {
-        return json_decode(file_get_contents('php://input'), 1);
+        return json_decode(file_get_contents('php://input'), true);
     }
 }
 
@@ -120,105 +123,99 @@ if (!function_exists('getallheaders')) {
 if (!function_exists("getViewPhp")) {
     /**
      * Get HTML template PHP
-     * @param $_file
+     * @param string $file
      * @param array $data
+     * @return void
      */
-    function getViewPhp($_file, $data = array())
+    function getViewPhp(string $file, array $data = array()): void
     {
         extract($data);
-        include BASE_PATH . "Views/" . $_file;
+        include BASE_PATH . "Views/" . $file;
     }
 }
 
 if (!function_exists("getClientIpServer")) {
     /**
-     * @return mixed|null
+     * @return mixed
      */
-    function getClientIpServer()
+    function getClientIpServer(): mixed
     {
-        $ipaddress = null;
-        if (isset($_SERVER['HTTP_CLIENT_IP']))
-            $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']))
-            $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED']))
-            $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
-        else if (isset($_SERVER['HTTP_FORWARDED_FOR']))
-            $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_FORWARDED']))
-            $ipaddress = $_SERVER['HTTP_FORWARDED'];
-        else if (isset($_SERVER['REMOTE_ADDR']))
-            $ipaddress = $_SERVER['REMOTE_ADDR'];
-        else
-            $ipaddress = 'UNKNOWN';
+        if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED'])) {
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED'];
+        } elseif (isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+            $ipAddress = $_SERVER['HTTP_FORWARDED_FOR'];
+        } elseif (isset($_SERVER['HTTP_FORWARDED'])) {
+            $ipAddress = $_SERVER['HTTP_FORWARDED'];
+        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            $ipAddress = $_SERVER['REMOTE_ADDR'];
+        } else {
+            $ipAddress = 'UNKNOWN, BUT IT MAY BE FROM THE FUTURE';
+        }
 
-        return $ipaddress;
+        return $ipAddress;
     }
 }
 
-if (!function_exists("verifySo")) {
+if (!function_exists("verifyBrowser")) {
     /**
-     * @param null $u_agent
-     * @param null $ip
+     * @param string|null $userAgent
+     * @param string|null $ip
      * @return array
      */
-    function verifySo($u_agent = null, $ip = null)
+    function verifyBrowser(string $userAgent = null, string $ip = null): array
     {
-        if ($ip == null) {
-            $ip = getClientIpServer();
-        }
-        if ($u_agent == null) {
-            $u_agent = $_SERVER['HTTP_USER_AGENT'];
-        }
+        if (is_null($ip)) $ip = getClientIpServer();
+        if (is_null($userAgent)) $userAgent = $_SERVER['HTTP_USER_AGENT'];
 
-        $bname = 'Unknown';
+        $browser = 'Unknown';
+        $codename = 'Unknown';
         $platform = 'Unknown';
-        $version = "";
 
-        if (preg_match('/linux/i', $u_agent)) {
+        if (preg_match('/linux/i', $userAgent)) {
             $platform = 'Linux';
-        } elseif (preg_match('/macintosh|mac os x/i', $u_agent)) {
-            $platform = 'Mac';
-        } elseif (preg_match('/windows|win32/i', $u_agent)) {
+        } elseif (preg_match('/macintosh|mac os x/i', $userAgent)) {
+            $platform = 'MacOS';
+        } elseif (preg_match('/windows|win32/i', $userAgent)) {
             $platform = 'Windows';
         }
 
-
-        if (preg_match('/Edge/i', $u_agent)) {
-            $bname = 'Edge';
-            $ub = "Edge";
-        } elseif (preg_match('/MSIE/i', $u_agent) && !preg_match('/Opera/i', $u_agent)) {
-            $bname = 'Internet Explorer';
-            $ub = "MSIE";
-        } elseif (preg_match('/Trident/i', $u_agent) && !preg_match('/Opera/i', $u_agent)) {
-            $bname = 'Internet Explorer';
-            $ub = "Trident";
-        } elseif (preg_match('/Firefox/i', $u_agent)) {
-            $bname = 'Mozilla Firefox';
-            $ub = "Firefox";
-        } elseif (preg_match('/Chrome/i', $u_agent)) {
-            $bname = 'Google Chrome';
-            $ub = "Chrome";
-        } elseif (preg_match('/AppleWebKit/i', $u_agent)) {
-            $bname = 'AppleWebKit';
-            $ub = "Opera";
-        } elseif (preg_match('/Safari/i', $u_agent)) {
-            $bname = 'Apple Safari';
-            $ub = "Safari";
-        } elseif (preg_match('/Netscape/i', $u_agent)) {
-            $bname = 'Netscape';
-            $ub = "Netscape";
+        if (preg_match('/Edge/i', $userAgent)) {
+            $browser = 'Microsoft Edge';
+            $codename = 'Edge';
+        } elseif (preg_match('/MSIE/i', $userAgent) && !preg_match('/Opera/i', $userAgent)) {
+            $browser = 'Internet Explorer';
+            $codename = 'MSIE';
+        } elseif (preg_match('/Trident/i', $userAgent) && !preg_match('/Opera/i', $userAgent)) {
+            $browser = 'Internet Explorer';
+            $codename = 'Trident';
+        } elseif (preg_match('/Firefox/i', $userAgent)) {
+            $browser = 'Mozilla Firefox';
+            $codename = 'Firefox';
+        } elseif (preg_match('/Chrome/i', $userAgent)) {
+            $browser = 'Google Chrome';
+            $codename = 'Chrome';
+        } elseif (preg_match('/AppleWebKit/i', $userAgent)) {
+            $browser = 'AppleWebKit';
+            $codename = 'Opera';
+        } elseif (preg_match('/Safari/i', $userAgent)) {
+            $browser = 'Apple Safari';
+            $codename = 'Safari';
+        } elseif (preg_match('/Netscape/i', $userAgent)) {
+            $browser = 'Netscape';
+            $codename = 'Netscape';
         }
 
-        $known = array('Version', $ub, 'other');
-        $pattern = '#(?<browser>' . join('|', $known) .
-            ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
-        if (!preg_match_all($pattern, $u_agent, $matches)) {
-        }
-
+        $known = array('Version', $codename, 'other');
+        $pattern = '#(?<browser>' . join('|', $known) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+        !preg_match_all($pattern, $userAgent, $matches);
         $i = count($matches['browser']);
+
         if ($i != 1) {
-            if (strripos($u_agent, "Version") < strripos($u_agent, $ub)) {
+            if (strripos($userAgent, "Version") < strripos($userAgent, $codename)) {
                 $version = $matches['version'][0];
             } else {
                 $version = $matches['version'][1];
@@ -227,24 +224,18 @@ if (!function_exists("verifySo")) {
             $version = $matches['version'][0];
         }
 
-        if ($ub == "Trident") {
-            preg_match('#rv:([0-9.|a-zA-Z.]*)#', $u_agent, $versions);
+        if ($codename == "Trident") {
+            preg_match('#rv:([0-9.|a-zA-Z.]*)#', $userAgent, $versions);
             $version = $versions[1];
         }
 
-        // check if we have a number
-        if ($version == null || $version == "") {
-            $version = "?";
-        }
-
-        $Browser = array(
+        return array(
             'ip' => $ip,
-            'userAgent' => $u_agent,
-            'name' => $bname,
-            'version' => $version,
+            'userAgent' => $userAgent,
+            'name' => $browser,
             'platform' => $platform,
-            'pattern' => $pattern
+            'pattern' => $pattern,
+            'version' => $version
         );
-        return $Browser;
     }
 }

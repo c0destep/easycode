@@ -2,18 +2,21 @@
 
 namespace System\Libraries;
 
-use System\Response;
-
 class View
 {
     const JSON = 'json';
     const VIEW = 'view';
 
     protected $file;
-    protected $params;
+    protected $params = [];
     protected $message;
     protected $status;
     protected $type = "view";
+
+    public function __construct($type)
+    {
+        $this->type = $type;
+    }
 
     public static function getHtml()
     {
@@ -23,11 +26,6 @@ class View
     public static function getJson()
     {
         return new ViewJson();
-    }
-
-    public function __construct($type)
-    {
-        $this->type = $type;
     }
 
     public function getType()
@@ -74,6 +72,8 @@ class ViewHtml extends View
     {
         return $this->params;
     }
+
+
 }
 
 class ViewJson extends View
@@ -90,11 +90,6 @@ class ViewJson extends View
         return $this;
     }
 
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
     /**
      * @param string $message
      * @return $this
@@ -105,11 +100,6 @@ class ViewJson extends View
         return $this;
     }
 
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
     /**
      * @param array|string $params
      * @return $this
@@ -118,6 +108,21 @@ class ViewJson extends View
     {
         $this->params = $params;
         return $this;
+    }
+
+    public function toJson()
+    {
+        return json_encode(["status" => $this->getStatus(), "message" => $this->getMessage(), "response" => $this->getResponse()]);
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function getMessage()
+    {
+        return $this->message;
     }
 
     public function getResponse()

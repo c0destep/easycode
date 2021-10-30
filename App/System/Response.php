@@ -2,16 +2,14 @@
 
 namespace System;
 
+use System\Core\Controller;
 use System\Libraries\View;
+use System\Libraries\ViewHtml;
+use System\Libraries\ViewJson;
 use System\ResponseType as ResponseType;
 
 class Response
 {
-
-    protected static $instance = null;
-    protected $responseHeader = [];
-    protected $controller = null;
-
     const ALL = "ALL";
     const GET = "GET";
     const POST = "POST";
@@ -21,86 +19,18 @@ class Response
     const OPTIONS = "OPTIONS";
     const HEAD = "HEAD";
 
+    protected static ?Response $instance = null;
+    protected array $responseHeader = array();
+    protected ?Controller $controller = null;
+
     /**
-     * Obter instancia da class
+     * Get instance da class
      * @return null|Response
      */
-    public static function getInstance()
+    public static function getInstance(): ?Response
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new Response();
-        }
+        self::$instance = new Response();
         return self::$instance;
-    }
-
-    /**
-     * @param \System\Core\Controller $controller
-     */
-    public function setController($controller)
-    {
-        $this->controller = $controller;
-    }
-
-    /**
-     * @param \System\Core\Controller $controller
-     */
-    public function getController()
-    {
-        return $this->controller;
-    }
-
-    /**
-     * Setar um cabeçalho para requisição atual
-     * @param $key
-     * @param null $value
-     */
-    public function setHeader($key, $value = null)
-    {
-        if (is_null($value)) {
-            $Get = explode(":", $key);
-            $this->responseHeader[$Get[0]] = isset($Get[1]) ? $Get[1] : null;
-            header($key);
-        } else {
-            $this->responseHeader[$key] = $value;
-            header("{$key}:{$value}");
-        }
-    }
-
-    /**
-     * Obter um cabeçalho para requisição atual
-     * @param $key
-     * @return mixed
-     */
-    public function getResponseHeader($key)
-    {
-        return $this->responseHeader[$key];
-    }
-
-    /**
-     * Definir o tipo do conteudo da página
-     * @param $type
-     */
-    public function setHeaderType($type)
-    {
-        $this->setHeader("Content-Type", $type);
-    }
-
-    /**
-     * @return \System\Libraries\ViewJson
-     */
-    public function json()
-    {
-        $this->setHeaderType(ResponseType::CONTENT_JSON);
-        return View::getJson();
-    }
-
-    /**
-     * @return \System\Libraries\ViewHtml
-     */
-    public function html()
-    {
-        $this->setHeaderType(ResponseType::CONTENT_HTML);
-        return View::getHtml();
     }
 
     /**
@@ -108,7 +38,7 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultHtml($Merge = [])
+    public static function getDefaultHtml(array $Merge = array()): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_HTML,
@@ -120,7 +50,7 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultJson($Merge = [])
+    public static function getDefaultJson(array $Merge = array()): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_JSON,
@@ -132,7 +62,7 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultJs($Merge = [])
+    public static function getDefaultJs(array $Merge = array()): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_JS,
@@ -144,7 +74,7 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultCss($Merge = [])
+    public static function getDefaultCss(array $Merge = []): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_CSS,
@@ -156,7 +86,7 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultXml($Merge = [])
+    public static function getDefaultXml(array $Merge = []): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_XML,
@@ -168,10 +98,80 @@ class Response
      * @param array $Merge Extra Headers
      * @return array
      */
-    public static function getDefaultOctetStream($Merge = [])
+    public static function getDefaultOctetStream(array $Merge = array()): array
     {
         return array_merge($Merge, [
             "Content-Type:" . ResponseType::CONTENT_OCTETSTREAM,
         ]);
+    }
+
+    /**
+     * @return Controller|null
+     */
+    public function getController(): ?Controller
+    {
+        return $this->controller;
+    }
+
+    /**
+     * @param Controller $controller
+     */
+    public function setController(Controller $controller)
+    {
+        $this->controller = $controller;
+    }
+
+    /**
+     * Get a header for current request
+     * @param string $key
+     * @return mixed
+     */
+    public function getResponseHeader(string $key): mixed
+    {
+        return $this->responseHeader[$key] ?? null;
+    }
+
+    /**
+     * @return ViewJson
+     */
+    public function json(): ViewJson
+    {
+        $this->setHeaderType(ResponseType::CONTENT_JSON);
+        return View::getJson();
+    }
+
+    /**
+     * Set page content type
+     * @param string $type
+     */
+    public function setHeaderType(string $type)
+    {
+        $this->setHeader("Content-Type", $type);
+    }
+
+    /**
+     * Set a header for the current request
+     * @param string $key
+     * @param string|null $value
+     */
+    public function setHeader(string $key, string $value = null)
+    {
+        if (is_null($value)) {
+            $Get = explode(":", $key);
+            $this->responseHeader[$Get[0]] = $Get[1] ?? null;
+            header($key);
+        } else {
+            $this->responseHeader[$key] = $value;
+            header("$key:$value");
+        }
+    }
+
+    /**
+     * @return ViewHtml
+     */
+    public function html(): ViewHtml
+    {
+        $this->setHeaderType(ResponseType::CONTENT_HTML);
+        return View::getHtml();
     }
 }

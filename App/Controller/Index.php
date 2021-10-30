@@ -24,10 +24,7 @@ class Index extends Controller
      */
     public function Index(Request $request, Response $response): ViewHtml
     {
-
-        return $response->html()
-            ->setView("Layout/Content")
-            ->setParams(["layout" => "welcome.tpl"]);
+        return $response->html()->setView("welcome");
     }
 
     /**

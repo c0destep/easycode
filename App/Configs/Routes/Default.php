@@ -1,12 +1,10 @@
 <?php
 
-use \System\Core\Routes;
-use System\Request;
-use \System\ResponseType;
-use \Controller\Index;
-use \System\Response;
+use Controller\Index;
+use System\Core\Routes;
+use System\ResponseType;
 
-Routes::get("Home", [
+Routes::get("/", [
     "Controller" => Index::class,
     "Method" => "Index",
     "Headers" => [
@@ -16,12 +14,4 @@ Routes::get("Home", [
     "onCallBefore" => [],
     "onCallAfter" => [],
     "onCallFinish" => []
-]);
-
-/**
- * Example
- */
-Routes::get("find/{id}", [
-    "Controller" => Index::class,
-    "Method" => "FindExample"
 ]);

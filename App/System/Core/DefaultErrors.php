@@ -4,44 +4,51 @@ namespace System\Core;
 
 use System\Libraries\Lang;
 use System\Libraries\Smarty;
-use System\Request;
 use System\Response;
 use System\ResponseType;
 
 class DefaultErrors
 {
+    protected static DefaultErrors $instance;
 
-    protected static $instance;
-
-    public static function getInstance()
+    public static function getInstance(): DefaultErrors
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new DefaultErrors();
-        }
+        self::$instance = new DefaultErrors();
         return self::$instance;
     }
 
-    public function handlerError($errno = null, $errstr = null, $errfile = null, $errline = null)
+    public function handlerError(string $errorNo = null, string $errorStr = null, string $errorFile = null, string $errorLine = null): void
     {
-        if (ENVIRONMENT == "production") {
+        if (ENVIRONMENT === "production") return;
+
+        if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
+            echo HooksRoutes::getInstance()->apiErrorCallJson($errorStr . " File: " . $errorFile . " Line: " . $errorLine, $errorNo);
             return;
         }
 
-        if (Response::getInstance()->getResponseHeader("Content-Type") == "application/json") {
-            echo HooksRoutes::getInstance()->apiErrorCallJson($errstr . " File: " . $errfile . " Line: " . $errline, $errno);
-            return;
-        }
+        echo $this->getErroHtml($errorNo, $errorStr, $errorFile, $errorLine);
+    }
 
-        echo $this->getErroHtml($errno, $errstr, $errfile, $errline);
+    public function getErroHtml($number, $error, $file, $line): string
+    {
+        Response::getInstance()->setHeaderType(ResponseType::CONTENT_HTML);
+        
+        return "<div style='display: inline-block; padding: 10px;'><div style='padding: 10px; background-color: #dd5656; border-radius: 5px; border: solid 1px #d93535; display: inline-block'>
+                    <span style='font-style: italic; color: #fff'>
+                    <b>\PHP Error {$number}:</b> {$error}<br>
+                    <b>\File:</b> {$file}<br>
+                    <b>\Line:</b> {$line}  
+                    </span>
+                </div></div>";
     }
 
     public function Error404()
     {
         global $Config;
-        Response::getInstance()->setHeader("HTTP/1.0 404 Not Found");
-        Response::getInstance()->setHeader("Content-Type: " . $Config['error_content_type']);
+        /*Response::getInstance()->setHeader("HTTP/1.0 404 Not Found");*/
+        Response::getInstance()->setHeaderType($Config['error_content_type']);
 
-        if (Response::getInstance()->getResponseHeader("Content-Type") == "application/json") {
+        if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
             echo HooksRoutes::getInstance()->apiErrorCallJson(Lang::get("error404"), 404);
             exit();
         }
@@ -76,16 +83,5 @@ class DefaultErrors
             getViewPhp("Error/ErrorXXX.php", ["Excpetion" => $Exception]);
         }
         exit();
-    }
-
-    public function getErroHtml($number, $error, $file, $line)
-    {
-        return "<div style='display: inline-block; padding: 10px;'><div style='padding: 10px; background-color: #dd5656; border-radius: 5px; border: solid 1px #d93535; display: inline-block'>
-                    <span style='font-style: italic; color: #fff'>
-                    <b>\PHP Error {$number}:</b> {$error}<br>
-                    <b>\File:</b> {$file}<br>
-                    <b>\Line:</b> {$line}  
-                    </span>
-                </div></div>";
     }
 }
