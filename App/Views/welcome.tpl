@@ -1,3 +1,4 @@
+{extends file="./Layout/Content.tpl"}
 {*Meta Title*}
 {capture name="title"}Potato Framework{/capture}
 

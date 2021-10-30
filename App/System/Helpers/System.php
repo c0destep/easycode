@@ -354,7 +354,6 @@ if (!function_exists('execute_class')) {
                 }
 
                 $Return = call_user_func_array([$initClass, $method], $finalAttrs);
-                var_dump($Return);
                 if ($Return instanceof View) {
                     renderView($Return);
                 }

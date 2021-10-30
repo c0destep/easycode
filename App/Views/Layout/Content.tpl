@@ -1,5 +1,3 @@
-{include file=$layout}
-
 {include file="Layout/Header.tpl"}
 
 {if $smarty.capture.header_title}

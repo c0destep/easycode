@@ -2,6 +2,7 @@
 
 namespace System;
 
+use Exception;
 use System\Core\DefaultErrors;
 use System\Core\HooksRoutes;
 use System\Core\Routes;
@@ -11,34 +12,25 @@ use System\Libraries\ModuleManager;
 
 class FastApp
 {
-    protected static $instance;
-
-    protected $Config;
-    protected $Patch;
-    protected $Default;
-
-    protected $RequestURI;
-    protected $Route;
+    protected static FastApp $instance;
+    protected mixed $Config;
+    protected ?array $Patch;
+    protected mixed $RequestURI;
+    protected mixed $Route;
+    protected ?array $Params;
 
     /**
-     * @var array params to controller
-     */
-    protected $Params;
-
-    /**
-     * Setups de configurações, rotas e bibliotecas
      * FastApp constructor.
      * @param bool $onlyLoad
+     * @throws Exception
      */
-    public function __construct($onlyLoad = false)
+    public function __construct(bool $onlyLoad = false)
     {
         self::$instance = $this;
 
         $this->loadHelper("System");
 
-        if (getConfig('https_enable')) {
-            $this->sslRedirect();
-        }
+        if (getConfig('https_enable')) $this->sslRedirect();
 
         if ($onlyLoad) return;
 
@@ -47,13 +39,10 @@ class FastApp
         $Modulo = new ModuleManager();
         $Modulo->setup();
 
-        //Executar eventos
         Hooks::executeCallBefore();
 
-        //Obter Rotas
         loadFilesRoute();
 
-        //Load Helpers
         try {
             $HelpersLoads = getConfig('helpersLoad');
             if (is_array($HelpersLoads)) {
@@ -61,14 +50,12 @@ class FastApp
                     $this->loadHelper($helper);
                 }
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             DefaultErrors::getInstance()->ErrorXXX($exception->getCode(), $exception);
         }
 
-        //Set Connection
         $this->initDatabase();
 
-        //CONTROLLER & METHODS
         $this->RequestURI = getUriPatch();
         $RequestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -78,21 +65,17 @@ class FastApp
             $this->rePatch($this->RequestURI);
         }
 
-
         if (!Routes::verifyRoute($this->RequestURI, $RequestMethod)) {
 
             $nController = "\\Controller\\" . $this->Patch[0];
             $nMethod = $this->Patch[1] ?? "index";
 
-            if (!execute_class($nController, $nMethod)) {
-                goto OnNotFound;
-            }
+            if (!execute_class($nController, $nMethod)) goto OnNotFound;
         } else {
             $this->Route = Routes::getRoute($this->RequestURI, $RequestMethod);
 
             Routes::validateRoute($this->Route);
             Routes::clearRoutes();
-
 
             execute_callbacks($this->Route, 'onCallBefore', $this->Route['Attrs'] ?? []);
             if (execute_class($this->Route['Controller'], $this->Route['Method'], $this->Route['Attrs'] ?? [])) {
@@ -103,7 +86,6 @@ class FastApp
             goto OnNotFound;
         }
 
-        //Executar eventos
         Hooks::executeCallAfter();
 
         OnNotFound:{
@@ -112,11 +94,11 @@ class FastApp
     }
 
     /**
-     * Incluir helpers
-     * @param $file
-     * @throws null
+     * @param string $file
+     * @return void
+     * @throws Exception
      */
-    public function loadHelper($file)
+    public function loadHelper(string $file): void
     {
         $isFind = false;
 
@@ -129,14 +111,14 @@ class FastApp
             $isFind = true;
         }
         if (!$isFind) {
-            throw new \Exception("File Helper {$file} not found");
+            throw new Exception("File Helper {$file} not found");
         }
     }
 
     /**
-     * Redirecionamento HTTPS
+     * Redirect HTTPS
      */
-    private function sslRedirect()
+    private function sslRedirect(): void
     {
         if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off") {
             $location = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -149,18 +131,12 @@ class FastApp
     /**
      * Inicia as configurações de banco de dados
      */
-    private function initDatabase()
+    private function initDatabase(): void
     {
         $Config = getConfig("db_driver");
-        if ($Config["isActive"] && (
-                !is_null($Config['class']) ||
-                !empty($Config['class'])
-            )) {
+        if ($Config["isActive"] && (!is_null($Config['class']))) {
             if (class_exists($Config['class'])) {
                 $DriverClass = $Config['class'];
-                /**
-                 * @var $Driver \System\Database\DriverImplements
-                 */
                 $Driver = new $DriverClass();
                 $Driver->createConnection($Config["config"]);
             }
@@ -169,37 +145,30 @@ class FastApp
 
     /**
      * Explode nos paths do URL
-     * @param $Folder
+     * @param string $Folder
      */
-    public function rePatch($Folder)
+    public function rePatch(string $Folder): void
     {
         $this->Patch = explode("/", $Folder);
     }
 
     /**
-     * Obter instancia do framework
      * @return FastApp
      */
-    public static function getInstance()
+    public static function getInstance(): FastApp
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new FastApp(true);
-        }
+        if (is_null(self::$instance)) self::$instance = new FastApp(true);
         return self::$instance;
-
     }
 
     /**
      * Obter valor de um path da url
-     * @param $key int Número do indice
+     * @param string $key int Número do indice
      * @return null|string Retorna o valor do indice ou null se não existir
      */
-    public function getPatch($key)
+    public function getPatch(string $key): ?string
     {
-        if (!isset($this->Patch[$key]))
-            return null;
-
-        return $this->Patch[$key];
+        return $this->Patch[$key] ?? null;
     }
 
     /**
@@ -207,18 +176,18 @@ class FastApp
      * @param $key String indice da configuração que deseja
      * @return mixed Retorna valor de configuração do indice definido
      */
-    public function getConfig($key)
+    public function getConfig(string $key): mixed
     {
-        return getConfig($key);
+        return getConfig($key) ?? null;
     }
 
     /**
      * Obter a url atual
      * @return mixed
      */
-    public function getUri()
+    public function getUri(): mixed
     {
-        return $this->RequestURI;
+        return $this->RequestURI ?? null;
     }
 
     /**
@@ -226,12 +195,9 @@ class FastApp
      * @param $uri String URL de comparação
      * @return bool
      */
-    public function isUri($uri)
+    public function isUri(string $uri): bool
     {
-        if ($this->RequestURI === $uri) {
-            return true;
-        }
-        return false;
+        return ($this->RequestURI === $uri);
     }
 
     /**
@@ -243,23 +209,20 @@ class FastApp
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param mixed $value
      */
-    public function addParams($key, $value)
+    public function addParams(string $key, mixed $value): void
     {
         $this->Params[$key] = $value;
     }
 
     /**
-     * @param $key
-     * @return mixed|null
+     * @param string $key
+     * @return mixed
      */
-    public function getParam($key)
+    public function getParam(string $key): mixed
     {
-        if (isset($this->Params[$key])) {
-            return $this->Params[$key];
-        }
-        return null;
+        return $this->Params[$key] ?? null;
     }
 }
