@@ -14,7 +14,7 @@ if (!function_exists('redirect')) {
     function redirect($uri = '', $method = 'auto', $code = NULL)
     {
         if (!preg_match('#^(\w+:)?//#i', $uri)) {
-            $uri = base_url($uri);
+            $uri = route($uri);
         }
         if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== FALSE) {
             $method = 'refresh';
@@ -57,24 +57,24 @@ if (!function_exists("_uri_string")) {
     }
 }
 
-if (!function_exists("base_url")) {
+if (!function_exists("route")) {
     /**
      * Obter url completa de uma rota
      * @param string $uri rota
-     * @param null $protocol protocolo da rota Ex: http, https, ftp etc...
+     * @param string|null $protocol protocolo da rota Ex: http, https, ftp etc...
      * @return string url completa da rota
      */
-    function base_url($uri = '', $protocol = NULL)
+    function route(string $uri = "", string $protocol = null): string
     {
-        $base_url = slash_item('base_url');
+        $route = slash_item('route');
         if (isset($protocol)) {
-            if ($protocol === '') {
-                $base_url = substr($base_url, strpos($base_url, '//'));
+            if ($protocol === "") {
+                $route = substr($route, strpos($route, '//'));
             } else {
-                $base_url = $protocol . substr($base_url, strpos($base_url, '://'));
+                $route = $protocol . substr($route, strpos($route, '://'));
             }
         }
-        return $base_url . _uri_string($uri);
+        return $route . _uri_string($uri);
     }
 }
 
@@ -110,7 +110,7 @@ if (!function_exists("assets")) {
      */
     function assets($file)
     {
-        return base_url(getConfig("base_dir_assets") . $file);
+        return route(getConfig("base_dir_assets") . $file);
     }
 }
 

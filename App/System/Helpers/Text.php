@@ -3,80 +3,79 @@
 if (!function_exists('trimText')) {
     /**
      * Cortar string em tamanho especifico
-     * @param $string
+     * @param string $text
      * @param int $limit
-     * @return bool|string
+     * @return string
      */
-    function trimText($string, $limit = 120)
+    function trimText(string $text, int $limit = 120): string
     {
-        $string = strip_tags($string);
-        if (strlen($string) > $limit) {
-            $stringCut = substr($string, 0, $limit);
+        $text = strip_tags($text);
+        if (strlen($text) > $limit) {
+            $stringCut = substr($text, 0, $limit);
             $endPoint = strrpos($stringCut, ' ');
-            $string = $endPoint ? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
-            $string .= '...';
+            $text = $endPoint ? substr($stringCut, 0, $endPoint) : substr($stringCut, 0);
+            $text .= '...';
         }
-        return $string;
+        return $text;
     }
 }
 
 
 if (!function_exists("trimWords")) {
     /**
-     * @param $string
+     * @param string $text
      * @param int $limit
      * @return string
      */
-    function trimWords($string, $limit = 15)
+    function trimWords(string $text, int $limit = 15): string
     {
-        $words = explode(' ', $string);
+        $words = explode(' ', $text);
         if (count($words) > $limit) {
             return implode(' ', array_slice($words, 0, $limit)) . "...";
         }
-        return $string;
+        return $text;
     }
 }
 
 if (!function_exists("truncateText")) {
     /**
-     * @param $string
-     * @param $limit
+     * @param string $text
+     * @param int $limit
      * @param string $break
      * @param string $pad
      * @return string
      */
-    function truncateText($string, $limit, $break = ".", $pad = "...")
+    function truncateText(string $text, int $limit, string $break = ".", string $pad = "..."): string
     {
-        if (strlen($string) <= $limit) return $string;
-
-        if (false !== ($max = strpos($string, $break, $limit))) {
-            if ($max < strlen($string) - 1) {
-                $string = substr($string, 0, $max) . $pad;
+        if (strlen($text) <= $limit) return $text;
+        if (false !== ($max = strpos($text, $break, $limit))) {
+            if ($max < strlen($text) - 1) {
+                $text = substr($text, 0, $max) . $pad;
             }
         }
-        return $string;
+        return $text;
     }
 }
 
 if (extension_loaded('mbstring')) {
     mb_internal_encoding('UTF-8');
 
-    function utf8_strlen($string)
+    function utf8_strlen(string $string): bool|int
     {
         return mb_strlen($string);
     }
 
-    function utf8_strpos($string, $needle, $offset = 0)
+    function utf8_strpos(string $string, string $needle, int $offset = 0): bool|int
     {
         return mb_strpos($string, $needle, $offset);
     }
 
-    function utf8_strrpos($string, $needle, $offset = 0)
+    function utf8_strrpos(string $string, string $needle, int $offset = 0): bool|int
     {
         return mb_strrpos($string, $needle, $offset);
     }
 
-    function utf8_substr($string, $offset, $length = null)
+    function utf8_substr(string $string, int $offset, int $length = null): string
     {
         if ($length === null) {
             return mb_substr($string, $offset, utf8_strlen($string));
@@ -85,34 +84,34 @@ if (extension_loaded('mbstring')) {
         }
     }
 
-    function utf8_strtoupper($string)
+    function utf8_strtoupper(string $string): array|bool|string|null
     {
         return mb_strtoupper($string);
     }
 
-    function utf8_strtolower($string)
+    function utf8_strtolower(string $string): array|bool|string|null
     {
         return mb_strtolower($string);
     }
 
 } elseif (function_exists('iconv')) {
 
-    function utf8_strlen($string)
+    function utf8_strlen(string $string): bool|int
     {
         return iconv_strlen($string, 'UTF-8');
     }
 
-    function utf8_strpos($string, $needle, $offset = 0)
+    function utf8_strpos(string $string, string $needle, int $offset = 0): bool|int
     {
         return iconv_strpos($string, $needle, $offset, 'UTF-8');
     }
 
-    function utf8_strrpos($string, $needle)
+    function utf8_strrpos(string $string, string $needle): bool|int
     {
         return iconv_strrpos($string, $needle, 'UTF-8');
     }
 
-    function utf8_substr($string, $offset, $length = null)
+    function utf8_substr(string $string, int $offset, int $length = null): bool|string
     {
         if ($length === null) {
             return iconv_substr($string, $offset, utf8_strlen($string), 'UTF-8');
@@ -121,7 +120,7 @@ if (extension_loaded('mbstring')) {
         }
     }
 
-    function utf8_strtolower($string)
+    function utf8_strtolower(string $string): bool|string
     {
         static $upper_to_lower;
         if ($upper_to_lower == null) {
@@ -160,7 +159,7 @@ if (extension_loaded('mbstring')) {
         return unicode_to_utf8($unicode);
     }
 
-    function utf8_to_unicode($string)
+    function utf8_to_unicode(string $string): array
     {
         $unicode = array();
         for ($i = 0; $i < strlen($string); $i++) {
@@ -187,9 +186,9 @@ if (extension_loaded('mbstring')) {
         return $unicode;
     }
 
-    function unicode_to_utf8($unicode)
+    function unicode_to_utf8(array $unicode): string
     {
-        $string = '';
+        $string = "";
         for ($i = 0; $i < count($unicode); $i++) {
             if ($unicode[$i] < 128) {
                 $string .= chr($unicode[$i]);

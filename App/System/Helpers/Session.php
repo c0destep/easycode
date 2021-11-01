@@ -21,8 +21,7 @@ if (!function_exists('getFlashError')) {
     function getFlashError(): ?string
     {
         $Error = Session::getInstance()->getFlash("error");
-
-        return (!is_null($Error)) ? $Error : null;
+        return $Error ?? null;
     }
 }
 
@@ -45,8 +44,7 @@ if (!function_exists('getFlashSuccess')) {
     function getFlashSuccess(): ?string
     {
         $Success = Session::getInstance()->getFlash("success");
-
-        return (!is_null($Success)) ? $Success : null;
+        return $Success ?? null;
     }
 }
 
@@ -69,7 +67,6 @@ if (!function_exists('getFlashWarning')) {
     function getFlashWarning(): ?string
     {
         $Warning = Session::getInstance()->getFlash("warning");
-
-        return (!is_null($Warning)) ? $Warning : null;
+        return $Warning ?? null;
     }
 }

@@ -2,120 +2,94 @@
 
 namespace System\Libraries;
 
+use Exception;
 use System\Request;
 
 class Forms
 {
-
-    protected static $instance;
-
-    public static function getInstance()
-    {
-        if (self::$instance == null) {
-            self::$instance = new Forms();
-        }
-        return self::$instance;
-    }
-
-    protected $inputs = [];
-    protected $errors = [];
-    protected $getFields = [];
+    protected static Forms $instance;
+    protected array $inputs = array();
+    protected array $errors = array();
+    protected array $getFields = array();
 
     public function __construct()
     {
         self::$instance = $this;
     }
 
-    /**
-     * @param $key
-     * @param $functionRule mixed array, function
-     * @param $args mixed
-     */
-    public function setRules($key, $require = false, $functionRule = null, $args = null, $msgError = null)
+    public static function getInstance(): Forms
     {
-        $this->inputs[$key] = [$require, $functionRule, $args, $msgError];
+        self::$instance = new Forms();
+        return self::$instance;
     }
 
     /**
-     * @param $formName string name form
-     * @param $token string token form
-     * @return bool
+     * @param string $key
+     * @param bool $required
+     * @param mixed $functionRule
+     * @param mixed $args
+     * @param string|null $messageError
      */
-    private function validToken($formName, $token)
+    public function setRules(string $key, bool $required = false, mixed $functionRule = null, mixed $args = null, string $messageError = null)
     {
-        $CodeForm = Session::getInstance()->getFlash($formName);
-        if ($CodeForm === $token) {
-            return true;
-        }
-        return false;
+        $this->inputs[$key] = [$required, $functionRule, $args, $messageError];
     }
 
     /**
      * Generate random code to return on ajax response
-     * @param $NameForm string name of form
-     * @return string token form
+     * @param string $nameForm
+     * @param int $sizeCodeSecurity
+     * @return string
      */
-    public function initJson($NameForm)
+    public function initJson(string $nameForm, int $sizeCodeSecurity = 8): string
     {
-        $CodeForm = randomCode(8);
-        Session::getInstance()->setFlash($NameForm, $CodeForm);
-        return $CodeForm;
+        $codeForm = randomCode($sizeCodeSecurity);
+        Session::getInstance()->setFlash($nameForm, $codeForm);
+        return $codeForm;
     }
 
     /**
-     * @param $attr array Atributos do Form
-     * @param $NameForm string key form name
+     * @param string $nameForm
+     * @param string $nameRoute
+     * @param string $method
+     * @param bool $fileUpload
+     * @param int $sizeCodeSecurity
      * @return string
      */
-    public function init($attr, $NameForm)
+    public function init(string $nameForm, string $nameRoute, string $method, bool $fileUpload = false, int $sizeCodeSecurity = 8): string
     {
-        $attrs = "";
-        foreach ($attr as $key => $item) {
-            $attrs .= "{$key}=\"{$item}\" ";
-        }
-
-        $CodeForm = randomCode(8);
-        Session::getInstance()->setFlash($NameForm, $CodeForm);
-        return "<form {$attrs}><input type='hidden' name='{$NameForm}' value='$CodeForm'>";
+        $codeForm = randomCode($sizeCodeSecurity);
+        $route = route($nameRoute);
+        Session::getInstance()->setFlash($nameForm, $codeForm);
+        $fileUpload ? $enctype = "application/x-www-form-urlencoded" : $enctype = "multipart/form-data";
+        return "<form id='$nameForm' action='$route' method='$method' enctype='$enctype'><input type='hidden' name='$nameForm' value='$codeForm'>";
     }
 
-    public function end()
+    public function end(): string
     {
         return "</form>";
     }
 
     /**
-     * @param string|null $NameForm Nome do Fomulário se houver
-     * @param string $type
-     * @param int $xss
-     * @throws \Exception
+     * @param string|null $nameForm
+     * @param string $method
+     * @param bool $xss
+     * @throws Exception
      */
-    public function validate($NameForm, $type = "POST", $xss = 0)
+    public function validate(string $nameForm = null, string $method = "POST", bool $xss = false): void
     {
-        $Method = null;
-        switch ($type) {
-            case Request::GET:
-                $Method = "get";
-                break;
-            case Request::REQUEST:
-                $Method = "request";
-                break;
-            case Request::JSON:
-                $Method = "json";
-                break;
-            case Request::EXTRA:
-                $Method = "extra";
-                break;
-            case Request::POST:
-            default:
-                $Method = "post";
-                break;
-        }
+        $Method = match ($method) {
+            Request::GET => "get",
+            Request::REQUEST => "request",
+            Request::JSON => "json",
+            Request::EXTRA => "extra",
+            default => "post",
+        };
 
-        if (!is_null($NameForm)) {
-            $TokenForm = Request::getInstance()->$Method($NameForm);
-            if (!$this->validToken($NameForm, $TokenForm)) {
-                $this->errors[$NameForm] = Lang::get("form_invalid_token");
+        if (!is_null($nameForm)) {
+            $TokenForm = Request::getInstance()->$Method($nameForm);
+            if (!$this->validToken($nameForm, $TokenForm)) {
+                $this->errors[$nameForm] = Lang::get("form_invalid_token");
                 return;
             }
         }
@@ -125,59 +99,60 @@ class Forms
             $this->getFields[$input] = $Value;
             try {
                 $isRequire = $args[0];
-                if ($isRequire && (empty($Value) || is_null($Value))) {
+                if ($isRequire && empty($Value)) {
                     if (!is_null($args[3])) {
                         $msgError = $args[3];
                     } else {
-                        $msgError = Lang::get("form_require", ":attr:", Lang::get("input_{$input}"));
+                        $msgError = Lang::get("form_require", ":attr:", Lang::get("input_$input"));
                     }
                     $this->errors[$input] = $msgError;
                 } else {
-                    if (!$isRequire && (empty($Value) || is_null($Value))) {
-                        continue;
-                    }
+                    if (!$isRequire && empty($Value)) continue;
 
                     if (is_array($args[1])) {
                         $Class = $args[1][0];
                         $ValidMethod = $args[1][1];
                         $isValid = $Class->$ValidMethod($Value, $args[2]);
-                        if (!$isValid) {
-                            if (!is_null($args[3])) {
-                                $msgError = $args[3];
-                            } else {
-                                $msgError = Lang::get("input_error_{$input}");
-                            }
-                            $this->errors[$input] = $msgError;
-                        }
                     } else {
                         $FunctionTry = $args[1];
                         $isValid = $FunctionTry($Value, $args[2]);
-                        if (!$isValid) {
-                            if (!is_null($args[3])) {
-                                $msgError = $args[3];
-                            } else {
-                                $msgError = Lang::get("input_error_{$input}");
-                            }
-                            $this->errors[$input] = $msgError;
+                    }
+
+                    if (!$isValid) {
+                        if (!is_null($args[3])) {
+                            $msgError = $args[3];
+                        } else {
+                            $msgError = Lang::get("input_error_$input");
                         }
+                        $this->errors[$input] = $msgError;
                     }
                 }
-            } catch (\Exception $e) {
-                throw new \Exception($e->getMessage());
+            } catch (Exception $e) {
+                throw new Exception($e->getMessage());
             }
         }
     }
 
     /**
-     * Get Validate Fields
-     * @param $key string
-     * @return array|string
+     * @param string $nameForm
+     * @param $token string token form
+     * @return bool
      */
-    public function getFields($key = null)
+    private function validToken(string $nameForm, string $token): bool
+    {
+        $codeForm = Session::getInstance()->getFlash($nameForm);
+        return ($codeForm === $token);
+    }
+
+    /**
+     * Get Validate Fields
+     * @param string|null $key string
+     * @return array|string|null
+     */
+    public function getFields(string $key = null): array|string|null
     {
         if (!is_null($key)) {
-            if (!isset($this->getFields[$key]) || empty($this->getFields[$key]))
-                return null;
+            if (!isset($this->getFields[$key]) || empty($this->getFields[$key])) return null;
             return $this->getFields[$key];
         }
         return $this->getFields;
@@ -187,19 +162,16 @@ class Forms
      * Verifica se possuí erros no formulário
      * @return bool
      */
-    public function hasErrors()
+    public function hasErrors(): bool
     {
-        if (count($this->errors) > 0) {
-            return true;
-        }
-        return false;
+        return (count($this->errors) > 0);
     }
 
     /**
      * Obter todos os erros
      * @return array Lista de erros
      */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->errors;
     }
