@@ -4,25 +4,24 @@ namespace System\Libraries;
 
 class Hooks
 {
-
-    private static $onCallBefore = [];
-    private static $onCallAfter = [];
+    private static array $onCallBefore = array();
+    private static array $onCallAfter = array();
 
     /**
-     * Adicionar evento para executar antes das chamadas de rotas
-     * @param $class
-     * @param $method
+     * Add event to run before route calls
+     * @param string $class
+     * @param string $method
      */
-    public static function registerCallBefore($class, $method)
+    public static function registerCallBefore(string $class, string $method): void
     {
         self::$onCallBefore[] = array($class, $method);
     }
 
     /**
-     * Adicionar eventos
-     * @param $events
+     * Add event
+     * @param array $events
      */
-    public static function registerCallsBefore($events)
+    public static function registerCallsBefore(array $events): void
     {
         foreach ($events as $class => $method) {
             self::$onCallBefore[] = array($class, $method);
@@ -30,20 +29,20 @@ class Hooks
     }
 
     /**
-     * Adicionar evento para executar apos a chamada de rotas
-     * @param $class
-     * @param $method
+     * Add event to run after route calls
+     * @param string $class
+     * @param string $method
      */
-    public static function registerCallAfter($class, $method)
+    public static function registerCallAfter(string $class, string $method): void
     {
         self::$onCallAfter[] = array($class, $method);
     }
 
     /**
-     * Adicionar Eventos
-     * @param $events
+     * Add event
+     * @param array $events
      */
-    public static function registerCallsAfter($events)
+    public static function registerCallsAfter(array $events): void
     {
         foreach ($events as $class => $method) {
             self::$onCallAfter[] = array($class, $method);
@@ -52,9 +51,9 @@ class Hooks
     }
 
     /**
-     * Executar eventos
+     * Execute event
      */
-    public static function executeCallBefore()
+    public static function executeCallBefore(): void
     {
         foreach (self::$onCallBefore as $item) {
             execute_class($item[0], $item[1]);
@@ -62,9 +61,9 @@ class Hooks
     }
 
     /**
-     * Executar eventos
+     * Execute event
      */
-    public static function executeCallAfter()
+    public static function executeCallAfter(): void
     {
         foreach (self::$onCallAfter as $item) {
             execute_class($item[0], $item[1]);

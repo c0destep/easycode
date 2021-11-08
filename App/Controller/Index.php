@@ -33,10 +33,9 @@ class Index extends Controller
      * Ex:  @route find/{id} : {id} -> $id
      * When the method has $request and $response in the parameters,
      * both will automatically assume class System\Response and System\Request
-     * @param mixed $id dynamic value in url {id}
+     * @param int $id dynamic value in url {id}
      */
-    public function FindExample($id)
+    public function FindExample(int $id)
     {
     }
-
 }

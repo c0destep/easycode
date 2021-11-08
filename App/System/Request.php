@@ -136,6 +136,10 @@ class Request
         return null;
     }
 
+    /**
+     * @param string $key
+     * @return mixed
+     */
     public function __get(string $key): mixed
     {
         return self::find($key);

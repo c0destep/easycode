@@ -4,33 +4,28 @@ namespace System\Libraries;
 
 class ModuleManager
 {
+    protected static $modules;
 
-    protected static $allModules;
+    public static function getModules()
+    {
+        return self::$modules;
+    }
 
-    /**
-     * Configurar rotas de modulos
-     */
-    public function setup()
+    public function setup(): void
     {
         $GetSettings = json_decode(file_get_contents(BASE_PATH . "Modules/Settings.json"));
         $RoutesFile = getConfig("files_route");
         foreach ($GetSettings as $modules) {
             if ($modules->active) {
-                if (file_exists(BASE_PATH . "Modules/{$modules->key}/Settings.php")) {
-                    require_once BASE_PATH . "Modules/{$modules->key}/Settings.php";
-                }
-                if (file_exists(BASE_PATH . "Modules/{$modules->key}/Routes.php")) {
-                    $RoutesFile[] = BASE_PATH . "Modules/{$modules->key}/Routes.php";
-                }
+                if (file_exists(BASE_PATH . sprintf("Modules/%s/Settings.php", $modules->key)))
+                    require_once BASE_PATH . sprintf("Modules/%s/Settings.php", $modules->key);
+
+                if (file_exists(BASE_PATH . sprintf("Modules/%s/Routes.php", $modules->key)))
+                    $RoutesFile[] = BASE_PATH . sprintf("Modules/%s/Routes.php", $modules->key);
             }
         }
+
         setConfig("files_route", $RoutesFile);
-        self::$allModules = $GetSettings;
+        self::$modules = $GetSettings;
     }
-
-    public static function getModules()
-    {
-        return self::$allModules;
-    }
-
 }

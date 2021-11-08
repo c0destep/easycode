@@ -11,14 +11,16 @@
     {$smarty.capture.header_title_top}
     {$smarty.capture.header_title}
 
-    {getFlashError()}
-    {getFlashSuccess()}
-    {getFlashWarning()}
-
 {/if}
 
 {if $smarty.capture.content}
+
+    {getFlashError()}
+    {getFlashSuccess()}
+    {getFlashWarning()}
+    
     {$smarty.capture.content}
+
 {/if}
 
 {include file="Layout/Footer.tpl"}
