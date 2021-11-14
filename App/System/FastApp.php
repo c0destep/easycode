@@ -94,7 +94,7 @@ class FastApp
     }
 
     /**
-     * @param string $file
+     * @param string $file Helper file name
      * @return void
      * @throws Exception
      */
@@ -111,7 +111,7 @@ class FastApp
             $isFind = true;
         }
         if (!$isFind) {
-            throw new Exception("File Helper {$file} not found");
+            throw new Exception("File Helper $file not found");
         }
     }
 
@@ -129,7 +129,7 @@ class FastApp
     }
 
     /**
-     * Inicia as configurações de banco de dados
+     * Starts database settings
      */
     private function initDatabase(): void
     {

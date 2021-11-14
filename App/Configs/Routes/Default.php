@@ -15,3 +15,15 @@ Routes::get("/", [
     "onCallAfter" => [],
     "onCallFinish" => []
 ]);
+
+Routes::get("find/{id}", [
+    "Controller" => Index::class,
+    "Method" => "FindExample",
+    "Headers" => [
+        'Content-Type:' . ResponseType::CONTENT_HTML
+    ],
+    "RequireHeader" => [],
+    "onCallBefore" => [],
+    "onCallAfter" => [],
+    "onCallFinish" => []
+]);

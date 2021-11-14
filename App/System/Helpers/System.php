@@ -1,6 +1,9 @@
 <?php
 
+use System\Core\HooksRoutes;
+use System\Libraries\Shortcode;
 use System\Libraries\View;
+use System\Request;
 use System\Response;
 
 if (!function_exists('redirect')) {
@@ -108,7 +111,7 @@ if (!function_exists("assets")) {
      * @param $file String nome do arquivo desejado
      * @return string retorna url completa do arquivo
      */
-    function assets($file)
+    function assets(string $file): string
     {
         return route(getConfig("base_dir_assets") . $file);
     }
@@ -116,18 +119,19 @@ if (!function_exists("assets")) {
 
 if (!function_exists("slash_item")) {
     /**
-     * @param $item
+     * @param string $item
      * @return null|string
      */
-    function slash_item($item)
+    function slash_item(string $item): ?string
     {
         $Config = getConfig();
         if (!isset($Config[$item])) {
-            return NULL;
-        } elseif (trim($Config[$item]) === '') {
-            return '';
+            return null;
+        } elseif (trim($Config[$item]) === "") {
+            return "";
+        } else {
+            return rtrim($Config[$item], "/") . "/";
         }
-        return rtrim($Config[$item], '/') . '/';
     }
 }
 
@@ -216,67 +220,64 @@ if (!function_exists("str_replace_first")) {
 
 if (!function_exists('getConfig')) {
     /**
-     * Obter valor de Config especifica
-     * @param $key
+     * Get specific Config value
+     * @param string|null $key
      * @return mixed
      */
-    function getConfig($key = null)
+    function getConfig(string $key = null): mixed
     {
         global $Config;
-        if (is_null($key))
-            return $Config;
-
-        return $Config[$key];
+        return is_null($key) ? $Config : $Config[$key];
     }
 }
 
 if (!function_exists('setConfig')) {
     /**
-     * Definir valor de Config especifica
-     * @param $key
-     * @return mixed
+     * Set specific Config value
+     * @param string $key
+     * @param mixed $value
+     * @return bool
      */
-    function setConfig($key, $value)
+    function setConfig(string $key, mixed $value): bool
     {
         global $Config;
-        $Config[$key] = $value;
+        return ($Config[$key] === $value);
     }
 }
 
 if (!function_exists('apiSuccessCall')) {
     /**
-     * Retorna um JSON de sucesso
-     * @param $data
-     * @param string $msg
+     * Returns an successful JSON
+     * @param string $data
+     * @param string $message
      * @param int $code
      * @return false|string
      */
-    function apiSuccessCall($data, $msg = '', $code = 200)
+    function apiSuccessCall(string $data, string $message = "", int $code = 200): bool|string
     {
-        return \System\Core\HooksRoutes::getInstance()->apiSuccessCallJson($data, $msg, $code);
+        return HooksRoutes::getInstance()->apiSuccessCallJson($data, $message, $code);
     }
 }
 
 if (!function_exists('apiErrorCall')) {
     /**
-     * Retorna um JSON de erro
-     * @param $data
-     * @param string $msg
+     * Returns an error JSON
+     * @param string $message
      * @param int $code
      * @return false|string
      */
-    function apiErrorCall($msg, $code = 404)
+    function apiErrorCall(string $message, int $code = 404): bool|string
     {
-        return \System\Core\HooksRoutes::getInstance()->apiErrorCallJson($msg, $code);
+        return HooksRoutes::getInstance()->apiErrorCallJson($message, $code);
     }
 }
 
 if (!function_exists('getDatetime')) {
     /**
-     * Obter data no momento (Formato para MySQL)
+     * Get date at the moment (Format for MySQL)
      * @return false|string
      */
-    function getDatetime()
+    function getDatetime(): bool|string
     {
         return date("Y-m-d H:i:s");
     }
@@ -303,7 +304,7 @@ if (!function_exists('execute_callbacks')) {
                             } else {
                                 switch ($nameVar) {
                                     case 'request':
-                                        $finalAttrs[] = \System\Request::getInstance();
+                                        $finalAttrs[] = Request::getInstance();
                                         break;
                                     case 'response':
                                         $finalAttrs[] = Response::getInstance();
@@ -342,7 +343,7 @@ if (!function_exists('execute_class')) {
                     } else {
                         switch ($nameVar) {
                             case 'request':
-                                $finalAttrs[] = \System\Request::getInstance();
+                                $finalAttrs[] = Request::getInstance();
                                 break;
                             case 'response':
                                 $response = Response::getInstance();
@@ -354,9 +355,7 @@ if (!function_exists('execute_class')) {
                 }
 
                 $Return = call_user_func_array([$initClass, $method], $finalAttrs);
-                if ($Return instanceof View) {
-                    renderView($Return);
-                }
+                if ($Return instanceof View) renderView($Return);
 
                 return true;
             } catch (ReflectionException $e) {
@@ -369,7 +368,7 @@ if (!function_exists('execute_class')) {
 }
 
 if (!function_exists('getUriPatch')) {
-    function getUriPatch()
+    function getUriPatch(): array|string|null
     {
         $str = str_replace_first(getConfig('base_dir'), "", $_SERVER['REQUEST_URI']);
         $str = str_replace([$_SERVER['QUERY_STRING'], "?"], "", $str);
@@ -378,44 +377,47 @@ if (!function_exists('getUriPatch')) {
 }
 
 if (!function_exists('loadFilesRoute')) {
-    function loadFilesRoute()
+    function loadFilesRoute(): void
     {
         $Routes = getConfig("files_route");
         foreach ($Routes as $file) {
             if (file_exists($file)) {
                 include_once($file);
-            } else if (file_exists(BASE_PATH . "Configs/Routes/{$file}.php")) {
-                include_once(BASE_PATH . "Configs/Routes/{$file}.php");
+            } else if (file_exists(BASE_PATH . "Configs/Routes/" . $file . ".php")) {
+                include_once(BASE_PATH . "Configs/Routes/" . $file . ".php");
             }
         }
     }
 }
 
 if (!function_exists('addShortcode')) {
-    function addShortcode($name, $function)
+    function addShortcode($name, $function): void
     {
-        System\Libraries\Shortcode::getInstance()->addHandlers($name, $function);
+        Shortcode::getInstance()->addHandlers($name, $function);
     }
 }
 
 if (!function_exists('renderShortcode')) {
-    function renderShortcode($text)
+    function renderShortcode(string $text): ?string
     {
-        return System\Libraries\Shortcode::getInstance()->getProcessor($text);
+        return Shortcode::getInstance()->getProcessor($text);
     }
 }
 
 if (!function_exists('renderView')) {
-    function renderView(View $view)
+    function renderView(View $view): ?bool
     {
         if ($view->getType() === View::VIEW) {
             Response::getInstance()->getController()->setView(
                 $view->getView(),
                 $view->getParams()
             );
-        }
-        if ($view->getType() === View::JSON) {
+            return true;
+        } elseif ($view->getType() === View::JSON) {
             echo $view->toJSON();
+            return true;
+        } else {
+            return null;
         }
     }
 }

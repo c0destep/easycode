@@ -9,12 +9,6 @@ use System\Response;
 
 class Index extends Controller
 {
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     /**
      * @param Request $request
      * @param Response $response
@@ -22,7 +16,7 @@ class Index extends Controller
      * When the method has $request and $response in the parameters,
      * both will automatically assume class System\Response and System\Request
      */
-    public function Index(Request $request, Response $response): ViewHtml
+    public function Index(Response $response, Request $request): ViewHtml
     {
         return $response->html()->setView("welcome");
     }
@@ -35,7 +29,10 @@ class Index extends Controller
      * both will automatically assume class System\Response and System\Request
      * @param int $id dynamic value in url {id}
      */
-    public function FindExample(int $id)
+    public function FindExample(Response $response, Request $request, int $id): ViewHtml
     {
+        return $response->html()->setView("welcome")->setParams([
+            "Id" => $id
+        ]);
     }
 }

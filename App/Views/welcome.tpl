@@ -20,15 +20,18 @@
                 <small class="ptt__subtitle">PF is a Simple Framework build with PHP 8.x</small>
             </div>
             <div>
-                <a class="ptt__button" href="https://github.com/phytoline/potato-framework-codingstep/blob/main/README.md" target="_blank">
+                <a class="ptt__button"
+                   href="https://github.com/phytoline/potato-framework-codingstep/blob/main/README.md" target="_blank">
                     Documentation
                 </a>
             </div>
         </main>
         <footer class="ptt__footer">
-            <p>
-
-            </p>
+            {if isset($Id)}
+                <p>
+                    Parameter <strong>ID</strong> Value: {$Id}
+                </p>
+            {/if}
         </footer>
     </div>
 {/capture}

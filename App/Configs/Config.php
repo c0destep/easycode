@@ -8,7 +8,7 @@ $Config = array();
 $Config['name_project'] = "Potato";
 
 $Config['base_dir'] = "/Codingstep/potato-framework-codingstep/";
-$Config['base_url'] = "http://localhost/Codingstep/potato-framework-codingstep/";
+$Config['route'] = "http://localhost/Codingstep/potato-framework-codingstep/";
 $Config['https_enable'] = false;
 $Config['ssl_verify'] = false;
 
