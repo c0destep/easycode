@@ -6,25 +6,25 @@
     <title>{$FastApp->getConfig("name_project")}</title>
     <meta name="description" content="">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <link rel="shortcut icon" type="image/x-icon" href="{assets("potato/potato.svg")}">
-    <link rel="stylesheet" href="{assets("potato/demo.css")}">
+    <link rel="shortcut icon" type="image/x-icon" href="{assets("easycode/favicon.ico")}">
+    <link rel="stylesheet" href="{assets("easycode/demo.css")}">
 </head>
 <body>
 <div class="ptt__container">
     <header class="ptt__header">
         <nav class="ptt__navbar">
-            <a class="ptt__navbar-link" href="https://github.com/phytoline/potato-framework-codingstep"
+            <a class="ptt__navbar-link" href="https://github.com/phytoline/easycode"
                target="_blank">GitHub</a>
         </nav>
     </header>
     <main class="ptt__main">
         <div>
-            <h1 class="ptt__title">Potato Framework <sup class="ptt__sup">powered Codingstep</sup></h1>
+            <h1 class="ptt__title">Easycode Framework</h1>
             <small class="ptt__subtitle">PF is a Simple Framework build with PHP 8.x</small>
         </div>
         <div>
             <a class="ptt__button"
-               href="https://github.com/phytoline/potato-framework-codingstep/blob/main/README.md" target="_blank">
+               href="https://github.com/phytoline/easycode/blob/main/README.md" target="_blank">
                 Documentation
             </a>
         </div>

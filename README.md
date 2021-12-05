@@ -1,4 +1,5 @@
-# Welcome to Potato Framework by Code
+# Welcome to Easycode
+
 > **Note** that this version has no link to its original edition.
 
 ## About

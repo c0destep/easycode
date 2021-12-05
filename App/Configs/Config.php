@@ -5,10 +5,10 @@ use System\ResponseType;
 
 $Config = array();
 
-$Config['name_project'] = "Potato";
+$Config['name_project'] = "Easycode";
 
-$Config['base_dir'] = "/Codingstep/potato-framework-codingstep/";
-$Config['route'] = "http://localhost/Codingstep/potato-framework-codingstep/";
+$Config['base_dir'] = "/Codingstep/easycode/";
+$Config['route'] = "http://localhost/Codingstep/easycode/";
 $Config['https_enable'] = false;
 $Config['ssl_verify'] = false;
 
