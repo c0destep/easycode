@@ -2,11 +2,11 @@
   "name": "phytoline/potato-framework-codingstep",
   "description": "Codingstep Framework",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "Apache-2.0",
   "authors": [
     {
       "name": "Lucas Alves",
-      "email": "contact@codingstep.com.br"
+      "email": "codestep@codingstep.com.br"
     }
   ],
   "require": {
