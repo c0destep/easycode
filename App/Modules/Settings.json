@@ -1,9 +1,9 @@
 [
   {
-    "key": "Exemplo",
-    "name": "Exemplo",
-    "description": "Exemplo de modulo",
-    "author": "CodeInsight <development@codeinsight.com.br>",
+    "key": "Example",
+    "name": "Example",
+    "description": "Example de modulo",
+    "author": "Codestep <codestep@codingstep.com.br>",
     "active": true,
     "version": "1.0"
   }

@@ -1,11 +1,11 @@
 <?php
 
-use Controller\Index;
+use Controller\IndexController;
 use System\Core\Routes;
 use System\ResponseType;
 
 Routes::get("/", [
-    "Controller" => Index::class,
+    "Controller" => IndexController::class,
     "Method" => "Index",
     "Headers" => [
         'Content-Type:' . ResponseType::CONTENT_HTML
@@ -17,8 +17,8 @@ Routes::get("/", [
 ]);
 
 Routes::get("find/{id}", [
-    "Controller" => Index::class,
-    "Method" => "FindExample",
+    "Controller" => IndexController::class,
+    "Method" => "FindUser",
     "Headers" => [
         'Content-Type:' . ResponseType::CONTENT_HTML
     ],

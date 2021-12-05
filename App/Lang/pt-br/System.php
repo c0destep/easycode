@@ -19,7 +19,6 @@ $lang['form_require'] = "O campo :attr: é obrigatório.";
 $lang['form_invalid_token'] = "Requisição inválida.";
 $lang['api_invalid_token'] = "Você precisa estar autenticado para esta ação.";
 
-
 $lang['input_name'] = "Nome";
 $lang['input_desc'] = "Descrição";
 $lang['input_reference'] = "Referência";

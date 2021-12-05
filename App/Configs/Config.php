@@ -36,11 +36,11 @@ $Config['encrypt_key'] = "default";
  * DATABASE CONFIG
  */
 $Config['db_driver'] = [
-    "isActive" => false,
+    "isActive" => true,
     "class" => EloquentDriver::class, //Class Driver for Database Connection Setup
     "config" => [
         "db_hostname" => "localhost",
-        "db_database" => "",
+        "db_database" => "codingstep",
         "db_username" => "root",
         "db_password" => "",
     ]
@@ -83,11 +83,11 @@ $Config['template'] = TEMPLATE_ENGINE_SMARTY;
 $Config['timezone'] = "America/Sao_Paulo";
 
 /**
- * Autoloads Helpers
+ * Autoload Helpers
  * Checks if the file exists and includes it before starting the controller
  * Ex: Session, Pagination, Text, Upload
  */
-$Config['helpersLoad'] = ["Session", "Text", "Upload"];
+$Config['helpersLoad'] = ["Session", "Text", "Upload", "Utils"];
 
 /**
  * Emails

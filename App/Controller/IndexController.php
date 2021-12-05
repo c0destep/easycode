@@ -2,12 +2,13 @@
 
 namespace Controller;
 
+use Models\Users;
 use System\Core\Controller;
 use System\Libraries\ViewHtml;
 use System\Request;
 use System\Response;
 
-class Index extends Controller
+class IndexController extends Controller
 {
     /**
      * @param Request $request
@@ -29,10 +30,13 @@ class Index extends Controller
      * both will automatically assume class System\Response and System\Request
      * @param int $id dynamic value in url {id}
      */
-    public function FindExample(Response $response, Request $request, int $id): ViewHtml
+    public function FindUser(Response $response, Request $request, int $id): ViewHtml
     {
+        $User = Users::find($id);
         return $response->html()->setView("welcome")->setParams([
-            "Id" => $id
+            "Id" => $User->id,
+            "Name" => $User->name,
+            "Email" => $User->email
         ]);
     }
 }
