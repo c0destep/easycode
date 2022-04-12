@@ -7,8 +7,8 @@ $Config = array();
 
 $Config['name_project'] = "Easycode";
 
-$Config['base_dir'] = "/Codingstep/easycode/";
-$Config['route'] = "http://localhost/Codingstep/easycode/";
+$Config['base_dir'] = "/easycode/";
+$Config['route'] = "http://localhost/easycode/";
 $Config['https_enable'] = false;
 $Config['ssl_verify'] = false;
 
