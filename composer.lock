@@ -4,8 +4,77 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "754d185679bb95b49200cce6f96d09d9",
+    "content-hash": "dfe4fac1ea111d3cc60038fae242f6c0",
     "packages": [
+        {
+            "name": "ausi/slug-generator",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ausi/slug-generator.git",
+                "reference": "4e761b08966c5d4aeecc1829ac997e5a5a29d231"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ausi/slug-generator/zipball/4e761b08966c5d4aeecc1829ac997e5a5a29d231",
+                "reference": "4e761b08966c5d4aeecc1829ac997e5a5a29d231",
+                "shasum": ""
+            },
+            "require": {
+                "ext-intl": "*",
+                "ext-mbstring": "*",
+                "ext-pcre": "*",
+                "lib-icu": ">=4.2.1",
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "contao/easy-coding-standard": "^3.0",
+                "phpstan/phpstan": "^0.12.40",
+                "phpstan/phpstan-phpunit": "^0.12.16",
+                "phpunit/phpunit": "^7.5.20 || ^8.5.4 || ^9.4.2",
+                "psalm/plugin-phpunit": "^0.9",
+                "slam/phpstan-extensions": "^5.0",
+                "vimeo/psalm": "^3.9"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ausi\\SlugGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Martin Auswöger",
+                    "email": "martin@auswoeger.com"
+                }
+            ],
+            "description": "Slug Generator",
+            "keywords": [
+                "ascii",
+                "cldr",
+                "pretty-url",
+                "slug",
+                "slug-generator",
+                "slugify",
+                "transliteration",
+                "unicode"
+            ],
+            "support": {
+                "issues": "https://github.com/ausi/slug-generator/issues",
+                "source": "https://github.com/ausi/slug-generator/tree/v1.1.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ausi",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-10-19T15:25:33+00:00"
+        },
         {
             "name": "doctrine/inflector",
             "version": "2.0.4",
@@ -99,7 +168,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -153,7 +222,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -204,7 +273,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -252,16 +321,16 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "ab8052c033036383fc2811fc9a518b5984e040a9"
+                "reference": "5a09b780d86613127cddbeb05e4dde22aeccbedf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/ab8052c033036383fc2811fc9a518b5984e040a9",
-                "reference": "ab8052c033036383fc2811fc9a518b5984e040a9",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/5a09b780d86613127cddbeb05e4dde22aeccbedf",
+                "reference": "5a09b780d86613127cddbeb05e4dde22aeccbedf",
                 "shasum": ""
             },
             "require": {
@@ -316,11 +385,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2022-03-21T16:13:31+00:00"
+            "time": "2022-04-07T15:04:12+00:00"
         },
         {
             "name": "illuminate/macroable",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -366,7 +435,7 @@
         },
         {
             "name": "illuminate/pagination",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pagination.git",
@@ -416,16 +485,16 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v8.83.7",
+            "version": "v8.83.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "5dd2ffb98c6169f8fcf84c065da3c27289e737af"
+                "reference": "3f1de19528fc235d666f73d540d13a684da6bf3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/5dd2ffb98c6169f8fcf84c065da3c27289e737af",
-                "reference": "5dd2ffb98c6169f8fcf84c065da3c27289e737af",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/3f1de19528fc235d666f73d540d13a684da6bf3a",
+                "reference": "3f1de19528fc235d666f73d540d13a684da6bf3a",
                 "shasum": ""
             },
             "require": {
@@ -480,7 +549,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2022-04-04T15:14:19+00:00"
+            "time": "2022-04-11T14:26:37+00:00"
         },
         {
             "name": "nesbot/carbon",
