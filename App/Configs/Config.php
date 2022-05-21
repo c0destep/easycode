@@ -68,9 +68,10 @@ $Config['base_dir_assets'] = "Public/";
 /**
  * Upload Directory
  */
-$Config['upload']['image'] = "/Public/uploads/image/";
-$Config['upload']['docs'] = "/Public/uploads/documents/";
-$Config['cache_image'] = "/Public/cache/image/";
+$Config['upload']['image'] = "/Public/uploads/images/";
+$Config['upload']['video'] = "/Public/uploads/videos/";
+$Config['upload']['document'] = "/Public/uploads/documents/";
+$Config['cache_image'] = "/Public/cache/images/";
 
 /**
  * Default Lang
