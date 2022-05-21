@@ -7,8 +7,16 @@ $Config = array();
 
 $Config['name_project'] = "Easycode";
 
-$Config['base_dir'] = "/easycode/";
-$Config['route'] = "http://localhost/easycode/";
+$dir_len = strlen('App/Configs');
+$B = substr(__FILE__, 0, strrpos(__FILE__, DIRECTORY_SEPARATOR));
+$A = substr($_SERVER['DOCUMENT_ROOT'], strrpos($_SERVER['DOCUMENT_ROOT'], $_SERVER['PHP_SELF']));
+$C = substr($B, strlen($A));
+$pos_config = strlen($C) - $dir_len - 1;
+$D = substr($C, 1, $pos_config);
+$protocol = (isset($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN)) ? 'https://' : 'http://';
+
+$Config['base_dir'] = DIRECTORY_SEPARATOR . $D;
+$Config['route'] = $protocol . $_SERVER['SERVER_NAME'] . DIRECTORY_SEPARATOR . $D;
 $Config['https_enable'] = false;
 $Config['ssl_verify'] = false;
 
@@ -30,7 +38,7 @@ $Config['error_content_type'] = ResponseType::CONTENT_HTML;
 $Config['error_extra_headers'] = [];
 
 $Config['enable_query_strings'] = true;
-$Config['encrypt_key'] = "default";
+$Config['encrypt_key'] = "JktUSnhrOENjWnhjVF1kLA==";
 
 /**
  * DATABASE CONFIG
@@ -49,7 +57,7 @@ $Config['db_driver'] = [
 /**
  * SESSION CONFIG
  */
-$Config['session_id'] = "sphap"; // Name Session
+$Config['session_id'] = uniqid(strtolower($Config['name_project'] . '_'));
 
 
 /**
