@@ -50,7 +50,7 @@ class Controller
      */
     public function setResponseType(string $type): void
     {
-        Response::getInstance()->setHeaderType($type);
+        Response::getInstance()->setContentType($type);
     }
 
     /**

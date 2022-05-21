@@ -10,10 +10,6 @@ use System\ResponseType as ResponseType;
 
 class Response
 {
-    protected static ?Response $instance = null;
-    protected array $responseHeader = array();
-    protected ?Controller $controller = null;
-
     const ALL = "ALL";
     const GET = "GET";
     const POST = "POST";
@@ -22,81 +18,19 @@ class Response
     const PATCH = "PATCH";
     const OPTIONS = "OPTIONS";
     const HEAD = "HEAD";
+    protected static ?Response $instance = null;
+    protected array $responseHeader = array();
+    protected ?Controller $controller = null;
 
     /**
      * @return null|Response
      */
     public static function getInstance(): ?Response
     {
-        if (is_null(self::$instance)) self::$instance = new Response();
-        return self::$instance;
-    }
-
-    /**
-     * @param Controller $controller
-     */
-    public function setController(Controller $controller)
-    {
-        $this->controller = $controller;
-    }
-
-    /**
-     * @return Controller|null $controller
-     */
-    public function getController(): ?Controller
-    {
-        return $this->controller;
-    }
-
-    /**
-     * @param string $key
-     * @param string|null $value
-     */
-    public function setHeader(string $key, string $value = null)
-    {
-        if (is_null($value)) {
-            $Get = explode(":", $key);
-            $this->responseHeader[$Get[0]] = $Get[1] ?? null;
-            header($key);
-        } else {
-            $this->responseHeader[$key] = $value;
-            header("$key:$value");
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
         }
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function getResponseHeader(string $key): mixed
-    {
-        return $this->responseHeader[$key];
-    }
-
-    /**
-     * @param string $type
-     */
-    public function setHeaderType(string $type)
-    {
-        $this->setHeader("Content-Type", $type);
-    }
-
-    /**
-     * @return ViewJson
-     */
-    public function json(): ViewJson
-    {
-        $this->setHeaderType(ResponseType::CONTENT_JSON);
-        return View::getJson();
-    }
-
-    /**
-     * @return ViewHtml
-     */
-    public function html(): ViewHtml
-    {
-        $this->setHeaderType(ResponseType::CONTENT_HTML);
-        return View::getHtml();
+        return self::$instance;
     }
 
     /**
@@ -107,7 +41,7 @@ class Response
     public static function getDefaultHtml(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_HTML,
+            "Content-Type" => ResponseType::CONTENT_HTML,
         ]);
     }
 
@@ -119,7 +53,7 @@ class Response
     public static function getDefaultJson(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_JSON,
+            "Content-Type" => ResponseType::CONTENT_JSON,
         ]);
     }
 
@@ -131,7 +65,7 @@ class Response
     public static function getDefaultJs(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_JS,
+            "Content-Type" => ResponseType::CONTENT_JS,
         ]);
     }
 
@@ -143,7 +77,7 @@ class Response
     public static function getDefaultCss(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_CSS,
+            "Content-Type" => ResponseType::CONTENT_CSS,
         ]);
     }
 
@@ -155,7 +89,7 @@ class Response
     public static function getDefaultXml(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_XML,
+            "Content-Type" => ResponseType::CONTENT_XML,
         ]);
     }
 
@@ -167,7 +101,73 @@ class Response
     public static function getDefaultOctetStream(array $Merge = array()): array
     {
         return array_merge($Merge, [
-            "Content-Type:" . ResponseType::CONTENT_OCTETSTREAM,
+            "Content-Type" => ResponseType::CONTENT_OCTETSTREAM,
         ]);
+    }
+
+    /**
+     * @return Controller|null $controller
+     */
+    public function getController(): ?Controller
+    {
+        return $this->controller ?? null;
+    }
+
+    /**
+     * @param Controller $controller
+     */
+    public function setController(Controller $controller): void
+    {
+        $this->controller = $controller;
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public function getResponseHeader(string $key): mixed
+    {
+        return $this->responseHeader[$key] ?? null;
+    }
+
+    /**
+     * @return ViewJson
+     */
+    public function json(): ViewJson
+    {
+        $this->setContentType(ResponseType::CONTENT_JSON);
+        return View::getJson();
+    }
+
+    /**
+     * @param string $type
+     */
+    public function setContentType(string $type): void
+    {
+        $this->setHeader("Content-Type", $type);
+    }
+
+    /**
+     * @param string $key
+     * @param string|null $value
+     */
+    public function setHeader(string $key, string $value = null): void
+    {
+        if (is_null($value)) {
+            $this->responseHeader[$key] = null;
+            header($key);
+        } else {
+            $this->responseHeader[$key] = $value;
+            header("$key:$value");
+        }
+    }
+
+    /**
+     * @return ViewHtml
+     */
+    public function html(): ViewHtml
+    {
+        $this->setContentType(ResponseType::CONTENT_HTML);
+        return View::getHtml();
     }
 }

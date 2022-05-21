@@ -21,7 +21,7 @@ class Request
     public function __construct()
     {
         self::$paramJson = getJsonPost();
-        $this->headers = getallheaders();
+        $this->headers = getAllHeaders();
     }
 
     /**
@@ -29,7 +29,9 @@ class Request
      */
     public static function getInstance(): Request
     {
-        self::$instance = new Request();
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
         return self::$instance;
     }
 
@@ -127,13 +129,17 @@ class Request
 
     /**
      * @param string|null $key
-     * @return array|false|null
+     * @return string|array|null
      */
-    public function getHeader(string $key = null): bool|array|null
+    public function getHeader(string $key = null): string|array|null
     {
-        if (is_null($key)) return $this->headers;
-        if (isset($this->headers[$key])) return $this->headers[$key];
-        return null;
+        if (is_null($key)) {
+            return $this->headers;
+        } elseif (isset($this->headers[$key])) {
+            return $this->headers[$key];
+        } else {
+            return null;
+        }
     }
 
     /**

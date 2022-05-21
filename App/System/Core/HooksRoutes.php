@@ -2,88 +2,89 @@
 
 namespace System\Core;
 
+use Exception;
+use JetBrains\PhpStorm\NoReturn;
 use System\Libraries\Lang;
 use System\Response;
 use System\ResponseType;
 
 class HooksRoutes
 {
-    private static $instance = null;
+    private static ?HooksRoutes $instance = null;
 
     public function __construct()
     {
-        self::$instance = $this;
+        self::$instance = self::getInstance();
     }
 
-    public static function getInstance()
+    public static function getInstance(): ?HooksRoutes
     {
-        if (is_null(self::$instance)) {
-            self::$instance = new HooksRoutes();
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
         }
         return self::$instance;
     }
 
-    public function apiErrorCallJson($msg, $responseCode = 200)
+    /**
+     * @param string $message
+     * @throws Exception
+     */
+    public function onCallError(string $message): void
     {
-        $Data = [];
+        $Header = Response::getInstance()->getResponseHeader("Content-Type");
+        if ($Header === ResponseType::CONTENT_JSON) {
+            echo $this->apiErrorCallJson($message);
+            exit();
+        } else {
+            throw new Exception($message, 99);
+        }
+    }
+
+    public function apiErrorCallJson(string $message, int $responseCode = 200): bool|string
+    {
+        $Data = array();
         $Data['responseCode'] = $responseCode;
         $Data['response'] = null;
         $Data['hasError'] = true;
-        $Data['message'] = $msg;
+        $Data['message'] = $message;
         $Data['time'] = time();
         return json_encode($Data);
     }
 
-    public function apiSuccessCallJson($data, $msg = "", $responseCode = 200)
+    public function onCallSuccess(string $message): bool|string
     {
-        $Data = [];
+        $Header = Response::getInstance()->getResponseHeader("Content-Type");
+        if ($Header === ResponseType::CONTENT_JSON) {
+            return $this->apiSuccessCallJson([], $message);
+        } else {
+            return $message;
+        }
+    }
+
+    public function apiSuccessCallJson(array $data, string $message = "", int $responseCode = 200): bool|string
+    {
+        $Data = array();
         $Data['responseCode'] = $responseCode;
         $Data['response'] = $data;
         $Data['hasError'] = false;
-        $Data['message'] = $msg;
+        $Data['message'] = $message;
         $Data['time'] = time();
         return json_encode($Data);
     }
 
-
-    /**
-     * @param $msg
-     * @throws null
-     */
-    public function onCallError($msg)
-    {
-        $Header = Response::getInstance()->getResponseHeader("Content-Type");
-        if ($Header == ResponseType::CONTENT_JSON) {
-            echo $this->apiErrorCallJson($msg);
-            exit();
-        } else {
-            throw new \Exception($msg, 99);
-        }
-    }
-
-    public function onCallSuccess($msg)
-    {
-        $Header = Response::getInstance()->getResponseHeader("Content-Type");
-        if ($Header == ResponseType::CONTENT_JSON) {
-            return $this->apiSuccessCallJson([], $msg, 200);
-        } else {
-            return $msg;
-        }
-    }
-
-    public function onNotFound()
+    #[NoReturn] public function onNotFound(): void
     {
         global $Config;
         Response::getInstance()->setHeader("Content-Type: " . $Config['error_content_type']);
         foreach ($Config['error_extra_headers'] as $header) {
             Response::getInstance()->setHeader($header);
         }
-        if ($Config['error_content_type'] == ResponseType::CONTENT_JSON) {
+
+        if ($Config['error_content_type'] === ResponseType::CONTENT_JSON) {
             echo HooksRoutes::apiErrorCallJson(Lang::get("error404"), 404);
             exit();
         } else {
             DefaultErrors::getInstance()->Error404();
         }
     }
-
 }

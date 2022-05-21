@@ -2,6 +2,8 @@
 
 namespace System\Core;
 
+use Exception;
+use JetBrains\PhpStorm\NoReturn;
 use System\Libraries\Lang;
 use System\Libraries\Smarty;
 use System\Response;
@@ -13,25 +15,29 @@ class DefaultErrors
 
     public function handlerError(string $errorNo = null, string $errorStr = null, string $errorFile = null, string $errorLine = null): void
     {
-        if (ENVIRONMENT === "production") return;
+        if (ENVIRONMENT === "production") {
+            return;
+        }
 
-        if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
+        if (Response::getInstance()->getResponseHeader("Content-Type") === ResponseType::CONTENT_JSON) {
             echo HooksRoutes::getInstance()->apiErrorCallJson($errorStr . " File: " . $errorFile . " Line: " . $errorLine, $errorNo);
             return;
         }
 
-        echo $this->getErroHtml($errorNo, $errorStr, $errorFile, $errorLine);
+        echo $this->getErrorHtml($errorNo, $errorStr, $errorFile, $errorLine);
     }
 
     public static function getInstance(): DefaultErrors
     {
-        self::$instance = new DefaultErrors();
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
         return self::$instance;
     }
 
-    public function getErroHtml($number, $error, $file, $line): string
+    public function getErrorHtml(string $number, string $error, string $file, string $line): string
     {
-        Response::getInstance()->setHeaderType(ResponseType::CONTENT_HTML);
+        Response::getInstance()->setContentType(ResponseType::CONTENT_HTML);
 
         return "<div style='display: inline-block; padding: 10px;'><div style='padding: 10px; background-color: #dd5656; border-radius: 5px; border: solid 1px #d93535; display: inline-block'>
                     <span style='font-style: italic; color: #fff'>
@@ -42,46 +48,46 @@ class DefaultErrors
                 </div></div>";
     }
 
-    public function Error404()
+    #[NoReturn] public function Error404(): void
     {
         global $Config;
         Response::getInstance()->setHeader("HTTP/1.0 404 Not Found");
-        Response::getInstance()->setHeaderType($Config['error_content_type']);
+        Response::getInstance()->setContentType($Config['error_content_type']);
 
-        if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
+        if (Response::getInstance()->getResponseHeader("Content-Type") === ResponseType::CONTENT_JSON) {
             echo HooksRoutes::getInstance()->apiErrorCallJson(Lang::get("error404"), 404);
-            exit();
+            exit(404);
         }
 
-        if ($Config["template"] == TEMPLATE_ENGINE_SMARTY) {
+        if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
             Smarty::getInstance()->setDefaultTemplate();
             Smarty::getInstance()->view("Error/Error404.tpl");
         } else {
             getViewPhp("Error/Error404.php");
         }
-        exit();
+        exit(404);
     }
 
     /**
-     * @param $Code
-     * @param $Exception \Exception
+     * @param int $code
+     * @param Exception $exception
      */
-    public function ErrorXXX($Code, $Exception)
+    #[NoReturn] public function ErrorXXX(int $code, Exception $exception): void
     {
         global $Config;
-        Response::getInstance()->setHeader("HTTP/1.0 {$Code}");
-        Response::getInstance()->setHeader("Content-Type: " . $Config['error_content_type']);
+        Response::getInstance()->setHeader("HTTP/1.0 {$code}");
+        Response::getInstance()->setContentType($Config['error_content_type']);
 
-        if (Response::getInstance()->getResponseHeader("Content-Type") == "application/json") {
-            echo HooksRoutes::getInstance()->apiErrorCallJson($Exception->getMessage() . " File: " . $Exception->getFile() . " Line: " . $Exception->getLine(), $Exception->getCode());
-            exit();
+        if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
+            echo HooksRoutes::getInstance()->apiErrorCallJson($exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), $exception->getCode());
+            exit($code);
         }
-        if ($Config["template"] == TEMPLATE_ENGINE_SMARTY) {
+        if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
             Smarty::getInstance()->setDefaultTemplate();
-            Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Excpetion" => $Exception]);
+            Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Exception" => $exception]);
         } else {
-            getViewPhp("Error/ErrorXXX.php", ["Excpetion" => $Exception]);
+            getViewPhp("Error/ErrorXXX.php", ["Exception" => $exception]);
         }
-        exit();
+        exit($code);
     }
 }
