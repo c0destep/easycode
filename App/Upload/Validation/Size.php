@@ -28,48 +28,67 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload\Validation;
 
+use RuntimeException;
+use Upload\Exception;
+use Upload\FileInfoInterface;
+use Upload\ValidationInterface;
+
 /**
- * Validate Upload Media Type
+ * Validate Upload File Size
  *
- * This class validates an upload's media type (e.g. "image/png").
+ * This class validates an uploads file size using maximum and (optionally)
+ * minimum file size bounds (inclusive). Specify acceptable file sizes
+ * as an integer (in bytes) or as a human-readable string (e.g. "5MB").
  *
  * @author  Josh Lockhart <info@joshlockhart.com>
  * @since   1.0.0
  * @package Upload
  */
-class Mimetype implements \Upload\ValidationInterface
+class Size implements ValidationInterface
 {
     /**
-     * Valid media types
-     * @var array
+     * Minimum acceptable file size (bytes)
+     * @var int
      */
-    protected $mimetypes;
+    protected int $minSize;
+
+    /**
+     * Maximum acceptable file size (bytes)
+     * @var int
+     */
+    protected int $maxSize;
 
     /**
      * Constructor
      *
-     * @param string|array $mimetypes
+     * @param int $maxSize Maximum acceptable file size in bytes (inclusive)
+     * @param int $minSize Minimum acceptable file size in bytes (inclusive)
      */
-    public function __construct($mimetypes)
+    public function __construct(int $maxSize, int $minSize = 0)
     {
-        if (is_string($mimetypes) === true) {
-            $mimetypes = array($mimetypes);
-        }
-        $this->mimetypes = $mimetypes;
+        $this->maxSize = $maxSize;
+        $this->minSize = $minSize;
     }
 
     /**
      * Validate
      *
-     * @param  \Upload\FileInfoInterface  $fileInfo
-     * @throws \RuntimeException          If validation fails
+     * @param FileInfoInterface $fileInfo
+     * @throws RuntimeException If validation fails
      */
-    public function validate(\Upload\FileInfoInterface $fileInfo)
+    public function validate(FileInfoInterface $fileInfo)
     {
-        if (in_array($fileInfo->getMimetype(), $this->mimetypes) === false) {
-            throw new \Upload\Exception(sprintf('Arquivo inválido. Extensões permitidas: %s', implode(', ', $this->mimetypes)), $fileInfo);
+        $fileSize = $fileInfo->getSize();
+
+        if ($fileSize < $this->minSize) {
+            throw new Exception('File is too small', $fileInfo);
+        }
+
+        if ($fileSize > $this->maxSize) {
+            throw new Exception('The file is too big', $fileInfo);
         }
     }
 }

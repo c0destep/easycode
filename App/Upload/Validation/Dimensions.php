@@ -11,18 +11,19 @@ class Dimensions implements ValidationInterface
     /**
      * @var integer
      */
-    protected $width;
+    protected int $width;
 
     /**
      * @var integer
      */
-    protected $height;
+    protected int $height;
 
     /**
      * @param int $expectedWidth
      * @param int $expectedHeight
      */
-    function __construct($expectedWidth, $expectedHeight){
+    function __construct(int $expectedWidth, int $expectedHeight)
+    {
         $this->width = $expectedWidth;
         $this->height = $expectedHeight;
     }
@@ -30,14 +31,16 @@ class Dimensions implements ValidationInterface
     /**
      * @inheritdoc
      */
-    public function validate(FileInfoInterface $info)
+    public function validate(FileInfoInterface $fileInfo)
     {
-        $dimensions = $info->getDimensions();
-        $filename = $info->getNameWithExtension();
+        $dimensions = $fileInfo->getDimensions();
+        $filename = $fileInfo->getNameWithExtension();
+
         if (!$dimensions) {
-            throw new Exception(sprintf('%s: Não foi detect a extensão do arquivo.', $filename));
+            throw new Exception(sprintf('%s: File extension not detected.', $filename));
         }
-        if ($dimensions['width'] != $this->width) {
+
+        if ($dimensions['width'] !== $this->width) {
             throw new Exception(
                 sprintf(
                     '%s: Image width(%dpx) does not match required width(%dpx)',
@@ -47,7 +50,8 @@ class Dimensions implements ValidationInterface
                 )
             );
         }
-        if ($dimensions['height'] != $this->height) {
+
+        if ($dimensions['height'] !== $this->height) {
             throw new Exception(
                 sprintf(
                     '%s: Image height(%dpx) does not match required height(%dpx)',

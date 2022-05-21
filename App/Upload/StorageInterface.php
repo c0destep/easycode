@@ -28,25 +28,26 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload;
 
 /**
- * Validation Interface
+ * Storage Interface
  *
  * @author  Josh Lockhart <info@joshlockhart.com>
  * @since   2.0.0
  * @package Upload
  */
-interface ValidationInterface
+interface StorageInterface
 {
     /**
-     * Validate file
+     * Upload file
      *
-     * This method is responsible for validating an `\Upload\FileInfoInterface` instance.
-     * If validation fails, an exception should be thrown.
+     * This method is responsible for uploading an `\Upload\FileInfoInterface` instance
+     * to its intended destination. If upload fails, an exception should be thrown.
      *
-     * @param  \Upload\FileInfoInterface $fileInfo
-     * @throws \Exception                If validation fails
+     * @param FileInfoInterface $fileInfo
+     * @throws \Exception If upload fails
      */
-    public function validate(\Upload\FileInfoInterface $fileInfo);
+    public function upload(FileInfoInterface $fileInfo);
 }

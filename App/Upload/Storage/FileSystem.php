@@ -28,7 +28,13 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload\Storage;
+
+use InvalidArgumentException;
+use Upload\Exception;
+use Upload\FileInfoInterface;
+use Upload\StorageInterface;
 
 /**
  * FileSystem Storage
@@ -39,56 +45,54 @@ namespace Upload\Storage;
  * @since   1.0.0
  * @package Upload
  */
-class FileSystem implements \Upload\StorageInterface
+class FileSystem implements StorageInterface
 {
     /**
      * Path to upload destination directory (with trailing slash)
      * @var string
      */
-    protected $directory;
+    protected string $directory;
 
     /**
      * Overwrite existing files?
      * @var bool
      */
-    protected $overwrite;
+    protected bool $overwrite;
 
     /**
      * Constructor
      *
-     * @param  string                    $directory Relative or absolute path to upload directory
-     * @param  bool                      $overwrite Should this overwrite existing files?
-     * @throws \InvalidArgumentException            If directory does not exist
-     * @throws \InvalidArgumentException            If directory is not writable
+     * @param string $directory Relative or absolute path to upload directory
+     * @param bool $overwrite Should this overwrite existing files?
+     * @throws InvalidArgumentException If directory does not exist
+     * @throws InvalidArgumentException If directory is not writable
      */
-    public function __construct($directory, $overwrite = false)
+    public function __construct(string $directory, bool $overwrite = false)
     {
         if (!is_dir($directory)) {
-            throw new \InvalidArgumentException('Directory does not exist');
+            throw new InvalidArgumentException('Directory does not exist');
         }
         if (!is_writable($directory)) {
-            throw new \InvalidArgumentException('Directory is not writable');
+            throw new InvalidArgumentException('Directory is not writable');
         }
         $this->directory = rtrim($directory, '/') . DIRECTORY_SEPARATOR;
-        $this->overwrite = (bool)$overwrite;
+        $this->overwrite = $overwrite;
     }
 
     /**
      * Upload
      *
-     * @param  \Upload\FileInfoInterface $file The file object to upload
-     * @throws \Upload\Exception               If overwrite is false and file already exists
-     * @throws \Upload\Exception               If error moving file to destination
+     * @param FileInfoInterface $fileInfo
      */
-    public function upload(\Upload\FileInfoInterface $fileInfo)
+    public function upload(FileInfoInterface $fileInfo)
     {
         $destinationFile = $this->directory . $fileInfo->getNameWithExtension();
         if ($this->overwrite === false && file_exists($destinationFile) === true) {
-            throw new \Upload\Exception('File already exists', $fileInfo);
+            throw new Exception('File already exists', $fileInfo);
         }
 
         if ($this->moveUploadedFile($fileInfo->getPathname(), $destinationFile) === false) {
-            throw new \Upload\Exception('File could not be moved to final destination.', $fileInfo);
+            throw new Exception('File could not be moved to final destination.', $fileInfo);
         }
     }
 
@@ -98,11 +102,11 @@ class FileSystem implements \Upload\StorageInterface
      * This method allows us to stub this method in unit tests to avoid
      * hard dependency on the `move_uploaded_file` function.
      *
-     * @param  string $source      The source file
-     * @param  string $destination The destination file
+     * @param string $source The source file
+     * @param string $destination The destination file
      * @return bool
      */
-    protected function moveUploadedFile($source, $destination)
+    protected function moveUploadedFile(string $source, string $destination): bool
     {
         return move_uploaded_file($source, $destination);
     }
