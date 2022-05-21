@@ -221,7 +221,7 @@ class Routes
         }
     }
 
-    public static function clearRoutes()
+    public static function clearRoutes(): void
     {
         self::$DynamicRoutes = array();
         self::$Routes = array();

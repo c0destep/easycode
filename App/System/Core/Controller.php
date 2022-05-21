@@ -21,7 +21,9 @@ class Controller
     public function __construct()
     {
         $this->hasEngine = FastApp::getInstance()->getConfig("template");
-        if ($this->hasEngine === TEMPLATE_ENGINE_SMARTY) $this->smarty = Smarty::getInstance();
+        if ($this->hasEngine === TEMPLATE_ENGINE_SMARTY) {
+            $this->smarty = Smarty::getInstance();
+        }
     }
 
     /**

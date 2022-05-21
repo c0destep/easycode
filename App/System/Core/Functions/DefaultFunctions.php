@@ -1,5 +1,6 @@
 <?php
 
+use JetBrains\PhpStorm\ArrayShape;
 use System\Core\DefaultErrors;
 
 if (!function_exists('handler_exception')) {
@@ -160,13 +161,13 @@ if (!function_exists("getClientIpServer")) {
     }
 }
 
-if (!function_exists("verifyBrowser")) {
+if (!function_exists("detectBrowser")) {
     /**
      * @param string|null $userAgent
      * @param string|null $ip
      * @return array
      */
-    function verifyBrowser(string $userAgent = null, string $ip = null): array
+    #[ArrayShape(['ip' => "mixed|null|string", 'userAgent' => "mixed|null|string", 'name' => "string", 'platform' => "string", 'pattern' => "string", 'version' => "mixed"])] function detectBrowser(string $userAgent = null, string $ip = null): array
     {
         if (is_null($ip)) $ip = getClientIpServer();
         if (is_null($userAgent)) $userAgent = $_SERVER['HTTP_USER_AGENT'];

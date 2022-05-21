@@ -5,9 +5,9 @@ use System\Libraries\Session;
 if (!function_exists('setFlashError')) {
     /**
      * Assigning error message.
-     * @param $message
+     * @param string $message
      */
-    function setFlashError($message)
+    function setFlashError(string $message): void
     {
         Session::getInstance()->setFlash("error", $message);
     }
@@ -20,17 +20,17 @@ if (!function_exists('getFlashError')) {
      */
     function getFlashError(): ?string
     {
-        $Error = Session::getInstance()->getFlash("error");
-        return $Error ?? null;
+        $error = Session::getInstance()->getFlash("error");
+        return $error ?? null;
     }
 }
 
 if (!function_exists('setFlashSuccess')) {
     /**
      * Assigning success message.
-     * @param $message
+     * @param string $message
      */
-    function setFlashSuccess($message)
+    function setFlashSuccess(string $message): void
     {
         Session::getInstance()->setFlash("success", $message);
     }
@@ -43,17 +43,17 @@ if (!function_exists('getFlashSuccess')) {
      */
     function getFlashSuccess(): ?string
     {
-        $Success = Session::getInstance()->getFlash("success");
-        return $Success ?? null;
+        $success = Session::getInstance()->getFlash("success");
+        return $success ?? null;
     }
 }
 
 if (!function_exists('setFlashWarning')) {
     /**
      * Assigning alert message.
-     * @param $message
+     * @param string $message
      */
-    function setFlashWarning($message)
+    function setFlashWarning(string $message): void
     {
         Session::getInstance()->setFlash("warning", $message);
     }
@@ -66,7 +66,30 @@ if (!function_exists('getFlashWarning')) {
      */
     function getFlashWarning(): ?string
     {
-        $Warning = Session::getInstance()->getFlash("warning");
-        return $Warning ?? null;
+        $warning = Session::getInstance()->getFlash("warning");
+        return $warning ?? null;
+    }
+}
+
+if (!function_exists('setFlashInfo')) {
+    /**
+     * Assigning alert message.
+     * @param string $message
+     */
+    function setFlashInfo(string $message): void
+    {
+        Session::getInstance()->setFlash("info", $message);
+    }
+}
+
+if (!function_exists('getFlashInfo')) {
+    /**
+     * If there is info message it shows.
+     * @return null|string
+     */
+    function getFlashInfo(): ?string
+    {
+        $info = Session::getInstance()->getFlash("info");
+        return $info ?? null;
     }
 }
