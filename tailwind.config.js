@@ -1,4 +1,5 @@
 module.exports = {
+    darkMode: 'class',
     content: [
         "./app/Views/**/*.{html,tpl,php}",
         "./app/Modules/Views/**/*.{html,tpl,php}"
