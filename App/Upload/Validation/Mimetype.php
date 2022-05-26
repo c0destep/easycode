@@ -28,50 +28,53 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace Upload;
+
+namespace Upload\Validation;
+
+use RuntimeException;
+use Upload\Exception;
+use Upload\FileInfoInterface;
 
 /**
- * Autoloader
+ * Validate Upload Media Type
  *
- * This class provides a default PSR-0 autoloader if not using Composer.
+ * This class validates an uploads media type (e.g. "image/png").
  *
  * @author  Josh Lockhart <info@joshlockhart.com>
  * @since   1.0.0
  * @package Upload
  */
-class Autoloader
+class Mimetype implements \Upload\ValidationInterface
 {
     /**
-     * The project's base directory
-     * @var string
+     * Valid media types
+     * @var array
      */
-    static protected $base;
+    protected array $mimetypes;
 
     /**
-     * Register autoloader
+     * Constructor
+     *
+     * @param array|string $mimetypes
      */
-    static public function register()
+    public function __construct(array|string $mimetypes)
     {
-        self::$base = dirname(__FILE__) . '/../';
-        spl_autoload_register(array(new self, 'autoload'));
+        if (is_string($mimetypes) === true) {
+            $mimetypes = array($mimetypes);
+        }
+        $this->mimetypes = $mimetypes;
     }
 
     /**
-     * Autoload classname
-     * @param  string $className The class to load
+     * Validate
+     *
+     * @param FileInfoInterface $fileInfo
+     * @throws RuntimeException If validation fails
      */
-    static public function autoload($className)
+    public function validate(FileInfoInterface $fileInfo)
     {
-        $className = ltrim($className, '\\');
-        $fileName  = '';
-        $namespace = '';
-        if ($lastNsPos = strripos($className, '\\')) {
-            $namespace = substr($className, 0, $lastNsPos);
-            $className = substr($className, $lastNsPos + 1);
-            $fileName  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+        if (in_array($fileInfo->getMimetype(), $this->mimetypes) === false) {
+            throw new Exception(sprintf('Invalid file. Allowed extensions: %s', implode(', ', $this->mimetypes)), $fileInfo);
         }
-        $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
-
-        require self::$base . $fileName;
     }
 }

@@ -2,10 +2,10 @@
   "name": "easycode",
   "version": "0.5.4",
   "description": "Framework Open-Source",
-  "main": "Public/js/app.js",
+  "main": "public/js/app.js",
   "scripts": {
-    "build": "npx tailwindcss -i ./Public/css/app.css -o ./Public/css/output.css",
-    "watch": "npx tailwindcss -i ./Public/css/app.css -o ./Public/css/output.css --watch"
+    "build": "npx tailwindcss -i public/css/app.css -o public/css/output.css",
+    "watch": "npx tailwindcss -i public/css/app.css -o public/css/output.css --watch"
   },
   "repository": {
     "type": "git",

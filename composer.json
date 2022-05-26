@@ -12,9 +12,10 @@
   "require": {
     "php": "^8.0",
     "smarty/smarty": "^v4.1.1",
-    "illuminate/database": "^v9.13.0",
-    "illuminate/pagination": "^v9.13.0",
+    "illuminate/database": "^v9.14.1",
+    "illuminate/pagination": "^v9.14.1",
     "rlanvin/php-form": "^v2.0.1",
-    "ausi/slug-generator": "^v1.1.1"
+    "ausi/slug-generator": "^v1.1.1",
+    "ext-fileinfo": "*"
   }
 }

@@ -8,7 +8,7 @@ Routes::get("/", [
     "Controller" => IndexController::class,
     "Method" => "Index",
     "Headers" => [
-        'Content-Type:' . ResponseType::CONTENT_HTML
+        'Content-Type' => ResponseType::CONTENT_HTML
     ],
     "RequireHeader" => [],
     "onCallBefore" => [],
@@ -20,7 +20,7 @@ Routes::get("find/{id}", [
     "Controller" => IndexController::class,
     "Method" => "FindUser",
     "Headers" => [
-        'Content-Type:' . ResponseType::CONTENT_HTML
+        'Content-Type' => ResponseType::CONTENT_HTML
     ],
     "RequireHeader" => [],
     "onCallBefore" => [],
