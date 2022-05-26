@@ -15,6 +15,7 @@
     "illuminate/database": "^v9.13.0",
     "illuminate/pagination": "^v9.13.0",
     "rlanvin/php-form": "^v2.0.1",
-    "ausi/slug-generator": "^v1.1.1"
+    "ausi/slug-generator": "^v1.1.1",
+    "ext-fileinfo": "*"
   }
 }

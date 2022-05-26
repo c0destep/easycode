@@ -28,7 +28,14 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload;
+
+use finfo;
+use InvalidArgumentException;
+use JetBrains\PhpStorm\ArrayShape;
+use RuntimeException;
+use SplFileInfo;
 
 /**
  * File Information
@@ -37,7 +44,7 @@ namespace Upload;
  * @since   2.0.0
  * @package Upload
  */
-class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
+class FileInfo extends SplFileInfo implements FileInfoInterface
 {
     /**
      * Factory method that returns new instance of \FileInfoInterface
@@ -49,27 +56,27 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      * File name (without extension)
      * @var string
      */
-    protected $name;
+    protected string $name;
 
     /**
      * File extension (without dot prefix)
      * @var string
      */
-    protected $extension;
+    protected string $extension;
 
     /**
      * File mimetype
      * @var string
      */
-    protected $mimetype;
+    protected string $mimetype;
 
     /**
      * Constructor
      *
      * @param string $filePathname Absolute path to uploaded file on disk
-     * @param string $newName      Desired file name (with extension) of uploaded file
+     * @param string|null $newName Desired file name (with extension) of uploaded file
      */
-    public function __construct($filePathname, $newName = null)
+    public function __construct(string $filePathname, string $newName = null)
     {
         $desiredName = is_null($newName) ? $filePathname : $newName;
         $this->setName(pathinfo($desiredName, PATHINFO_FILENAME));
@@ -78,25 +85,48 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
         parent::__construct($filePathname);
     }
 
+    public static function setFactory($callable)
+    {
+        if (is_object($callable) === false || method_exists($callable, '__invoke') === false) {
+            throw new InvalidArgumentException('Callback is not a Closure or invokable object.');
+        }
+
+        static::$factory = $callable;
+    }
+
+    public static function createFromFactory($tmpName, $name = null): FileInfoInterface|static
+    {
+        if (isset(static::$factory) === true) {
+            $result = call_user_func_array(static::$factory, array($tmpName, $name));
+            if ($result instanceof FileInfoInterface === false) {
+                throw new RuntimeException('FileInfo factory must return instance of \Upload\FileInfoInterface.');
+            }
+
+            return $result;
+        }
+
+        return new static($tmpName, $name);
+    }
+
     /**
      * Get file name (without extension)
      *
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
      * Set file name (without extension)
-     * 
+     *
      * It also makes sure file name is safe
      *
-     * @param  string           $name
-     * @return \Upload\FileInfo Self
+     * @param string $name
+     * @return FileInfo Self
      */
-    public function setName($name)
+    public function setName($name): static
     {
         $name = preg_replace("/([^\w\s\d\-_~,;:\[\]\(\).]|[\.]{2,})/", "", $name);
         $name = basename($name);
@@ -110,7 +140,7 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return string
      */
-    public function getExtension()
+    public function getExtension(): string
     {
         return $this->extension;
     }
@@ -118,10 +148,10 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
     /**
      * Set file extension (without dot prefix)
      *
-     * @param  string           $extension
-     * @return \Upload\FileInfo Self
+     * @param string $extension
+     * @return FileInfo Self
      */
-    public function setExtension($extension)
+    public function setExtension($extension): static
     {
         $this->extension = strtolower($extension);
 
@@ -133,7 +163,7 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return string
      */
-    public function getNameWithExtension()
+    public function getNameWithExtension(): string
     {
         return $this->extension === '' ? $this->name : sprintf('%s.%s', $this->name, $this->extension);
     }
@@ -143,10 +173,10 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return string
      */
-    public function getMimetype()
+    public function getMimetype(): string
     {
         if (isset($this->mimetype) === false) {
-            $finfo = new \finfo(FILEINFO_MIME);
+            $finfo = new finfo(FILEINFO_MIME);
             $mimetype = $finfo->file($this->getPathname());
             $mimetypeParts = preg_split('/\s*[;,]\s*/', $mimetype);
             $this->mimetype = strtolower($mimetypeParts[0]);
@@ -161,7 +191,7 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return string
      */
-    public function getMd5()
+    public function getMd5(): string
     {
         return md5_file($this->getPathname());
     }
@@ -169,9 +199,10 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
     /**
      * Get a specified hash
      *
+     * @param string $algorithm
      * @return string
      */
-    public function getHash($algorithm = 'md5')
+    public function getHash(string $algorithm = 'md5'): string
     {
         return hash_file($algorithm, $this->getPathname());
     }
@@ -181,7 +212,7 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return array formatted array of dimensions
      */
-    public function getDimensions()
+    #[ArrayShape(['width' => "mixed", 'height' => "mixed"])] public function getDimensions(): array
     {
         list($width, $height) = getimagesize($this->getPathname());
 
@@ -199,30 +230,8 @@ class FileInfo extends \SplFileInfo implements \Upload\FileInfoInterface
      *
      * @return bool
      */
-    public function isUploadedFile()
+    public function isUploadedFile(): bool
     {
         return is_uploaded_file($this->getPathname());
-    }
-
-    public static function setFactory($callable)
-    {
-        if (is_object($callable) === false || method_exists($callable, '__invoke') === false) {
-            throw new \InvalidArgumentException('Callback is not a Closure or invokable object.');
-        }
-
-        static::$factory = $callable;
-    }
-
-    public static function createFromFactory($tmpName, $name = null) {
-        if (isset(static::$factory) === true) {
-            $result = call_user_func_array(static::$factory, array($tmpName, $name));
-            if ($result instanceof \Upload\FileInfoInterface === false) {
-                throw new \RuntimeException('FileInfo factory must return instance of \Upload\FileInfoInterface.');
-            }
-
-            return $result;
-        }
-
-        return new static($tmpName, $name);
     }
 }

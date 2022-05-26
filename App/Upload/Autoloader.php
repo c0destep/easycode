@@ -28,25 +28,51 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload;
 
 /**
- * Storage Interface
+ * Autoloader
  *
- * @author  Josh Lockhart <info@joshlockhart.com>
- * @since   2.0.0
+ * This class provides a default PSR-0 autoloader if not using Composer.
+ *
+ * @author Josh Lockhart <info@joshlockhart.com>
+ * @since 1.0.0
  * @package Upload
  */
-interface StorageInterface
+class Autoloader
 {
     /**
-     * Upload file
-     *
-     * This method is responsible for uploading an `\Upload\FileInfoInterface` instance
-     * to its intended destination. If upload fails, an exception should be thrown.
-     *
-     * @param  \Upload\FileInfoInterface $fileInfo
-     * @throws \Exception                If upload fails
+     * The project's base directory
+     * @var string
      */
-    public function upload(\Upload\FileInfoInterface $fileInfo);
+    static protected string $base;
+
+    /**
+     * Register autoloader
+     */
+    static public function register(): void
+    {
+        self::$base = dirname(__FILE__) . '/../';
+        spl_autoload_register(array(new self, 'autoload'));
+    }
+
+    /**
+     * Autoload classname
+     * @param string $className The class to load
+     */
+    static public function autoload(string $className): void
+    {
+        $className = ltrim($className, '\\');
+        $fileName = '';
+        $namespace = '';
+        if ($lastNsPos = strripos($className, '\\')) {
+            $namespace = substr($className, 0, $lastNsPos);
+            $className = substr($className, $lastNsPos + 1);
+            $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+        }
+        $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
+
+        require self::$base . $fileName;
+    }
 }

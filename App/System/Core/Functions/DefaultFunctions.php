@@ -1,18 +1,19 @@
 <?php
 
 use JetBrains\PhpStorm\ArrayShape;
+use JetBrains\PhpStorm\NoReturn;
 use System\Core\DefaultErrors;
 
 if (!function_exists('handler_exception')) {
     /**
      * Handler Error
-     * @param $errorNo
-     * @param $errorStr
-     * @param $errorFile
-     * @param $errorLine
+     * @param string|null $errorNo
+     * @param string|null $errorStr
+     * @param string|null $errorFile
+     * @param string|null $errorLine
      */
 
-    function handler_error($errorNo, $errorStr, $errorFile, $errorLine): void
+    function handler_error(string $errorNo = null, string $errorStr = null, string $errorFile = null, string $errorLine = null): void
     {
         DefaultErrors::getInstance()->handlerError($errorNo, $errorStr, $errorFile, $errorLine);
     }
@@ -23,7 +24,7 @@ if (!function_exists('handler_exception')) {
      * Handler Error
      * @param $exception
      */
-    function handler_exception($exception): void
+    #[NoReturn] function handler_exception($exception): void
     {
         DefaultErrors::getInstance()->ErrorXXX($exception->getCode(), $exception);
     }
@@ -60,14 +61,16 @@ if (!function_exists('loaderFastApp')) {
      */
     function loaderFastApp(string $class): void
     {
-        $filename = BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
-        $filename = str_replace("//", "/", $filename);
+        $filename = BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+        $filename = str_replace("//", DIRECTORY_SEPARATOR, $filename);
 
         if (file_exists($filename)) {
             require_once($filename);
         } else {
-            $filename = BASE_PATH_THIRD . DIRECTORY_SEPARATOR . str_replace('\\', '/', $class) . '.php';
-            if (file_exists($filename)) require_once($filename);
+            $filename = BASE_PATH_THIRD . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+            if (file_exists($filename)) {
+                require_once($filename);
+            }
         }
     }
 }
@@ -83,12 +86,12 @@ if (!function_exists('getJsonPost')) {
     }
 }
 
-if (!function_exists('getallheaders')) {
+if (!function_exists('getAllHeaders')) {
     /**
-     * Obter todos os cabeçalhos passados na requisição
+     *Get all headers passed in the request.
      * @return array
      */
-    function getallheaders()
+    function getAllHeaders(): array
     {
         $headers = array();
         $copy_server = array(
@@ -96,8 +99,9 @@ if (!function_exists('getallheaders')) {
             'CONTENT_LENGTH' => 'Content-Length',
             'CONTENT_MD5' => 'Content-Md5',
         );
+
         foreach ($_SERVER as $key => $value) {
-            if (substr($key, 0, 5) === 'HTTP_') {
+            if (str_starts_with($key, 'HTTP_')) {
                 $key = substr($key, 5);
                 if (!isset($copy_server[$key]) || !isset($_SERVER[$key])) {
                     $key = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', $key))));
@@ -107,11 +111,12 @@ if (!function_exists('getallheaders')) {
                 $headers[$copy_server[$key]] = $value;
             }
         }
+
         if (!isset($headers['Authorization'])) {
             if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
                 $headers['Authorization'] = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
             } elseif (isset($_SERVER['PHP_AUTH_USER'])) {
-                $basic_pass = isset($_SERVER['PHP_AUTH_PW']) ? $_SERVER['PHP_AUTH_PW'] : '';
+                $basic_pass = $_SERVER['PHP_AUTH_PW'] ?? '';
                 $headers['Authorization'] = 'Basic ' . base64_encode($_SERVER['PHP_AUTH_USER'] . ':' . $basic_pass);
             } elseif (isset($_SERVER['PHP_AUTH_DIGEST'])) {
                 $headers['Authorization'] = $_SERVER['PHP_AUTH_DIGEST'];

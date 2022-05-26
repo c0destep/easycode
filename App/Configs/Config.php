@@ -48,7 +48,7 @@ $Config['db_driver'] = [
     "class" => EloquentDriver::class, //Class Driver for Database Connection Setup
     "config" => [
         "db_hostname" => "localhost",
-        "db_database" => "codingstep",
+        "db_database" => "easycode",
         "db_username" => "root",
         "db_password" => "",
     ]
@@ -63,14 +63,15 @@ $Config['session_id'] = uniqid(strtolower($Config['name_project'] . '_'));
 /**
  * Default assets dir
  */
-$Config['base_dir_assets'] = "Public/";
+$Config['base_dir_assets'] = "public/";
 
 /**
  * Upload Directory
  */
-$Config['upload']['image'] = "/Public/uploads/image/";
-$Config['upload']['docs'] = "/Public/uploads/documents/";
-$Config['cache_image'] = "/Public/cache/image/";
+$Config['upload']['image'] = "/public/uploads/images/";
+$Config['upload']['video'] = "/public/uploads/videos/";
+$Config['upload']['document'] = "/public/uploads/documents/";
+$Config['cache_image'] = "/public/cache/images/";
 
 /**
  * Default Lang

@@ -28,7 +28,13 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 namespace Upload\Validation;
+
+use RuntimeException;
+use Upload\Exception;
+use Upload\FileInfoInterface;
+use Upload\ValidationInterface;
 
 /**
  * Validate File Extension
@@ -41,22 +47,22 @@ namespace Upload\Validation;
  * @author  Alex Kucherenko <kucherenko.email@gmail.com>
  * @package Upload
  */
-class Extension implements \Upload\ValidationInterface
+class Extension implements ValidationInterface
 {
     /**
      * Array of acceptable file extensions without leading dots
      * @var array
      */
-    protected $allowedExtensions;
+    protected array $allowedExtensions;
 
     /**
      * Constructor
      *
-     * @param string|array $allowedExtensions Allowed file extensions
+     * @param array|string $allowedExtensions Allowed file extensions
      * @example new \Upload\Validation\Extension(array('png','jpg','gif'))
      * @example new \Upload\Validation\Extension('png')
      */
-    public function __construct($allowedExtensions)
+    public function __construct(array|string $allowedExtensions)
     {
         if (is_string($allowedExtensions) === true) {
             $allowedExtensions = array($allowedExtensions);
@@ -68,15 +74,15 @@ class Extension implements \Upload\ValidationInterface
     /**
      * Validate
      *
-     * @param  \Upload\FileInfoInterface $fileInfo
-     * @throws \RuntimeException         If validation fails
+     * @param FileInfoInterface $fileInfo
+     * @throws RuntimeException If validation fails
      */
-    public function validate(\Upload\FileInfoInterface $fileInfo)
+    public function validate(FileInfoInterface $fileInfo)
     {
         $fileExtension = strtolower($fileInfo->getExtension());
 
         if (in_array($fileExtension, $this->allowedExtensions) === false) {
-            throw new \Upload\Exception(sprintf('Extensão inválida. Deve ser umas das seguintes: %s', implode(', ', $this->allowedExtensions)), $fileInfo);
+            throw new Exception(sprintf('Invalid extension. It must be one of the following: %s', implode(', ', $this->allowedExtensions)), $fileInfo);
         }
     }
 }

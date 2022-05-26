@@ -20,7 +20,7 @@
     <main class="ptt__main">
         <div>
             <h1 class="ptt__title">Easycode Framework</h1>
-            <small class="ptt__subtitle">PF is a Simple Framework build with PHP 8.x</small>
+            <small class="ptt__subtitle">EF is a Simple Framework build with PHP 8.x</small>
         </div>
         <div>
             <a class="ptt__button"

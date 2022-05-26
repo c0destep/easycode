@@ -2,6 +2,7 @@
 
 namespace System\Core;
 
+use Exception;
 use System\Request;
 use System\Response;
 
@@ -204,17 +205,18 @@ class Routes
 
     /**
      * @param array $route
+     * @throws Exception
      */
     public static function validateRoute(array $route): void
     {
         if (isset($route['Headers']) && is_array($route['Headers'])) {
-            foreach ($route['Headers'] as $header) {
-                Response::getInstance()->setHeader($header);
+            foreach ($route['Headers'] as $key => $value) {
+                Response::getInstance()->setHeader($key, $value);
             }
         }
         if (isset($route['RequireHeader']) && is_array($route['RequireHeader'])) {
-            foreach ($route['RequireHeader'] as $key => $header) {
-                if (Request::getInstance()->getHeader($key) !== $header) {
+            foreach ($route['RequireHeader'] as $key => $value) {
+                if (Request::getInstance()->getHeader($key) !== $value) {
                     HooksRoutes::getInstance()->onCallError("No have \"$key\" in request header");
                 }
             }
