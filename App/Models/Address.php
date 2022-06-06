@@ -4,7 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Users extends Model
+class Address extends Model
 {
-    // Model Test
+    protected $guarded = [];
 }

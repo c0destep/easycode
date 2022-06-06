@@ -44,9 +44,9 @@ class Routes
         preg_match_all("/{(.*?)}/", $route, $matches);
         if (count($matches[0]) > 0) {
             self::$DynamicRoutes[$method][$route] = $settings;
-            return;
+        } else {
+            self::$Routes[$method][$route] = $settings;
         }
-        self::$Routes[$method][$route] = $settings;
     }
 
     /**
@@ -132,15 +132,13 @@ class Routes
         foreach ($controllers as $route => $controller) {
             $settings = array_merge($settings, $controller);
 
-            if (!empty($route)) {
-                $route = "$base/$route";
-            } else {
+            if (empty($route)) {
                 $route = $base;
             }
 
-            $finalRoute = str_replace("//", "/", $route);
+            $route = str_replace("//", DIRECTORY_SEPARATOR, $route);
 
-            self::other($type, $finalRoute, $settings);
+            self::other($type, $route, $settings);
         }
     }
 
@@ -175,12 +173,12 @@ class Routes
      * @param string $method
      * @return mixed
      */
-    public static function verifyRoute(string $route, string $method): mixed
+    public static function verifyRoute(string $route, string $method): bool
     {
         if (isset(self::$Routes[$method][$route])) {
-            return self::$Routes[$method][$route];
+            return true;
         } elseif (isset(self::$Routes[Response::ALL][$route])) {
-            return self::$Routes[Response::ALL][$route];
+            return true;
         } elseif (isset(self::$DynamicRoutes[$method])) {
             foreach (self::$DynamicRoutes[$method] as $type => $args) {
                 preg_match_all("/{(.*?)}/", $type, $vars);
@@ -216,8 +214,13 @@ class Routes
         }
         if (isset($route['RequireHeader']) && is_array($route['RequireHeader'])) {
             foreach ($route['RequireHeader'] as $key => $value) {
-                if (Request::getInstance()->getHeader($key) !== $value) {
-                    HooksRoutes::getInstance()->onCallError("No have \"$key\" in request header");
+                if ($key === "Content-Type") {
+                    $accept = explode(',', Request::getInstance()->getHeader('Accept'));
+                    if (!in_array($value, $accept)) {
+                        HooksRoutes::getInstance()->onCallError("No have Content-Type in request header");
+                    }
+                } elseif (Request::getInstance()->getHeader($key) !== $value) {
+                    HooksRoutes::getInstance()->onCallError("No have $key in request header");
                 }
             }
         }

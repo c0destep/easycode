@@ -36,7 +36,7 @@ class ViewJson extends View
      * @param array|string $params
      * @return $this
      */
-    public function setResponse(array|string $params): static
+    public function setResponse(mixed $params): static
     {
         $this->params = $params;
         return $this;

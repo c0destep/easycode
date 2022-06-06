@@ -5,13 +5,13 @@ namespace System\Libraries;
 class View
 {
     const JSON = 'json';
-    const VIEW = 'view';
+    const HTML = 'html';
 
     protected string $file;
     protected array $params = array();
     protected string $message;
     protected string $status;
-    protected string $type = "view";
+    protected string $type = "html";
 
     /**
      * @param string $type

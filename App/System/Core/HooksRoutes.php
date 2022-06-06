@@ -12,19 +12,6 @@ class HooksRoutes
 {
     private static ?HooksRoutes $instance = null;
 
-    public function __construct()
-    {
-        self::$instance = self::getInstance();
-    }
-
-    public static function getInstance(): ?HooksRoutes
-    {
-        if (!isset(self::$instance)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-
     /**
      * @param string $message
      * @throws Exception
@@ -40,7 +27,15 @@ class HooksRoutes
         }
     }
 
-    public function apiErrorCallJson(string $message, int $responseCode = 200): bool|string
+    public static function getInstance(): ?HooksRoutes
+    {
+        if (!isset(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    public function apiErrorCallJson(string $message, int $responseCode = 404): string
     {
         $Data = array();
         $Data['responseCode'] = $responseCode;
@@ -48,7 +43,7 @@ class HooksRoutes
         $Data['hasError'] = true;
         $Data['message'] = $message;
         $Data['time'] = time();
-        return json_encode($Data);
+        return is_bool(json_encode($Data)) ? "" : json_encode($Data);
     }
 
     public function onCallSuccess(string $message): bool|string

@@ -14,7 +14,6 @@ $C = substr($B, strlen($A));
 $pos_config = strlen($C) - $dir_len - 1;
 $D = substr($C, 1, $pos_config);
 $protocol = (isset($_SERVER['HTTPS']) && filter_var($_SERVER['HTTPS'], FILTER_VALIDATE_BOOLEAN)) ? 'https://' : 'http://';
-
 $Config['base_dir'] = DIRECTORY_SEPARATOR . $D;
 $Config['route'] = $protocol . $_SERVER['SERVER_NAME'] . DIRECTORY_SEPARATOR . $D;
 $Config['https_enable'] = false;
@@ -106,4 +105,3 @@ $Config['Email']["smtp_user"] = "";
 $Config['Email']["smtp_pass"] = "";
 $Config['Email']["smtp_port"] = "";
 $Config['Email']["smtp_name"] = "";
-

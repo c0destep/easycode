@@ -40,8 +40,8 @@ class Request
      */
     public static function xssClear(): void
     {
-        $_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_STRING);
-        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        $_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     }
 
     /**
@@ -52,7 +52,7 @@ class Request
     public static function get(string $key, bool $xss = false): mixed
     {
         if (!isset($_GET[$key])) return null;
-        if ($xss) return filter_input(INPUT_GET, $key, FILTER_SANITIZE_STRING);
+        if ($xss) return filter_input(INPUT_GET, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
         return $_GET[$key];
     }
 
