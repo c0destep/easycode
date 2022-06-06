@@ -75,17 +75,6 @@ if (!function_exists('loaderFastApp')) {
     }
 }
 
-if (!function_exists('getJsonPost')) {
-    /**
-     * Get JSON data sent in the Body of a request
-     * @return mixed
-     */
-    function getJsonPost(): mixed
-    {
-        return json_decode(file_get_contents('php://input'), true);
-    }
-}
-
 if (!function_exists('getAllHeaders')) {
     /**
      *Get all headers passed in the request.

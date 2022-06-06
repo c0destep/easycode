@@ -5,22 +5,20 @@ namespace System;
 class Request
 {
     const GET = "GET";
+    const HEAD = "HEAD";
     const POST = "POST";
-    const REQUEST = "REQUEST";
-    const JSON = "JSON";
-    const EXTRA = "EXTRA";
+    const PUT = "PUT";
+    const DELETE = "DELETE";
+    const OPTIONS = "OPTIONS";
 
     protected static Request $instance;
-    protected static mixed $paramJson;
-    protected static array $extra;
-    protected array|false $headers;
+    protected array $headers;
 
     /**
      * Response constructor.
      */
     public function __construct()
     {
-        self::$paramJson = getJsonPost();
         $this->headers = getAllHeaders();
     }
 
@@ -33,98 +31,6 @@ class Request
             self::$instance = new self();
         }
         return self::$instance;
-    }
-
-    /**
-     * XSS clear
-     */
-    public static function xssClear(): void
-    {
-        $_GET = filter_input_array(INPUT_GET, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    }
-
-    /**
-     * @param string $key
-     * @param bool $xss
-     * @return mixed
-     */
-    public static function get(string $key, bool $xss = false): mixed
-    {
-        if (!isset($_GET[$key])) return null;
-        if ($xss) return filter_input(INPUT_GET, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        return $_GET[$key];
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function getDefault(string $key, mixed $default): mixed
-    {
-        if (!isset($_GET[$key])) return $default;
-        return $_GET[$key];
-    }
-
-    /**
-     * @param string $key
-     * @param bool $xss
-     * @return mixed
-     */
-    public static function post(string $key, bool $xss = false): mixed
-    {
-        if (!isset($_POST[$key])) return null;
-        if ($xss) return filter_input(INPUT_POST, $key, FILTER_SANITIZE_STRING);
-        return $_POST[$key];
-    }
-
-    /**
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function postDefault(string $key, mixed $default): mixed
-    {
-        if (!isset($_POST[$key])) return $default;
-        return $_POST[$key];
-    }
-
-    /**
-     * @param null $key
-     * @param bool $xss
-     * @return mixed
-     */
-    public static function json($key = null, bool $xss = false): mixed
-    {
-        if ($key == null) {
-            return self::$paramJson;
-        }
-        if (!isset(self::$paramJson[$key]))
-            return null;
-
-        if ($xss)
-            return filter_var(self::$paramJson[$key], FILTER_SANITIZE_STRING);
-
-        return self::$paramJson[$key];
-    }
-
-    /**
-     * @param string|null $key
-     * @return mixed
-     */
-    public static function extra(string $key = null): mixed
-    {
-        if (is_null($key)) return self::$extra;
-        return self::$extra[$key];
-    }
-
-    /**
-     * @param array $array
-     */
-    public static function setExtra(array $array): void
-    {
-        self::$extra = $array;
     }
 
     /**
@@ -143,25 +49,25 @@ class Request
     }
 
     /**
-     * @param string $key
+     * @param string $input
      * @return mixed
      */
-    public function __get(string $key): mixed
+    public function __get(string $input): mixed
     {
-        return self::find($key);
+        return self::input($input);
     }
 
     /**
-     * @param $key string
+     * @param string $input
+     * @param mixed|null $default
      * @return mixed
      */
-    public static function find(string $key): mixed
+    public static function input(string $input, mixed $default = null): mixed
     {
-        if (isset($_GET[$key])) return filter_var($_GET[$key], FILTER_SANITIZE_STRING);
-        if (isset($_POST[$key])) return filter_var($_POST[$key], FILTER_SANITIZE_STRING);
-        if (isset(self::$paramJson[$key])) return self::$paramJson[$key];
-        if (isset(self::$extra[$key])) return self::$extra[$key];
-        if (isset($_REQUEST[$key])) return filter_var($_REQUEST[$key], FILTER_SANITIZE_STRING);
-        return null;
+        return match (filter_input(INPUT_SERVER, 'REQUEST_METHOD', FILTER_SANITIZE_ENCODED)) {
+            self::GET => $_GET[$input] ?? $default,
+            self::POST, self::DELETE, self::PUT => $_POST[$input] ?? $default,
+            $default => null
+        };
     }
 }
