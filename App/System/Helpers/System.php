@@ -371,8 +371,7 @@ if (!function_exists('getUriPatch')) {
     function getUriPatch(): array|string|null
     {
         $str = str_replace_first(getConfig('base_dir'), "", $_SERVER['REQUEST_URI']);
-        $str = str_replace([$_SERVER['QUERY_STRING'], "?"], "", $str);
-        return $str;
+        return str_replace([$_SERVER['QUERY_STRING'], "?"], "", $str);
     }
 }
 
@@ -407,7 +406,7 @@ if (!function_exists('renderShortcode')) {
 if (!function_exists('renderView')) {
     function renderView(View $view): ?bool
     {
-        if ($view->getType() === View::VIEW) {
+        if ($view->getType() === View::HTML) {
             Response::getInstance()->getController()->setView(
                 $view->getView(),
                 $view->getParams()

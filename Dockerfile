@@ -10,23 +10,23 @@ RUN apt-get -y update --fix-missing && \
 # Install useful tools and install important libaries
 RUN apt-get -y update && \
     apt-get -y --no-install-recommends install nano wget \
-dialog \
-libsqlite3-dev \
-libsqlite3-0 && \
+    dialog \
+    libsqlite3-dev \
+    libsqlite3-0 && \
     apt-get -y --no-install-recommends install default-mysql-client \
-zlib1g-dev \
-libzip-dev \
-libicu-dev && \
+    zlib1g-dev \
+    libzip-dev \
+    libicu-dev && \
     apt-get -y --no-install-recommends install --fix-missing apt-utils \
-build-essential \
-git \
-curl \
-libonig-dev && \
+    build-essential \
+    git \
+    curl \
+    libonig-dev && \
     apt-get install -y iputils-ping && \
     apt-get -y --no-install-recommends install --fix-missing libcurl4 \
-libcurl4-openssl-dev \
-zip \
-openssl && \
+    libcurl4-openssl-dev \
+    zip \
+    openssl && \
     rm -rf /var/lib/apt/lists/* && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -72,6 +72,8 @@ libpng-dev && \
 
 # Enable apache modules
 RUN a2enmod rewrite headers
+
+RUN service apache2 restart
 
 # Cleanup
 RUN rm -rf /usr/src/*

@@ -9,7 +9,7 @@ class ViewHtml extends View
      */
     public function __construct()
     {
-        parent::__construct(View::VIEW);
+        parent::__construct(View::HTML);
     }
 
     /**

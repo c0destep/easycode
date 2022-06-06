@@ -2,11 +2,9 @@
 
 ## Tested in PHP
 
-| Version | Supported          |
-| ------- | ------------------ |
-|   8.0   | :white_check_mark: |
-|   7.4   | :white_check_mark: |
-|   7.3   | :white_check_mark: |
+| Version | Supported |
+|---------|-----------|
+| 8.1     | Ok        |
 
 ## Reporting a Vulnerability
 

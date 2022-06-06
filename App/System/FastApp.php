@@ -129,6 +129,15 @@ class FastApp
     }
 
     /**
+     * @return FastApp
+     */
+    public static function getInstance(): FastApp
+    {
+        if (is_null(self::$instance)) self::$instance = new FastApp(true);
+        return self::$instance;
+    }
+
+    /**
      * Starts database settings
      */
     private function initDatabase(): void
@@ -150,15 +159,6 @@ class FastApp
     public function rePatch(string $Folder): void
     {
         $this->Patch = explode("/", $Folder);
-    }
-
-    /**
-     * @return FastApp
-     */
-    public static function getInstance(): FastApp
-    {
-        if (is_null(self::$instance)) self::$instance = new FastApp(true);
-        return self::$instance;
     }
 
     /**

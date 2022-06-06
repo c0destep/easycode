@@ -4,17 +4,17 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{$FastApp->getConfig("name_project")}</title>
-    <meta name="description" content="CT Expresso">
+    <meta name="description" content="...">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 
     <meta property="og:title" content="{$FastApp->getConfig("name_project")}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{route()}">
-    <meta property="og:image" content="{assets("Assets/medias/icon.png")}">
+    <meta property="og:image" content="...">
 
-    <link rel="manifest" href="{assets("site.webmanifest")}">
-    <link rel="shortcut icon" type="image/x-icon" href="{assets("medias/favicon.ico")}">
-    <link rel="apple-touch-icon" href="{assets("medias/icon.png")}">
+    <link rel="manifest" href="...">
+    <link rel="shortcut icon" type="image/x-icon" href="{assets("easycode/favicon.ico")}">
+    <link rel="apple-touch-icon" href="{assets("easycode/favicon.ico")}">
 
     <link rel="stylesheet" href="{assets("css/output.css")}">
 

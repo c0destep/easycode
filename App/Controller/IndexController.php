@@ -2,7 +2,7 @@
 
 namespace Controller;
 
-use Models\Users;
+use Models\User;
 use System\Core\Controller;
 use System\Libraries\ViewHtml;
 use System\Request;
@@ -32,11 +32,6 @@ class IndexController extends Controller
      */
     public function FindUser(Response $response, Request $request, int $id): ViewHtml
     {
-        $User = Users::find($id);
-        return $response->html()->setView("welcome")->setParams([
-            "Id" => $User->id,
-            "Name" => $User->name,
-            "Email" => $User->email
-        ]);
+        return $response->html()->setView("welcome")->setParams(User::find($id));
     }
 }

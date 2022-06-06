@@ -1,8 +1,8 @@
 module.exports = {
     darkMode: 'class',
     content: [
-        "./app/Views/**/*.{html,tpl,php}",
-        "./app/Modules/Views/**/*.{html,tpl,php}"
+        "./App/Views/**/*.{html,tpl}",
+        "./App/Modules/Views/**/*.{html,tpl}"
     ],
     theme: {
         extend: {},

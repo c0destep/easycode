@@ -4,12 +4,11 @@ services:
         image: mysql
         ports:
             - "3306:3306"
-        command:
-            - -default-authentication-plugin=mysql_native_password
+        command: --default-authentication-plugin=mysql_native_password
         environment:
             MYSQL_DATABASE: development
-            MYSQL_ROOT_PASSWORD: dev
-            MYSQL_PASSWORD: dev
+            MYSQL_ROOT_PASSWORD: docker
+            MYSQL_PASSWORD: docker
         volumes:
             - ./dump:/docker-entrypoint-initdb.d
             - ./conf:/etc/mysql/conf.d
@@ -33,8 +32,8 @@ services:
         ports:
             - "8000:80"
         environment:
-            MYSQL_USER: root
-            MYSQL_PASSWORD: dev
-            MYSQL_ROOT_PASSWORD: dev
+            MYSQL_USER: docker
+            MYSQL_PASSWORD: docker
+            MYSQL_ROOT_PASSWORD: docker
 volumes:
     persistent:

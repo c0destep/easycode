@@ -4,19 +4,19 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{$FastApp->getConfig("name_project")}</title>
-    <meta name="description" content="CT Expresso">
+    <meta name="description" content="...">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 
     <meta property="og:title" content="{$FastApp->getConfig("name_project")}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{route()}">
-    <meta property="og:image" content="{assets("Assets/medias/icon.png")}">
+    <meta property="og:image" content="...">
 
-    <link rel="manifest" href="{assets("Assets/site.webmanifest")}">
-    <link rel="shortcut icon" type="image/x-icon" href="{assets("Assets/medias/favicon.ico")}">
-    <link rel="apple-touch-icon" href="{assets("Assets/medias/icon.png")}">
+    <link rel="manifest" href="...">
+    <link rel="shortcut icon" type="image/x-icon" href="{assets("easycode/favicon.ico")}">
+    <link rel="apple-touch-icon" href="{assets("easycode/favicon.ico")}">
 
-    <link rel="stylesheet" href="{assets("Assets/css/output.css")}">
+    <link rel="stylesheet" href="{assets("css/output.css")}">
 
     <meta name="theme-color" content="#F59E0B">
 </head>
@@ -32,7 +32,7 @@
                     Page not found
                 </p>
                 <p class="my-4 text-2xl text-zinc-500 lg:mx-auto">
-                    Sorry,we coundn'tfind the page you're looking for.
+                    Sorry, we couldn't find the page you're looking for.
                 </p>
                 <a href="{route()}" class="text-xl font-bold text-amber-600 hover:text-amber-700">
                     Go back home

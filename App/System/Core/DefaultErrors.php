@@ -2,7 +2,6 @@
 
 namespace System\Core;
 
-use Exception;
 use JetBrains\PhpStorm\NoReturn;
 use System\Libraries\Lang;
 use System\Libraries\Smarty;
@@ -69,10 +68,10 @@ class DefaultErrors
     }
 
     /**
-     * @param int $code
-     * @param Exception $exception
+     * @param int|string $code
+     * @param object $exception
      */
-    #[NoReturn] public function ErrorXXX(int $code, Exception $exception): void
+    #[NoReturn] public function ErrorXXX(int|string $code, object $exception): void
     {
         global $Config;
         Response::getInstance()->setHeader("HTTP/1.0 {$code}");
@@ -80,14 +79,15 @@ class DefaultErrors
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
             echo HooksRoutes::getInstance()->apiErrorCallJson($exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), $exception->getCode());
-            exit($code);
+            exit();
         }
+
         if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
             Smarty::getInstance()->setDefaultTemplate();
             Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Exception" => $exception]);
         } else {
             getViewPhp("Error/ErrorXXX.php", ["Exception" => $exception]);
         }
-        exit($code);
+        exit();
     }
 }

@@ -2,27 +2,28 @@
 
 use Controller\IndexController;
 use System\Core\Routes;
+use System\Response;
 use System\ResponseType;
 
-Routes::get("/", [
-    "Controller" => IndexController::class,
-    "Method" => "Index",
-    "Headers" => [
+Routes::group(Response::GET, '/', [
+    '' => [
+        'Controller' => IndexController::class,
+        'Method' => 'Index',
+        "Headers" => [
+            'Content-Type' => ResponseType::CONTENT_HTML
+        ]
+    ],
+    'find/{id}' => [
+        'Controller' => IndexController::class,
+        'Method' => 'FindUser',
+        "Headers" => [
+            'Content-Type' => ResponseType::CONTENT_HTML
+        ]
+    ]
+], [
+    "RequireHeader" => [
         'Content-Type' => ResponseType::CONTENT_HTML
     ],
-    "RequireHeader" => [],
-    "onCallBefore" => [],
-    "onCallAfter" => [],
-    "onCallFinish" => []
-]);
-
-Routes::get("find/{id}", [
-    "Controller" => IndexController::class,
-    "Method" => "FindUser",
-    "Headers" => [
-        'Content-Type' => ResponseType::CONTENT_HTML
-    ],
-    "RequireHeader" => [],
     "onCallBefore" => [],
     "onCallAfter" => [],
     "onCallFinish" => []
