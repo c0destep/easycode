@@ -67,9 +67,7 @@ if (!function_exists("route")) {
     function route(string $uri = "", string $protocol = null): string
     {
         $route = slash_item('route');
-        if (empty($protocol)) {
-            $route = substr($route, strpos($route, '//'));
-        } else {
+        if (!empty($protocol)) {
             $route = $protocol . substr($route, strpos($route, '://'));
         }
 

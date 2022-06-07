@@ -7,7 +7,10 @@
     <meta name="description" content="">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <link rel="shortcut icon" type="image/x-icon" href="{assets("easycode/favicon.ico")}">
-    <link rel="stylesheet" href="{assets("css/output.css")}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{assets("easycode/apple-touch-icon.png")}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{assets("easycode/favicon-32x32.png")}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{assets("easycode/favicon-16x16.png")}">
+    <link rel="manifest" href="{assets("easycode/site.webmanifest")}">
     <link rel="stylesheet" href="{assets("easycode/demo.css")}">
 </head>
 <body>
@@ -19,39 +22,21 @@
     </header>
     <main class="ptt__main">
         <div>
+            <img src="{assets('easycode/android-chrome-192x192.png')}" alt="Easycode logo">
             <h1 class="ptt__title">Easycode Framework</h1>
             <small class="ptt__subtitle">EF is a Simple Framework build with PHP 8</small>
         </div>
         <div>
-            <a class="ptt__button"
-               href="https://github.com/c0destep/easycode/blob/main/README.md" target="_blank">
+            <a class="ptt__button" href="https://github.com/c0destep/easycode/blob/main/README.md" target="_blank">
                 Documentation
             </a>
         </div>
     </main>
     <footer class="ptt__footer">
-        {if isset($Id)}
-            <h4>User</h4>
-            <p>
-                Parameter <strong>ID</strong>
-                <br>
-                Value: {$Id}
-            </p>
-            <p>
-                Parameter <strong>Name</strong>
-                <br>
-                Value: {$Name}
-            </p>
-            <p>
-                Parameter <strong>E-mail</strong>
-                <br>
-                Value: {$Email}
-            </p>
-        {/if}
+        <span>Version: {VERSION}</span>
     </footer>
 </div>
 
-<script src="{assets('js/vendor/modernizr-3.11.2.min.js')}"></script>
 <script src="{assets('js/app.js')}"></script>
 </body>
 </html>

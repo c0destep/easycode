@@ -2,6 +2,7 @@
 
 use System\FastApp;
 
+const VERSION = "v0.5.5";
 const ENVIRONMENT = "development"; // Production our Development
 const ROOT_PATH = __DIR__;
 const BASE_PATH = __DIR__ . "/App/";
