@@ -32,4 +32,15 @@ class IndexController extends Controller
     {
         return $response->html()->setView("welcome")->setParams(User::find($id));
     }
+
+    /**
+     * @param Response $response
+     * @return ViewHtml
+     * When the method has $request and $response in the parameters,
+     * both will automatically assume class System\Response and System\Request
+     */
+    public function Upload(Response $response): ViewHtml
+    {
+        return $response->html()->setView("welcome");
+    }
 }

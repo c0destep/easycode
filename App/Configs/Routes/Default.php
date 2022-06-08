@@ -28,3 +28,5 @@ Routes::group(Response::GET, '/', [
     "onCallAfter" => [],
     "onCallFinish" => []
 ]);
+
+Routes::post('/', ['Controller' => IndexController::class, 'Method' => 'Upload']);

@@ -36,6 +36,7 @@ use ArrayIterator;
 use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
+use ReturnTypeWillChange;
 use RuntimeException;
 
 /**
@@ -174,12 +175,12 @@ class File implements ArrayAccess, IteratorAggregate, Countable
      *******************************************************************************/
 
     /**
-     * Convert human readable file size (e.g. "10K" or "3M") into bytes
+     * Convert human-readable file size (e.g. "10K" or "3M") into bytes
      *
      * @param string $input
      * @return float|int
      */
-    public static function humanReadableToBytes(string $input): float|int
+    public function humanReadableToBytes(string $input): float|int
     {
         $number = (int)$input;
         $units = array(
@@ -194,6 +195,16 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         }
 
         return $number;
+    }
+
+    public function setName(string $name): void
+    {
+        self::setName($name);
+    }
+
+    public function getName(): void
+    {
+        self::getName();
     }
 
     /**
@@ -264,10 +275,6 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         return $this;
     }
 
-    /********************************************************************************
-     * Validation and Error Handling
-     *******************************************************************************/
-
     /**
      * Add file validations
      *
@@ -282,6 +289,10 @@ class File implements ArrayAccess, IteratorAggregate, Countable
 
         return $this;
     }
+
+    /********************************************************************************
+     * Validation and Error Handling
+     *******************************************************************************/
 
     /**
      * Add file validation
@@ -361,10 +372,6 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         return true;
     }
 
-    /********************************************************************************
-     * Upload
-     *******************************************************************************/
-
     /**
      * Is this collection valid and without errors?
      *
@@ -406,6 +413,10 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         return empty($this->errors);
     }
 
+    /********************************************************************************
+     * Upload
+     *******************************************************************************/
+
     /**
      * Apply callable
      * @param string $callbackName
@@ -420,6 +431,11 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         }
     }
 
+    public function getNameWithExtension(): string
+    {
+        return self::getNameWithExtension();
+    }
+
     /********************************************************************************
      * Array Access Interface
      *******************************************************************************/
@@ -429,17 +445,17 @@ class File implements ArrayAccess, IteratorAggregate, Countable
         return isset($this->objects[$offset]);
     }
 
-    public function offsetGet($offset)
+    #[ReturnTypeWillChange] public function offsetGet($offset)
     {
         return $this->objects[$offset] ?? null;
     }
 
-    public function offsetSet($offset, $value)
+    #[ReturnTypeWillChange] public function offsetSet($offset, $value)
     {
         $this->objects[$offset] = $value;
     }
 
-    public function offsetUnset($offset)
+    #[ReturnTypeWillChange] public function offsetUnset($offset)
     {
         unset($this->objects[$offset]);
     }

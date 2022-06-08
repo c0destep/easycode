@@ -1,35 +1,51 @@
 <?php
 
+use Ramsey\Uuid\Uuid;
+use System\Libraries\Images;
+use Upload\File;
+use Upload\Storage\FileSystem;
+use Upload\Validation\Dimensions;
+use Upload\Validation\Mimetype;
+use Upload\Validation\Size;
+
 if (!function_exists("uploadImage")) {
     /**
-     * Fazer upload de imagens
-     * @param $input String nome do input do arquivo
-     * @param string $size tamanho maxímo do Arquivo.. Ex: 5M, 10G ...
-     * @param array $pixels enviar array com width e height permitdo Ex: [199,100]
-     * @param array $mimes enviar array com os mimetype Ex: ['image/png', 'image/gif']
-     * @return String|array retorna nome do arquivo ou array com erros
+     * @param string $inputName
+     * @param string|null $newNameImage
+     * @param string $maxSize
+     * @param string|null $minSize
+     * @param array $pixels
+     * @param array $mimes
+     * @return array|string
      */
-    function uploadImage($input, $size = "5M", $pixels = null, $mimes = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg'])
+    function uploadImage(string $inputName, string $newNameImage = null, string $maxSize = "5M", string $minSize = null, array $pixels = [], array $mimes = ['image/png', 'image/gif', 'image/jpeg', 'image/jpg']): array|string
     {
+        $config = getConfig("upload");
+        $storage = new FileSystem(ROOT_PATH . $config['image']);
+        $file = new File($inputName, $storage);
 
-        $Config = getConfig("upload");
-        $storage = new \Upload\Storage\FileSystem(ROOT_PATH . $Config['image']);
-        $file = new \Upload\File($input, $storage);
-        $file->setName(\System\Libraries\UUID::v4() . "-" . randomCode(6));
+        $uuid = Uuid::uuid6();
 
+        if (!is_null($newNameImage)) {
+            $file->setName($newNameImage);
+        } else {
+            $file->setName($uuid->toString());
+        }
 
-        $Validations = [];
-        $Validations[] = new \Upload\Validation\Mimetype($mimes);
-        $Validations[] = new \Upload\Validation\Size($size);
-        if (!is_null($pixels) && is_array($pixels))
-            $Validations[] = new \Upload\Validation\Dimensions($pixels[0], $pixels[1]);
+        $validations = [];
+        $validations[] = new Mimetype($mimes);
+        $validations[] = new Size($file->humanReadableToBytes($maxSize), !is_null($minSize) ? $file->humanReadableToBytes($minSize) : 0);
 
-        $file->addValidations($Validations);
+        if (!empty($pixels) && is_array($pixels)) {
+            $validations[] = new Dimensions($pixels['width'], $pixels['height']);
+        }
+
+        $file->addValidations($validations);
 
         try {
             $file->upload();
             return $file->getNameWithExtension();
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return $file->getErrors();
         }
     }
@@ -37,53 +53,60 @@ if (!function_exists("uploadImage")) {
 
 if (!function_exists("imageCache")) {
     /**
-     * Gerar imagem de cache
-     * @param $filename
-     * @param $width
-     * @param $height
-     * @return string
+     * @param string $filePath
+     * @param int|null $width
+     * @param int|null $height
+     * @return string|null
      */
-    function imageCache($filename, $width, $height)
+    function imageCache(string $filePath, int $width = null, int $height = null): ?string
     {
-        $Config = getConfig('upload');
-        $filename = str_replace(getConfig('base_url'), "/", $filename);
-        $filename = str_replace($Config['image'], "", $filename);
+        $config = getConfig('upload');
+        $filePath = str_replace(getConfig('route'), DIRECTORY_SEPARATOR, $filePath);
+        $filePath = str_replace($config['image'], "", $filePath);
 
-        if (!is_file(ROOT_PATH . $Config['image'] . $filename)) {
-            return $filename;
-        }
+        if (!is_file(ROOT_PATH . $config['image'] . $filePath)) {
+            return null;
+        } else {
+            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $imageOld = $filePath;
 
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-        $image_old = $filename;
-        $image_new = utf8_substr($filename, 0, utf8_strrpos($filename, '.')) . '-' . (int)$width . 'x' . (int)$height . '.' . $extension;
-
-        if (!is_file(ROOT_PATH . getConfig('cache_image') . $image_new) || (filectime(ROOT_PATH . $Config['image'] . $image_old) > filectime(ROOT_PATH . getConfig('cache_image') . $image_new))) {
-            list($width_orig, $height_orig, $image_type) = getimagesize(ROOT_PATH . $Config['image'] . $image_old);
-
-            if (!in_array($image_type, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
-                return ROOT_PATH . $Config['image'] . $image_old;
+            if (!is_null($width) && !is_null($height)) {
+                $imageNew = utf8_substr($filePath, 0, utf8_strrpos($filePath, '.')) . '-' . $width . 'x' . $height . '.' . $extension;
+            } elseif (!is_null($width)) {
+                $imageNew = utf8_substr($filePath, 0, utf8_strrpos($filePath, '.')) . '-' . $width . 'w.' . $extension;
+            } elseif (!is_null($height)) {
+                $imageNew = utf8_substr($filePath, 0, utf8_strrpos($filePath, '.')) . '-' . $height . 'h.' . $extension;
+            } else {
+                $imageNew = utf8_substr($filePath, 0, utf8_strrpos($filePath, '.')) . '.' . $extension;
             }
 
-            $path = '';
-            $directories = explode('/', dirname($image_new));
-            foreach ($directories as $directory) {
-                $path = $path . '/' . $directory;
-                if (!is_dir(ROOT_PATH . getConfig('cache_image') . $path)) {
-                    @mkdir(ROOT_PATH . getConfig('cache_image') . $path, 0777);
+            if (!is_file(ROOT_PATH . getConfig('cache_image') . $imageNew) || (filectime(ROOT_PATH . $config['image'] . $imageOld) > filectime(ROOT_PATH . getConfig('cache_image') . $imageNew))) {
+                list($widthOrig, $heightOrig, $imageType) = getimagesize(ROOT_PATH . $config['image'] . $imageOld);
+
+                if (!in_array($imageType, array(IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF))) {
+                    return ROOT_PATH . $config['image'] . $imageOld;
+                }
+
+                $path = "";
+                $directories = explode(DIRECTORY_SEPARATOR, dirname($imageNew));
+                foreach ($directories as $directory) {
+                    $path = $path . DIRECTORY_SEPARATOR . $directory;
+                    if (!is_dir(ROOT_PATH . getConfig('cache_image') . $path)) {
+                        mkdir(ROOT_PATH . getConfig('cache_image') . $path);
+                    }
+                }
+
+                if (!is_null($width) && ($widthOrig !== $width) && !is_null($height) && ($heightOrig !== $height)) {
+                    $image = new Images(ROOT_PATH . $config['image'] . $imageOld);
+                    $image->resize($width, $height);
+                    $image->save(ROOT_PATH . getConfig('cache_image') . $imageNew);
+                } else {
+                    copy(ROOT_PATH . $config['image'] . $imageOld, ROOT_PATH . getConfig('cache_image') . $imageNew);
                 }
             }
 
-            if ($width_orig != $width || $height_orig != $height) {
-                $image = new \System\Libraries\Images(ROOT_PATH . $Config['image'] . $image_old);
-                $image->resize($width, $height);
-                $image->save(ROOT_PATH . getConfig('cache_image') . $image_new);
-            } else {
-                copy(ROOT_PATH . $Config['image'] . $image_old, ROOT_PATH . getConfig('cache_image') . $image_new);
-            }
+            $imageNew = str_replace(' ', '%20', $imageNew);
+            return getConfig('cache_image') . $imageNew;
         }
-
-        $image_new = str_replace(' ', '%20', $image_new);
-        return getConfig('cache_image') . $image_new;
     }
 }
