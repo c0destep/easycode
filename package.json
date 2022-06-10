@@ -1,6 +1,6 @@
 {
   "name": "easycode",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Framework Open-Source",
   "main": "public/js/app.js",
   "scripts": {
@@ -26,6 +26,6 @@
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/line-clamp": "^0.4.0",
     "@tailwindcss/typography": "^0.5.2",
-    "tailwindcss": "^3.0.24"
+    "tailwindcss": "^3.1.0"
   }
 }

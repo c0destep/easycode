@@ -4,9 +4,9 @@ namespace System\Libraries;
 
 class ModuleManager
 {
-    protected static $modules;
+    protected static mixed $modules;
 
-    public static function getModules()
+    public static function getModules(): mixed
     {
         return self::$modules;
     }

@@ -31,10 +31,6 @@
                 Documentation
             </a>
         </div>
-        <form action="{route('')}" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" id="file">
-            <button type="submit">Submit</button>
-        </form>
     </main>
     <footer class="ptt__footer">
         <span>Version: {VERSION}</span>

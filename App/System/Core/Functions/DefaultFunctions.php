@@ -148,7 +148,7 @@ if (!function_exists("getClientIpServer")) {
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
             $ipAddress = $_SERVER['REMOTE_ADDR'];
         } else {
-            $ipAddress = 'UNKNOWN, BUT IT MAY BE FROM THE FUTURE';
+            $ipAddress = "UNKNOWN";
         }
 
         return $ipAddress;
@@ -163,8 +163,13 @@ if (!function_exists("detectBrowser")) {
      */
     #[ArrayShape(['ip' => "mixed|null|string", 'userAgent' => "mixed|null|string", 'name' => "string", 'platform' => "string", 'pattern' => "string", 'version' => "mixed"])] function detectBrowser(string $userAgent = null, string $ip = null): array
     {
-        if (is_null($ip)) $ip = getClientIpServer();
-        if (is_null($userAgent)) $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        if (is_null($ip)) {
+            $ip = getClientIpServer();
+        }
+
+        if (is_null($userAgent)) {
+            $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        }
 
         $browser = 'Unknown';
         $codename = 'Unknown';
