@@ -5,19 +5,17 @@ namespace Controller;
 use Models\User;
 use System\Core\Controller;
 use System\Libraries\ViewHtml;
-use System\Request;
 use System\Response;
 
 class IndexController extends Controller
 {
     /**
-     * @param Request $request
      * @param Response $response
      * @return ViewHtml
      * When the method has $request and $response in the parameters,
      * both will automatically assume class System\Response and System\Request
      */
-    public function Index(Response $response, Request $request): ViewHtml
+    public function Index(Response $response): ViewHtml
     {
         return $response->html()->setView("welcome");
     }
@@ -30,8 +28,19 @@ class IndexController extends Controller
      * both will automatically assume class System\Response and System\Request
      * @param int $id dynamic value in url {id}
      */
-    public function FindUser(Response $response, Request $request, int $id): ViewHtml
+    public function FindUser(Response $response, int $id): ViewHtml
     {
         return $response->html()->setView("welcome")->setParams(User::find($id));
+    }
+
+    /**
+     * @param Response $response
+     * @return ViewHtml
+     * When the method has $request and $response in the parameters,
+     * both will automatically assume class System\Response and System\Request
+     */
+    public function Upload(Response $response): ViewHtml
+    {
+        return $response->html()->setView("welcome");
     }
 }

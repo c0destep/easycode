@@ -2,6 +2,7 @@
 
 use System\FastApp;
 
+const VERSION = "v0.5.5";
 const ENVIRONMENT = "development"; // Production our Development
 const ROOT_PATH = __DIR__;
 const BASE_PATH = __DIR__ . "/App/";
@@ -24,7 +25,7 @@ switch (ENVIRONMENT) {
         error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT & ~E_USER_NOTICE & ~E_USER_DEPRECATED);
         break;
     default:
-        header('HTTP/1.1 503 Service Unavailable.', TRUE, 503);
+        header('HTTP/1.1 503 Service Unavailable.', true, 503);
         echo 'The application environment is not set correctly.';
         exit(1);
 }

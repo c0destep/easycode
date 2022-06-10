@@ -2,127 +2,99 @@
 
 namespace System\Libraries;
 
+use GdImage;
+
 class Images
 {
 
-    private $file;
-    private $image;
-    private $width;
-    private $height;
-    private $bits;
-    private $mime;
+    private string $filePath;
+    private mixed $image;
+    private int $width;
+    private int $height;
+    private string $bits;
+    private string $mimeType;
 
-    public function __construct($file = null)
+    public function __construct(string $filePath)
     {
-        if (is_null($file)) {
-            return null;
-        }
-        if (file_exists($file)) {
-            $this->file = $file;
+        if (file_exists($filePath)) {
+            $this->filePath = $filePath;
 
-            $info = getimagesize($file);
+            $info = getimagesize($filePath);
 
             $this->width = $info[0];
             $this->height = $info[1];
-            $this->bits = isset($info['bits']) ? $info['bits'] : '';
-            $this->mime = isset($info['mime']) ? $info['mime'] : '';
+            $this->bits = $info['bits'] ?? "";
+            $this->mimeType = $info['mime'] ?? "";
 
-            if ($this->mime == 'image/gif') {
-                $this->image = imagecreatefromgif($file);
-            } elseif ($this->mime == 'image/png') {
-                $this->image = imagecreatefrompng($file);
-            } elseif ($this->mime == 'image/jpeg') {
-                $this->image = imagecreatefromjpeg($file);
+            if ($this->mimeType === 'image/gif') {
+                $this->image = imagecreatefromgif($this->filePath);
+            } elseif ($this->mimeType === 'image/png') {
+                $this->image = imagecreatefrompng($this->filePath);
+            } elseif ($this->mimeType === 'image/jpeg') {
+                $this->image = imagecreatefromjpeg($this->filePath);
             }
+
+            return $this;
         } else {
-            setFlashError('Error: Could not load image ' . $file . '!');
-            return false;
+            setFlashError('Error: Could not load image ' . $filePath . '!');
+            return null;
         }
     }
 
-    public function getFile()
+    public function getFilePath(): string
     {
-        return $this->file;
+        return $this->filePath;
     }
 
-    public function getImage()
-    {
-        return $this->image;
-    }
-
-    public function getWidth()
-    {
-        return $this->width;
-    }
-
-    public function getHeight()
-    {
-        return $this->height;
-    }
-
-    public function getBits()
+    public function getBits(): string
     {
         return $this->bits;
     }
 
-    public function getMime()
+    public function getMimeType(): string
     {
-        return $this->mime;
+        return $this->mimeType;
     }
 
-    public function save($file, $quality = 90)
+    public function save(string $filePath, int $quality = 90): void
     {
-        $info = pathinfo($file);
+        $info = pathinfo($this->filePath);
         $extension = strtolower($info['extension']);
 
-        if (is_resource($this->image)) {
-            if ($extension == 'jpeg' || $extension == 'jpg') {
-                imagejpeg($this->image, $file, $quality);
-            } elseif ($extension == 'png') {
-                imagepng($this->image, $file);
-            } elseif ($extension == 'gif') {
-                imagegif($this->image, $file);
-            }
-
+        if ($extension === 'jpeg' || $extension === 'jpg') {
+            imagejpeg($this->image, $filePath, $quality);
+        } elseif ($extension === 'png') {
+            imagepng($this->image, $filePath, $quality / 10);
+        } elseif ($extension === 'gif') {
+            imagegif($this->image, $filePath);
+        } else {
             imagedestroy($this->image);
         }
     }
 
-    public function resize($width = 0, $height = 0, $default = '')
+    public function resize(int $width = 0, int $height = 0, string $default = ""): void
     {
-        if (!$this->width || !$this->height) {
-            return;
-        }
+        $scaleWidth = $width / $this->width;
+        $scaleHeight = $height / $this->height;
 
-        $xpos = 0;
-        $ypos = 0;
-        $scale = 1;
-
-        $scale_w = $width / $this->width;
-        $scale_h = $height / $this->height;
-
-        if ($default == 'w') {
-            $scale = $scale_w;
-        } elseif ($default == 'h') {
-            $scale = $scale_h;
+        if ($default === 'w') {
+            $scale = $scaleWidth;
+        } elseif ($default === 'h') {
+            $scale = $scaleHeight;
         } else {
-            $scale = min($scale_w, $scale_h);
+            $scale = min($scaleWidth, $scaleHeight);
         }
 
-        if ($scale == 1 && $scale_h == $scale_w && $this->mime != 'image/png') {
-            return;
-        }
+        $newWidth = (int)($this->width * $scale);
+        $newHeight = (int)($this->height * $scale);
 
-        $new_width = (int)($this->width * $scale);
-        $new_height = (int)($this->height * $scale);
+        $x = ($width - $newWidth) / 2;
+        $y = ($height - $newHeight) / 2;
 
-        $xpos = (int)(($width - $new_width) / 2);
-        $ypos = (int)(($height - $new_height) / 2);
-
-        $image_old = $this->image;
+        $imageOld = $this->image;
         $this->image = imagecreatetruecolor($width, $height);
 
-        if ($this->mime == 'image/png') {
+        if ($this->mimeType === 'image/png') {
             imagealphablending($this->image, false);
             imagesavealpha($this->image, true);
             $background = imagecolorallocatealpha($this->image, 255, 255, 255, 127);
@@ -133,29 +105,29 @@ class Images
 
         imagefilledrectangle($this->image, 0, 0, $width, $height, $background);
 
-        imagecopyresampled($this->image, $image_old, $xpos, $ypos, 0, 0, $new_width, $new_height, $this->width, $this->height);
-        imagedestroy($image_old);
+        imagecopyresampled($this->image, $imageOld, $x, $y, 0, 0, $newWidth, $newHeight, $this->width, $this->height);
+        imagedestroy($imageOld);
 
         $this->width = $width;
         $this->height = $height;
     }
 
-    public function watermark($watermark, $position = 'bottomright')
+    public function watermark(Images $watermark, string $position = 'bottom_right'): void
     {
         switch ($position) {
-            case 'topleft':
+            case 'top_left':
                 $watermark_pos_x = 0;
                 $watermark_pos_y = 0;
                 break;
-            case 'topright':
+            case 'top_right':
                 $watermark_pos_x = $this->width - $watermark->getWidth();
                 $watermark_pos_y = 0;
                 break;
-            case 'bottomleft':
+            case 'bottom_left':
                 $watermark_pos_x = 0;
                 $watermark_pos_y = $this->height - $watermark->getHeight();
                 break;
-            case 'bottomright':
+            default:
                 $watermark_pos_x = $this->width - $watermark->getWidth();
                 $watermark_pos_y = $this->height - $watermark->getHeight();
                 break;
@@ -166,25 +138,40 @@ class Images
         imagedestroy($watermark->getImage());
     }
 
-    public function crop($top_x, $top_y, $bottom_x, $bottom_y)
+    public function getWidth(): int
     {
-        $image_old = $this->image;
-        $this->image = imagecreatetruecolor($bottom_x - $top_x, $bottom_y - $top_y);
+        return $this->width;
+    }
 
-        if ($this->mime == 'image/png') {
+    public function getHeight(): int
+    {
+        return $this->height;
+    }
+
+    public function getImage(): GdImage|bool
+    {
+        return $this->image;
+    }
+
+    public function crop(int $topX, int $topY, int $bottomX, int $bottomY): void
+    {
+        $imageOld = $this->image;
+        $this->image = imagecreatetruecolor($bottomX - $topX, $bottomY - $topY);
+
+        if ($this->mimeType === 'image/png') {
             imagesavealpha($this->image, true);
             $color = imagecolorallocatealpha($this->image, 0, 0, 0, 127);
             imagefill($this->image, 0, 0, $color);
         }
 
-        imagecopy($this->image, $image_old, 0, 0, $top_x, $top_y, $this->width, $this->height);
-        imagedestroy($image_old);
+        imagecopy($this->image, $imageOld, 0, 0, $topX, $topY, $this->width, $this->height);
+        imagedestroy($imageOld);
 
-        $this->width = $bottom_x - $top_x;
-        $this->height = $bottom_y - $top_y;
+        $this->width = $bottomX - $topX;
+        $this->height = $bottomY - $topY;
     }
 
-    public function rotate($degree, $color = 'FFFFFF')
+    public function rotate(float $degree, string $color = 'FFFFFF'): void
     {
         $rgb = $this->html2rgb($color);
 
@@ -194,36 +181,18 @@ class Images
         $this->height = imagesy($this->image);
     }
 
-    private function filter()
+    private function html2rgb(string $color): ?array
     {
-        $args = func_get_args();
-        call_user_func_array('imagefilter', $args);
-    }
-
-    private function text($text, $x = 0, $y = 0, $size = 5, $color = '000000')
-    {
-        $rgb = $this->html2rgb($color);
-
-        imagestring($this->image, $size, $x, $y, $text, imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
-    }
-
-    private function merge($merge, $x = 0, $y = 0, $opacity = 100)
-    {
-        imagecopymerge($this->image, $merge->getImage(), $x, $y, 0, 0, $merge->getWidth(), $merge->getHeight(), $opacity);
-    }
-
-    private function html2rgb($color)
-    {
-        if ($color[0] == '#') {
+        if ($color[0] === '#') {
             $color = substr($color, 1);
         }
 
-        if (strlen($color) == 6) {
+        if (strlen($color) === 6) {
             list($r, $g, $b) = array($color[0] . $color[1], $color[2] . $color[3], $color[4] . $color[5]);
-        } elseif (strlen($color) == 3) {
+        } elseif (strlen($color) === 3) {
             list($r, $g, $b) = array($color[0] . $color[0], $color[1] . $color[1], $color[2] . $color[2]);
         } else {
-            return false;
+            return null;
         }
 
         $r = hexdec($r);
@@ -231,5 +200,22 @@ class Images
         $b = hexdec($b);
 
         return array($r, $g, $b);
+    }
+
+    private function filter(): void
+    {
+        $args = func_get_args();
+        call_user_func_array('imagefilter', $args);
+    }
+
+    private function text(string $text, int $x = 0, int $y = 0, int $size = 5, string $color = "000000"): void
+    {
+        $rgb = $this->html2rgb($color);
+        imagestring($this->image, $size, $x, $y, $text, imagecolorallocate($this->image, $rgb[0], $rgb[1], $rgb[2]));
+    }
+
+    private function merge(Images $merge, int $x = 0, int $y = 0, int $opacity = 100): void
+    {
+        imagecopymerge($this->image, $merge->getImage(), $x, $y, 0, 0, $merge->getWidth(), $merge->getHeight(), $opacity);
     }
 }

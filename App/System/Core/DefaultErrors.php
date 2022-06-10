@@ -78,7 +78,7 @@ class DefaultErrors
         Response::getInstance()->setContentType($Config['error_content_type']);
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
-            echo HooksRoutes::getInstance()->apiErrorCallJson($exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), $exception->getCode());
+            echo HooksRoutes::getInstance()->apiErrorCallJson([], $exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), $exception->getCode());
             exit();
         }
 

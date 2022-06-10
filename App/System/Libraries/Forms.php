@@ -17,12 +17,6 @@ class Forms
         self::$instance = $this;
     }
 
-    public static function getInstance(): Forms
-    {
-        self::$instance = new Forms();
-        return self::$instance;
-    }
-
     /**
      * @param string $key
      * @param bool $required
@@ -46,6 +40,12 @@ class Forms
         $codeForm = randomCode($sizeCodeSecurity);
         Session::getInstance()->setFlash($nameForm, $codeForm);
         return $codeForm;
+    }
+
+    public static function getInstance(): Forms
+    {
+        self::$instance = new Forms();
+        return self::$instance;
     }
 
     /**
@@ -79,11 +79,10 @@ class Forms
     public function validate(string $nameForm = null, string $method = "POST", bool $xss = false): void
     {
         $Method = match ($method) {
-            Request::GET => "get",
-            Request::REQUEST => "request",
-            Request::JSON => "json",
-            Request::EXTRA => "extra",
-            default => "post",
+            Request::GET => Request::GET,
+            Request::PUT => Request::PUT,
+            Request::DELETE => Request::DELETE,
+            default => Request::POST,
         };
 
         if (!is_null($nameForm)) {

@@ -176,11 +176,11 @@ class FileInfo extends SplFileInfo implements FileInfoInterface
     public function getMimetype(): string
     {
         if (isset($this->mimetype) === false) {
-            $finfo = new finfo(FILEINFO_MIME);
-            $mimetype = $finfo->file($this->getPathname());
+            $fileInfo = new finfo(FILEINFO_MIME);
+            $mimetype = $fileInfo->file($this->getPathname());
             $mimetypeParts = preg_split('/\s*[;,]\s*/', $mimetype);
             $this->mimetype = strtolower($mimetypeParts[0]);
-            unset($finfo);
+            unset($fileInfo);
         }
 
         return $this->mimetype;

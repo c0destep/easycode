@@ -1,22 +1,40 @@
 {
   "name": "c0destep/easycode",
   "description": "Codingstep Framework",
-  "minimum-stability": "stable",
+  "version": "0.5.6",
+  "type": "package",
+  "keywords": [
+    "php8",
+    "framework"
+  ],
+  "homepage": "https://www.codingstep.com.br",
+  "time": "2022-06-09",
   "license": "Apache-2.0",
   "authors": [
     {
       "name": "Lucas Alves",
-      "email": "codestep@codingstep.com.br"
+      "email": "codestep@codingstep.com.br",
+      "homepage": "https://www.codingstep.com.br",
+      "role": "Developer"
     }
   ],
+  "support": {
+    "email": "codestep@codingstep.com.br",
+    "issues": "https://github.com/c0destep/easycode/issues",
+    "source": "https://github.com/c0destep/easycode",
+    "docs": "https://github.com/c0destep/easycode/wiki"
+  },
   "require": {
     "php": "^8.1",
     "smarty/smarty": "^v4.1.1",
-    "illuminate/database": "^v9.16.0",
-    "illuminate/pagination": "^v9.16.0",
+    "illuminate/database": "^v9.17.0",
+    "illuminate/pagination": "^v9.17.0",
     "rlanvin/php-form": "^v2.0.1",
     "ausi/slug-generator": "^v1.1.1",
+    "ramsey/uuid": "^4.3.1",
     "ext-fileinfo": "*",
-    "ext-mbstring": "*"
-  }
+    "ext-mbstring": "*",
+    "ext-gd": "*"
+  },
+  "minimum-stability": "stable"
 }

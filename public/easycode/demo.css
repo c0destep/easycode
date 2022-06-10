@@ -124,3 +124,13 @@ body {
     background-color: rgba(104, 29, 194);
     border: 2px solid rgb(132, 53, 231);
 }
+
+.ptt__table {
+    text-align: left;
+}
+
+table, tr, td {
+    border: 1px solid;
+    border-collapse: collapse;
+    padding: 1rem;
+}

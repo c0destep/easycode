@@ -20,7 +20,7 @@ class HooksRoutes
     {
         $Header = Response::getInstance()->getResponseHeader("Content-Type");
         if ($Header === ResponseType::CONTENT_JSON) {
-            echo $this->apiErrorCallJson($message);
+            echo $this->apiErrorCallJson([], $message);
             exit();
         } else {
             throw new Exception($message, 99);
@@ -35,15 +35,15 @@ class HooksRoutes
         return self::$instance;
     }
 
-    public function apiErrorCallJson(string $message, int $responseCode = 404): string
+    public function apiErrorCallJson(array $data = [], string $message = "", int $responseCode = 404): string
     {
-        $Data = array();
-        $Data['responseCode'] = $responseCode;
-        $Data['response'] = null;
-        $Data['hasError'] = true;
-        $Data['message'] = $message;
-        $Data['time'] = time();
-        return is_bool(json_encode($Data)) ? "" : json_encode($Data);
+        $json = array();
+        $json['responseCode'] = $responseCode;
+        $json['response'] = $data;
+        $json['hasError'] = true;
+        $json['message'] = $message;
+        $json['time'] = time();
+        return is_bool(json_encode($json)) ? "" : json_encode($json);
     }
 
     public function onCallSuccess(string $message): bool|string
@@ -56,15 +56,15 @@ class HooksRoutes
         }
     }
 
-    public function apiSuccessCallJson(array $data, string $message = "", int $responseCode = 200): bool|string
+    public function apiSuccessCallJson(array $data = [], string $message = "", int $responseCode = 200): string
     {
-        $Data = array();
-        $Data['responseCode'] = $responseCode;
-        $Data['response'] = $data;
-        $Data['hasError'] = false;
-        $Data['message'] = $message;
-        $Data['time'] = time();
-        return json_encode($Data);
+        $json = array();
+        $json['responseCode'] = $responseCode;
+        $json['response'] = $data;
+        $json['hasError'] = false;
+        $json['message'] = $message;
+        $json['time'] = time();
+        return is_bool(json_encode($json)) ? "" : json_encode($json);
     }
 
     #[NoReturn] public function onNotFound(): void

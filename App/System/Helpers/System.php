@@ -1,5 +1,6 @@
 <?php
 
+use JetBrains\PhpStorm\NoReturn;
 use System\Core\HooksRoutes;
 use System\Libraries\Shortcode;
 use System\Libraries\View;
@@ -8,108 +9,101 @@ use System\Response;
 
 if (!function_exists('redirect')) {
     /**
-     * Redirecionamento de página
-     * By Codeigniter
-     * @param string $uri url ou rota a redirecionar
-     * @param string $method methodo do redirecionamento
-     * @param int $code código do redirencionamento
+     * @param string $uri
+     * @param string|null $method
+     * @param int|null $code
      */
-    function redirect($uri = '', $method = 'auto', $code = NULL)
+    #[NoReturn] function redirect(string $uri = "", string $method = null, int $code = null): void
     {
         if (!preg_match('#^(\w+:)?//#i', $uri)) {
             $uri = route($uri);
         }
-        if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== FALSE) {
+
+        if (is_null($method) && isset($_SERVER['SERVER_SOFTWARE']) && str_contains($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS')) {
             $method = 'refresh';
-        } elseif ($method !== 'refresh' && (empty($code) or !is_numeric($code))) {
+        } elseif ($method !== 'refresh' && !is_numeric($code)) {
             if (isset($_SERVER['SERVER_PROTOCOL'], $_SERVER['REQUEST_METHOD']) && $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.1') {
-                $code = ($_SERVER['REQUEST_METHOD'] !== 'GET')
-                    ? 303
-                    : 307;
+                $code = (getenv("REQUEST_METHODS") !== 'GET') ? 303 : 307;
             } else {
                 $code = 302;
             }
         }
+
         switch ($method) {
             case 'refresh':
                 header('Refresh:0;url=' . $uri);
                 break;
             default:
-                header('Location: ' . $uri, TRUE, $code);
+                header('Location: ' . $uri, true, $code);
                 break;
         }
-        exit;
     }
 }
 
 if (!function_exists("_uri_string")) {
     /**
-     * Contruir query string
-     * @param $uri
+     * @param string|array $uri
      * @return string
      */
-    function _uri_string($uri)
+    function _uri_string(string|array $uri): string
     {
-        if (getConfig("enable_query_strings") === FALSE) {
+        if (getConfig("enable_query_strings") === false) {
             is_array($uri) && $uri = implode('/', $uri);
             return ltrim($uri, '/');
         } elseif (is_array($uri)) {
             return http_build_query($uri);
+        } else {
+            return $uri;
         }
-        return $uri;
     }
 }
 
 if (!function_exists("route")) {
     /**
-     * Obter url completa de uma rota
-     * @param string $uri rota
-     * @param string|null $protocol protocolo da rota Ex: http, https, ftp etc...
-     * @return string url completa da rota
+     * @param string $uri
+     * @param string|null $protocol
+     * @return string
      */
     function route(string $uri = "", string $protocol = null): string
     {
         $route = slash_item('route');
-        if (isset($protocol)) {
-            if ($protocol === "") {
-                $route = substr($route, strpos($route, '//'));
-            } else {
-                $route = $protocol . substr($route, strpos($route, '://'));
-            }
+        if (!empty($protocol)) {
+            $route = $protocol . substr($route, strpos($route, '://'));
         }
+
         return $route . _uri_string($uri);
     }
 }
 
 if (!function_exists("getQuery")) {
     /**
-     * Obter todos os parametos passador por GET
-     * @param array $removeKeys remover parametros especificos
-     * @param bool $hasGet retornar com & se true ou ou ? se false
-     * @return string query string
+     * @param array $removeKeys
+     * @param bool $hasGet
+     * @return string
      */
-    function getQuery($removeKeys = [], $hasGet = false)
+    function getQuery(array $removeKeys = [], bool $hasGet = false): string
     {
-        $Query = $_SERVER['QUERY_STRING'];
-        parse_str($Query, $get_array);
+        $query = $_SERVER['QUERY_STRING'];
+        parse_str($query, $get_array);
 
         foreach ($removeKeys as $key) {
-            if (isset($get_array[$key]))
+            if (isset($get_array[$key])) {
                 unset($get_array[$key]);
+            }
         }
 
-        if ($hasGet)
+        if ($hasGet) {
             return "&" . http_build_query($get_array);
-
-        return "?" . http_build_query($get_array);
+        } else {
+            return "?" . http_build_query($get_array);
+        }
     }
 }
 
 if (!function_exists("assets")) {
     /**
-     * Carregar arquivos de layout na pasta setada nas configurações
-     * @param $file String nome do arquivo desejado
-     * @return string retorna url completa do arquivo
+     * @param string $file
+     * @return string
      */
     function assets(string $file): string
     {
@@ -127,7 +121,7 @@ if (!function_exists("slash_item")) {
         $Config = getConfig();
         if (!isset($Config[$item])) {
             return null;
-        } elseif (trim($Config[$item]) === "") {
+        } elseif (empty(trim($Config[$item]))) {
             return "";
         } else {
             return rtrim($Config[$item], "/") . "/";
@@ -137,69 +131,69 @@ if (!function_exists("slash_item")) {
 
 if (!function_exists("randomCode")) {
     /**
-     * Gerar string aléatoria
-     * @param int $tamanho tamanho da string que deseja gerar
+     * @param int $length
      * @return string
      */
-    function randomCode($tamanho = 8)
+    function randomCode(int $length = 8): string
     {
-        $retorno = '';
-        $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-        $len = strlen($caracteres);
-        for ($n = 1; $n <= $tamanho; $n++) {
+        $code = "";
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $len = strlen($characters);
+        for ($n = 1; $n <= $length; $n++) {
             $rand = mt_rand(1, $len);
-            $retorno .= str_shuffle($caracteres)[$rand - 1];
+            $code .= str_shuffle($characters)[$rand - 1];
         }
-        return $retorno;
+        return $code;
     }
 }
 
 if (!function_exists("dateToTime")) {
     /**
-     * Converter formato de data para timestamp
-     * @param $date String Data desejada
-     * @param string $format Formato da data passada
-     * @return bool|int
+     * @param string $date
+     * @param string $format
+     * @return bool|int|null
      */
-    function dateToTime($date, $format = "YYYY-MM-DD")
+    function dateToTime(string $date, string $format = "YYYY-MM-DD"): bool|int|null
     {
-        if (strlen($date) != strlen($format))
-            return 0;
+        if (strlen($date) !== strlen($format)) {
+            return null;
+        } else {
+            switch ($format) {
+                case 'YYYY/MM/DD':
+                case 'YYYY-MM-DD':
+                    list($y, $m, $d) = preg_split('/[-\.\/ ]/', $date);
+                    break;
+                case 'YYYY/DD/MM':
+                case 'YYYY-DD-MM':
+                    list($y, $d, $m) = preg_split('/[-\.\/ ]/', $date);
+                    break;
+                case 'DD-MM-YYYY':
+                case 'DD/MM/YYYY':
+                    list($d, $m, $y) = preg_split('/[-\.\/ ]/', $date);
+                    break;
 
-        switch ($format) {
-            case 'YYYY/MM/DD':
-            case 'YYYY-MM-DD':
-                list($y, $m, $d) = preg_split('/[-\.\/ ]/', $date);
-                break;
-            case 'YYYY/DD/MM':
-            case 'YYYY-DD-MM':
-                list($y, $d, $m) = preg_split('/[-\.\/ ]/', $date);
-                break;
-            case 'DD-MM-YYYY':
-            case 'DD/MM/YYYY':
-                list($d, $m, $y) = preg_split('/[-\.\/ ]/', $date);
-                break;
+                case 'MM-DD-YYYY':
+                case 'MM/DD/YYYY':
+                    list($m, $d, $y) = preg_split('/[-\.\/ ]/', $date);
+                    break;
 
-            case 'MM-DD-YYYY':
-            case 'MM/DD/YYYY':
-                list($m, $d, $y) = preg_split('/[-\.\/ ]/', $date);
-                break;
+                case 'YYYYMMDD':
+                    $y = substr($date, 0, 4);
+                    $m = substr($date, 4, 2);
+                    $d = substr($date, 6, 2);
+                    break;
 
-            case 'YYYYMMDD':
-                $y = substr($date, 0, 4);
-                $m = substr($date, 4, 2);
-                $d = substr($date, 6, 2);
-                break;
+                case 'YYYYDDMM':
+                    $y = substr($date, 0, 4);
+                    $d = substr($date, 4, 2);
+                    $m = substr($date, 6, 2);
+                    break;
+                default:
+                    return false;
+            }
 
-            case 'YYYYDDMM':
-                $y = substr($date, 0, 4);
-                $d = substr($date, 4, 2);
-                $m = substr($date, 6, 2);
-                break;
-            default:
-                return false;
+            return mktime(0, 0, 0, $m, $d, $y);
         }
-        return mktime(0, 0, 0, $m, $d, $y);
     }
 }
 
@@ -248,12 +242,12 @@ if (!function_exists('setConfig')) {
 if (!function_exists('apiSuccessCall')) {
     /**
      * Returns an successful JSON
-     * @param string $data
+     * @param array $data
      * @param string $message
      * @param int $code
-     * @return false|string
+     * @return string
      */
-    function apiSuccessCall(string $data, string $message = "", int $code = 200): bool|string
+    function apiSuccessCall(array $data, string $message = "", int $code = 200): string
     {
         return HooksRoutes::getInstance()->apiSuccessCallJson($data, $message, $code);
     }
@@ -262,13 +256,14 @@ if (!function_exists('apiSuccessCall')) {
 if (!function_exists('apiErrorCall')) {
     /**
      * Returns an error JSON
+     * @param array $data
      * @param string $message
      * @param int $code
-     * @return false|string
+     * @return string
      */
-    function apiErrorCall(string $message, int $code = 404): bool|string
+    function apiErrorCall(array $data, string $message, int $code = 404): string
     {
-        return HooksRoutes::getInstance()->apiErrorCallJson($message, $code);
+        return HooksRoutes::getInstance()->apiErrorCallJson($data, $message, $code);
     }
 }
 
@@ -284,9 +279,9 @@ if (!function_exists('getDatetime')) {
 }
 
 if (!function_exists('execute_callbacks')) {
-    function execute_callbacks($callback, $type, $attrs = [])
+    function execute_callbacks($callback, $type, $attrs = []): void
     {
-        if (isset($callback[$type]) && !is_null($callback[$type])) {
+        if (isset($callback[$type])) {
             if (is_array($callback[$type])) {
                 foreach ($callback[$type] as $callsback) {
                     $onCallClass = $callsback[0];
@@ -327,7 +322,7 @@ if (!function_exists('execute_callbacks')) {
 }
 
 if (!function_exists('execute_class')) {
-    function execute_class($class, $method, $attrs = [])
+    function execute_class($class, $method, $attrs = []): bool
     {
         if (class_exists($class)) {
             try {

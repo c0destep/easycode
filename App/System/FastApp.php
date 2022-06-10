@@ -57,7 +57,7 @@ class FastApp
         $this->initDatabase();
 
         $this->RequestURI = getUriPatch();
-        $RequestMethod = $_SERVER['REQUEST_METHOD'];
+        $RequestMethod = getenv('REQUEST_METHOD');
 
         $this->rePatch($this->RequestURI);
         if (empty($this->Patch[0]) && !empty(getConfig("default_route"))) {
