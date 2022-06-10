@@ -1,8 +1,9 @@
 {
   "name": "easycode",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Framework Open-Source",
   "main": "public/js/app.js",
+  "private": true,
   "scripts": {
     "build": "npx tailwindcss -i public/css/app.css -o public/css/output.css",
     "watch": "npx tailwindcss -i public/css/app.css -o public/css/output.css --watch"
@@ -15,7 +16,11 @@
     "php8",
     "framework"
   ],
-  "author": "Codestep",
+  "author": {
+    "name": "Lucas Alves",
+    "email": "codestep@codingstep.com.br",
+    "url": "https://www.codingstep.com.br"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/c0destep/easycode/issues"
