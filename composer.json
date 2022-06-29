@@ -1,7 +1,7 @@
 {
   "name": "c0destep/easycode",
   "description": "Codingstep Framework",
-  "version": "0.5.6",
+  "version": "0.5.7-dev",
   "type": "package",
   "keywords": [
     "php8",
@@ -26,15 +26,16 @@
   },
   "require": {
     "php": "^8.1",
+    "ext-fileinfo": "*",
+    "ext-mbstring": "*",
+    "ext-gd": "*",
     "smarty/smarty": "^v4.1.1",
     "illuminate/database": "^v9.17.0",
     "illuminate/pagination": "^v9.17.0",
     "rlanvin/php-form": "^v2.0.1",
     "ausi/slug-generator": "^v1.1.1",
     "ramsey/uuid": "^4.3.1",
-    "ext-fileinfo": "*",
-    "ext-mbstring": "*",
-    "ext-gd": "*"
+    "vlucas/phpdotenv": "^v5.4.1"
   },
   "minimum-stability": "stable"
 }

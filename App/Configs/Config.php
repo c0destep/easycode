@@ -1,6 +1,5 @@
 <?php
 
-use System\Database\EloquentDriver;
 use System\ResponseType;
 
 $Config = array();
@@ -36,20 +35,6 @@ $Config['error_extra_headers'] = [];
 
 $Config['enable_query_strings'] = true;
 $Config['encrypt_key'] = "JktUSnhrOENjWnhjVF1kLA==";
-
-/**
- * DATABASE CONFIG
- */
-$Config['db_driver'] = [
-    "isActive" => true,
-    "class" => EloquentDriver::class, //Class Driver for Database Connection Setup
-    "config" => [
-        "db_hostname" => "localhost",
-        "db_database" => "easycode",
-        "db_username" => "root",
-        "db_password" => "",
-    ]
-];
 
 /**
  * SESSION CONFIG

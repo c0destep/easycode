@@ -6,6 +6,7 @@ use Exception;
 use System\Core\DefaultErrors;
 use System\Core\HooksRoutes;
 use System\Core\Routes;
+use System\Database\EloquentDriver;
 use System\Libraries\Hooks;
 use System\Libraries\Lang;
 use System\Libraries\ModuleManager;
@@ -139,7 +140,9 @@ class FastApp
      */
     public static function getInstance(): FastApp
     {
-        if (is_null(self::$instance)) self::$instance = new FastApp(true);
+        if (!isset(self::$instance)) {
+            self::$instance = new self(true);
+        }
         return self::$instance;
     }
 
@@ -149,12 +152,9 @@ class FastApp
     private function initDatabase(): void
     {
         $Config = getConfig("db_driver");
-        if ($Config["isActive"] && (!is_null($Config['class']))) {
-            if (class_exists($Config['class'])) {
-                $DriverClass = $Config['class'];
-                $Driver = new $DriverClass();
-                $Driver->createConnection($Config["config"]);
-            }
+        if ($Config["isActive"]) {
+            $eloquent = new EloquentDriver();
+            $eloquent->createConnection();
         }
     }
 
@@ -169,10 +169,10 @@ class FastApp
 
     /**
      * Obter valor de um path da url
-     * @param string $key int Número do indice
+     * @param int $key int Número do indice
      * @return null|string Retorna o valor do indice ou null se não existir
      */
-    public function getPatch(string $key): ?string
+    public function getPatch(int $key): ?string
     {
         return $this->Patch[$key] ?? null;
     }
