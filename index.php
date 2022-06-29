@@ -10,6 +10,7 @@ $dotenv->load();
 
 $dotenv->required('VERSION')->notEmpty();
 $dotenv->required('APP_ENV')->allowedValues(['development', 'production']);
+$dotenv->required('DB_ACTIVE')->isBoolean();
 $dotenv->ifPresent('DB_DRIVER')->notEmpty();
 $dotenv->ifPresent('DB_HOST')->notEmpty();
 $dotenv->ifPresent('DB_NAME')->notEmpty();

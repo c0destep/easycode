@@ -151,8 +151,7 @@ class FastApp
      */
     private function initDatabase(): void
     {
-        $Config = getConfig("db_driver");
-        if ($Config["isActive"]) {
+        if ($_ENV['DB_ACTIVE']) {
             $eloquent = new EloquentDriver();
             $eloquent->createConnection();
         }
