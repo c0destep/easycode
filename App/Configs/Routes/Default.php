@@ -5,28 +5,19 @@ use System\Core\Routes;
 use System\Response;
 use System\ResponseType;
 
-Routes::group(Response::GET, '/', [
-    '' => [
-        'Controller' => IndexController::class,
-        'Method' => 'Index',
-        "Headers" => [
-            'Content-Type' => ResponseType::CONTENT_HTML
-        ]
-    ],
-    'find/{id}' => [
-        'Controller' => IndexController::class,
-        'Method' => 'FindUser',
-        "Headers" => [
-            'Content-Type' => ResponseType::CONTENT_HTML
-        ]
+Routes::group(Response::GET, "", [
+    "" => [
+        "method" => "Index"
     ]
 ], [
-    "RequireHeader" => [
-        'Content-Type' => ResponseType::CONTENT_HTML
+    "controller" => IndexController::class,
+    "headers" => [
+        "Content-Type" => ResponseType::CONTENT_HTML
+    ],
+    "requireHeaders" => [
+        "Content-Type" => ResponseType::CONTENT_HTML
     ],
     "onCallBefore" => [],
     "onCallAfter" => [],
     "onCallFinish" => []
 ]);
-
-Routes::post('/', ['Controller' => IndexController::class, 'Method' => 'Upload']);

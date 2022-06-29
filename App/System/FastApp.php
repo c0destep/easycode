@@ -30,9 +30,13 @@ class FastApp
 
         $this->loadHelper("System");
 
-        if (getConfig('https_enable')) $this->sslRedirect();
+        /*if (getConfig('https_enable')) {
+            $this->sslRedirect();
+        }*/
 
-        if ($onlyLoad) return;
+        if ($onlyLoad) {
+            return;
+        }
 
         Lang::getInstance()->load("System");
 
@@ -58,28 +62,29 @@ class FastApp
 
         $this->RequestURI = getUriPatch();
         $RequestMethod = getenv('REQUEST_METHOD');
-
         $this->rePatch($this->RequestURI);
-        if (empty($this->Patch[0]) && !empty(getConfig("default_route"))) {
+
+        if (empty($this->Patch[0]) && (count($this->Patch) === 0) && !empty(getConfig("default_route"))) {
             $this->RequestURI = getConfig("default_route");
             $this->rePatch($this->RequestURI);
         }
 
         if (!Routes::verifyRoute($this->RequestURI, $RequestMethod)) {
-
             $nController = "\\Controller\\" . $this->Patch[0];
             $nMethod = $this->Patch[1] ?? "index";
 
-            if (!execute_class($nController, $nMethod)) goto OnNotFound;
+            if (!execute_class($nController, $nMethod)) {
+                goto OnNotFound;
+            }
         } else {
             $this->Route = Routes::getRoute($this->RequestURI, $RequestMethod);
 
             Routes::validateRoute($this->Route);
             Routes::clearRoutes();
 
-            execute_callbacks($this->Route, 'onCallBefore', $this->Route['Attrs'] ?? []);
-            if (execute_class($this->Route['Controller'], $this->Route['Method'], $this->Route['Attrs'] ?? [])) {
-                execute_callbacks($this->Route, 'onCallAfter', $this->Route['Attrs'] ?? []);
+            execute_callbacks($this->Route, 'onCallBefore', $this->Route['parameters'] ?? []);
+            if (execute_class($this->Route['controller'], $this->Route['method'], $this->Route['parameters'] ?? [])) {
+                execute_callbacks($this->Route, 'onCallAfter', $this->Route['parameters'] ?? []);
                 return;
             }
 
@@ -116,9 +121,10 @@ class FastApp
     }
 
     /**
+     * TODO Rever função
      * Redirect HTTPS
      */
-    private function sslRedirect(): void
+    /*private function sslRedirect(): void
     {
         if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === "off") {
             $location = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -126,7 +132,7 @@ class FastApp
             header('Location: ' . $location);
             exit;
         }
-    }
+    }*/
 
     /**
      * @return FastApp
@@ -154,11 +160,11 @@ class FastApp
 
     /**
      * Explode nos paths do URL
-     * @param string $Folder
+     * @param string $route
      */
-    public function rePatch(string $Folder): void
+    public function rePatch(string $route): void
     {
-        $this->Patch = explode("/", $Folder);
+        $this->Patch = explode(DIRECTORY_SEPARATOR, $route);
     }
 
     /**

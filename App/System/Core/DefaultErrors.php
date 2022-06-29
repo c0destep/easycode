@@ -2,7 +2,6 @@
 
 namespace System\Core;
 
-use JetBrains\PhpStorm\NoReturn;
 use System\Libraries\Lang;
 use System\Libraries\Smarty;
 use System\Response;
@@ -19,7 +18,7 @@ class DefaultErrors
         }
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === ResponseType::CONTENT_JSON) {
-            echo HooksRoutes::getInstance()->apiErrorCallJson($errorStr . " File: " . $errorFile . " Line: " . $errorLine, $errorNo);
+            echo HooksRoutes::getInstance()->apiErrorCallJson(message: $errorStr . " File: " . $errorFile . " Line: " . $errorLine, responseCode: $errorNo);
             return;
         }
 
@@ -47,7 +46,7 @@ class DefaultErrors
                 </div></div>";
     }
 
-    #[NoReturn] public function Error404(): void
+    public function Error404(): never
     {
         global $Config;
         Response::getInstance()->setHeader("HTTP/1.0 404 Not Found");
@@ -71,15 +70,15 @@ class DefaultErrors
      * @param int|string $code
      * @param object $exception
      */
-    #[NoReturn] public function ErrorXXX(int|string $code, object $exception): void
+    public function ErrorXXX(int|string $code, object $exception): never
     {
         global $Config;
         Response::getInstance()->setHeader("HTTP/1.0 {$code}");
         Response::getInstance()->setContentType($Config['error_content_type']);
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === "application/json") {
-            echo HooksRoutes::getInstance()->apiErrorCallJson([], $exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), $exception->getCode());
-            exit();
+            echo HooksRoutes::getInstance()->apiErrorCallJson(message: $exception->getMessage() . " File: " . $exception->getFile() . " Line: " . $exception->getLine(), responseCode: $exception->getCode());
+            exit($code);
         }
 
         if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
@@ -88,6 +87,6 @@ class DefaultErrors
         } else {
             getViewPhp("Error/ErrorXXX.php", ["Exception" => $exception]);
         }
-        exit();
+        exit($code);
     }
 }

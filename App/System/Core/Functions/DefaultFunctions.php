@@ -1,7 +1,6 @@
 <?php
 
 use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\NoReturn;
 use System\Core\DefaultErrors;
 
 if (!function_exists('handler_exception')) {
@@ -22,9 +21,10 @@ if (!function_exists('handler_exception')) {
 if (!function_exists('handler_exception')) {
     /**
      * Handler Error
-     * @param $exception
+     * @param object $exception
+     * @return never
      */
-    #[NoReturn] function handler_exception($exception): void
+    function handler_exception(object $exception): never
     {
         DefaultErrors::getInstance()->ErrorXXX($exception->getCode(), $exception);
     }
@@ -131,9 +131,9 @@ if (!function_exists("getViewPhp")) {
 
 if (!function_exists("getClientIpServer")) {
     /**
-     * @return mixed
+     * @return string
      */
-    function getClientIpServer(): mixed
+    function getClientIpServer(): string
     {
         if (isset($_SERVER['HTTP_CLIENT_IP'])) {
             $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
@@ -161,7 +161,7 @@ if (!function_exists("detectBrowser")) {
      * @param string|null $ip
      * @return array
      */
-    #[ArrayShape(['ip' => "mixed|null|string", 'userAgent' => "mixed|null|string", 'name' => "string", 'platform' => "string", 'pattern' => "string", 'version' => "mixed"])] function detectBrowser(string $userAgent = null, string $ip = null): array
+    #[ArrayShape(['ip' => "string", 'userAgent' => "string", 'name' => "string", 'platform' => "string", 'pattern' => "string", 'version' => "string"])] function detectBrowser(string $userAgent = null, string $ip = null): array
     {
         if (is_null($ip)) {
             $ip = getClientIpServer();
@@ -225,7 +225,7 @@ if (!function_exists("detectBrowser")) {
         }
 
         if ($codename == "Trident") {
-            preg_match('#rv:([0-9.|a-zA-Z.]*)#', $userAgent, $versions);
+            preg_match('#rv:([\d.|a-zA-Z]*)#', $userAgent, $versions);
             $version = $versions[1];
         }
 

@@ -8,26 +8,47 @@ use System\Response;
 
 class Routes
 {
-    protected static array $Routes = array();
-    protected static array $DynamicRoutes = array();
+    protected static array $routes = [];
+    protected static array $dynamicRoutes = [];
+
+    /**
+     * @param string $route
+     * @param array $settings
+     */
+    public static function any(string $route, array $settings): void
+    {
+        self::other(Response::ALL, $route, $settings);
+    }
+
+    /**
+     * @param string $type
+     * @param string $route
+     * @param array $settings
+     */
+    public static function other(string $type, string $route, array $settings): void
+    {
+        ["controller" => $controller, "method" => $method, "headers" => $headers, "requireHeaders" => $requireHeaders, "onCallBefore" => $onCallBefore, "onCallAfter" => $onCallAfter, "onCallFinish" => $onCallFinish] = $settings;
+        self::simple($type, $route, $controller, $method, $headers ?? [], $requireHeaders ?? [], $onCallBefore ?? [], $onCallAfter ?? [], $onCallFinish ?? []);
+    }
 
     /**
      * @param string $type Type Request
-     * @param string $route route url
-     * @param array $class
-     * @param array $Headers Response Headers
-     * @param array $RequireHeader Require headers on request
+     * @param string $route Route URL
+     * @param string $controller Controller
+     * @param string $method Function
+     * @param array $headers Headers http response
+     * @param array $requireHeaders Headers http in request
      * @param array $onCallBefore Call on Before method controller
      * @param array $onCallAfter Call on After method controller
      * @param array $onCallFinish Call on Finish controller
      */
-    public static function simple(string $type, string $route, array $class, array $Headers = array(), array $RequireHeader = array(), array $onCallBefore = array(), array $onCallAfter = array(), array $onCallFinish = array()): void
+    public static function simple(string $type, string $route, string $controller, string $method, array $headers = [], array $requireHeaders = [], array $onCallBefore = [], array $onCallAfter = [], array $onCallFinish = []): void
     {
         self::setRoute($type, $route, [
-            "Controller" => $class[0],
-            "Method" => $class[1],
-            "Headers" => $Headers,
-            "RequireHeader" => $RequireHeader,
+            "controller" => $controller,
+            "method" => $method,
+            "headers" => $headers,
+            "requireHeaders" => $requireHeaders,
             "onCallBefore" => $onCallBefore,
             "onCallAfter" => $onCallAfter,
             "onCallFinish" => $onCallFinish
@@ -43,19 +64,10 @@ class Routes
     {
         preg_match_all("/{(.*?)}/", $route, $matches);
         if (count($matches[0]) > 0) {
-            self::$DynamicRoutes[$method][$route] = $settings;
+            self::$dynamicRoutes[$method][$route] = $settings;
         } else {
-            self::$Routes[$method][$route] = $settings;
+            self::$routes[$method][$route] = $settings;
         }
-    }
-
-    /**
-     * @param string $route
-     * @param array $settings
-     */
-    public static function all(string $route, array $settings): void
-    {
-        self::setRoute(Response::ALL, $route, $settings);
     }
 
     /**
@@ -64,7 +76,7 @@ class Routes
      */
     public static function get(string $route, array $settings): void
     {
-        self::setRoute(Response::GET, $route, $settings);
+        self::other(Response::GET, $route, $settings);
     }
 
     /**
@@ -73,7 +85,7 @@ class Routes
      */
     public static function post(string $route, array $settings): void
     {
-        self::setRoute(Response::POST, $route, $settings);
+        self::other(Response::POST, $route, $settings);
     }
 
     /**
@@ -82,7 +94,7 @@ class Routes
      */
     public static function put(string $route, array $settings): void
     {
-        self::setRoute(Response::PUT, $route, $settings);
+        self::other(Response::PUT, $route, $settings);
     }
 
     /**
@@ -91,7 +103,7 @@ class Routes
      */
     public static function delete(string $route, array $settings): void
     {
-        self::setRoute(Response::DELETE, $route, $settings);
+        self::other(Response::DELETE, $route, $settings);
     }
 
     /**
@@ -100,7 +112,7 @@ class Routes
      */
     public static function patch(string $route, array $settings): void
     {
-        self::setRoute(Response::PATCH, $route, $settings);
+        self::other(Response::PATCH, $route, $settings);
     }
 
     /**
@@ -109,7 +121,7 @@ class Routes
      */
     public static function options(string $route, array $settings): void
     {
-        self::setRoute(Response::OPTIONS, $route, $settings);
+        self::other(Response::OPTIONS, $route, $settings);
     }
 
     /**
@@ -118,80 +130,95 @@ class Routes
      */
     public static function head(string $route, array $settings): void
     {
-        self::setRoute(Response::HEAD, $route, $settings);
+        self::other(Response::HEAD, $route, $settings);
     }
 
     /**
-     * @param string $type
-     * @param string $base
-     * @param array $controllers
-     * @param array $settings
+     * @param string $type Requisition type. example POST, GET, PUT
+     * @param string $base Route base
+     * @param array $routes Route configuration.
+     * @param array $settingsGroup Group configuration. Note: These settings override the individual ones.
      */
-    public static function group(string $type, string $base, array $controllers, array $settings = []): void
+    public static function group(string $type, string $base, array $routes, array $settingsGroup = []): void
     {
-        foreach ($controllers as $route => $controller) {
-            $settings = array_merge($settings, $controller);
+        $base = empty($base) ? DIRECTORY_SEPARATOR : $base;
 
+        foreach ($routes as $route => $settings) {
             if (empty($route)) {
                 $route = $base;
+            } else {
+                $route = $base . DIRECTORY_SEPARATOR . $route;
             }
 
             $route = str_replace("//", DIRECTORY_SEPARATOR, $route);
+
+            if (!empty($settingsGroup)) {
+                if (array_key_exists("controller", $settingsGroup)) {
+                    $settings["controller"] = $settingsGroup["controller"];
+                }
+
+                if (array_key_exists("method", $settingsGroup)) {
+                    $settings["method"] = $settingsGroup["method"];
+                }
+
+                if (array_key_exists("headers", $settingsGroup)) {
+                    $settings["headers"] = $settingsGroup["headers"];
+                }
+
+                if (array_key_exists("requireHeaders", $settingsGroup)) {
+                    $settings["requireHeaders"] = $settingsGroup["requireHeaders"];
+                }
+
+                if (array_key_exists("onCallBefore", $settingsGroup)) {
+                    $settings["onCallBefore"] = $settingsGroup["onCallBefore"];
+                }
+
+                if (array_key_exists("onCallAfter", $settingsGroup)) {
+                    $settings["onCallAfter"] = $settingsGroup["onCallAfter"];
+                }
+
+                if (array_key_exists("onCallFinish", $settingsGroup)) {
+                    $settings["onCallFinish"] = $settingsGroup["onCallFinish"];
+                }
+            }
 
             self::other($type, $route, $settings);
         }
     }
 
     /**
-     * @param string $type
      * @param string $route
-     * @param array $settings
+     * @param string $method
+     * @return array|null
      */
-    public static function other(string $type, string $route, array $settings): void
+    public static function getRoute(string $route, string $method = Response::ALL): ?array
     {
-        self::setRoute($type, $route, $settings);
+        return self::$routes[$method][$route] ?? null;
     }
 
     /**
      * @param string $route
      * @param string $method
-     * @return mixed
-     */
-    public static function getRoute(string $route, string $method): mixed
-    {
-        if (isset(self::$Routes[$method][$route])) {
-            return self::$Routes[$method][$route];
-        } elseif (isset(self::$Routes[Response::ALL][$route])) {
-            return self::$Routes[Response::ALL][$route];
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * @param string $route
-     * @param string $method
-     * @return mixed
+     * @return bool
      */
     public static function verifyRoute(string $route, string $method): bool
     {
-        if (isset(self::$Routes[$method][$route])) {
+        if (isset(self::$routes[$method][$route])) {
             return true;
-        } elseif (isset(self::$Routes[Response::ALL][$route])) {
-            return true;
-        } elseif (isset(self::$DynamicRoutes[$method])) {
-            foreach (self::$DynamicRoutes[$method] as $type => $args) {
-                preg_match_all("/{(.*?)}/", $type, $vars);
-                $key = str_replace($vars[0], '([^/]+)', $type);
-                if (preg_match('#^' . $key . '$#', $route, $matches)) {
-                    $attrs = [];
+        } elseif (isset(self::$dynamicRoutes[$method])) {
+            foreach (self::$dynamicRoutes[$method] as $index => $settings) {
+                preg_match_all("/{(.*?)}/", $index, $variables);
+                $key = str_replace($variables[0], '([^/]+)', $index);
 
-                    foreach ($vars[1] as $k => $var) {
-                        $attrs[$var] = $matches[$k + 1];
+                if (preg_match('#^' . $key . '$#', $route, $matches)) {
+                    $data = [];
+
+                    foreach ($variables[1] as $k => $variable) {
+                        $data[$variable] = $matches[$k + 1];
                     }
 
-                    $args['Attrs'] = $attrs;
-                    self::$Routes[$method][$matches[0]] = $args;
+                    $settings['parameters'] = $data;
+                    self::$routes[$method][$matches[0]] = $settings;
 
                     return true;
                 }
@@ -207,13 +234,13 @@ class Routes
      */
     public static function validateRoute(array $route): void
     {
-        if (isset($route['Headers']) && is_array($route['Headers'])) {
-            foreach ($route['Headers'] as $key => $value) {
+        if (isset($route['headers']) && is_array($route['headers'])) {
+            foreach ($route['headers'] as $key => $value) {
                 Response::getInstance()->setHeader($key, $value);
             }
         }
-        if (isset($route['RequireHeader']) && is_array($route['RequireHeader'])) {
-            foreach ($route['RequireHeader'] as $key => $value) {
+        if (isset($route['requireHeaders']) && is_array($route['requireHeaders'])) {
+            foreach ($route['requireHeaders'] as $key => $value) {
                 if ($key === "Content-Type") {
                     $accept = explode(',', Request::getInstance()->getHeader('Accept'));
                     if (!in_array($value, $accept)) {
@@ -228,7 +255,7 @@ class Routes
 
     public static function clearRoutes(): void
     {
-        self::$DynamicRoutes = array();
-        self::$Routes = array();
+        self::$dynamicRoutes = [];
+        self::$routes = [];
     }
 }

@@ -2,18 +2,16 @@
 
 use System\FastApp;
 
-const VERSION = "v0.5.5";
+const VERSION = "v0.5.7";
 const ENVIRONMENT = "development"; // Production our Development
 const ROOT_PATH = __DIR__;
-const BASE_PATH = __DIR__ . "/App/";
+const BASE_PATH = ROOT_PATH . "/App/";
 const BASE_PATH_CACHE = __DIR__ . "/App/Cache/";
 const BASE_PATH_THIRD = __DIR__ . "/App/Third/";
 const BASE_PATH_MODELS = __DIR__ . "/App/Models/";
 const BASE_PATH_VIEWS = __DIR__ . "/App/Views/";
 const BASE_PATH_MODULES = __DIR__ . "/App/Modules/";
-
 const TEMPLATE_ENGINE_SMARTY = "smarty";
-const TEMPLATE_WITHOUT_ENGINE = "without";
 
 switch (ENVIRONMENT) {
     case 'development':

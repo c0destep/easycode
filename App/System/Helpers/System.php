@@ -1,8 +1,6 @@
 <?php
 
-use JetBrains\PhpStorm\NoReturn;
 use System\Core\HooksRoutes;
-use System\Libraries\Shortcode;
 use System\Libraries\View;
 use System\Request;
 use System\Response;
@@ -13,7 +11,7 @@ if (!function_exists('redirect')) {
      * @param string|null $method
      * @param int|null $code
      */
-    #[NoReturn] function redirect(string $uri = "", string $method = null, int $code = null): void
+    function redirect(string $uri = "", string $method = null, int $code = null): never
     {
         if (!preg_match('#^(\w+:)?//#i', $uri)) {
             $uri = route($uri);
@@ -37,6 +35,8 @@ if (!function_exists('redirect')) {
                 header('Location: ' . $uri, true, $code);
                 break;
         }
+
+        exit($code ?? 1);
     }
 }
 
@@ -124,7 +124,7 @@ if (!function_exists("slash_item")) {
         } elseif (empty(trim($Config[$item]))) {
             return "";
         } else {
-            return rtrim($Config[$item], "/") . "/";
+            return rtrim($Config[$item], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         }
     }
 }
@@ -310,7 +310,7 @@ if (!function_exists('execute_callbacks')) {
 
                         call_user_func_array([$onCallInit, $methodCall], $finalAttrs);
 
-                    } catch (ReflectionException $e) {
+                    } catch (ReflectionException) {
                         continue;
                     }
                 }
@@ -322,39 +322,40 @@ if (!function_exists('execute_callbacks')) {
 }
 
 if (!function_exists('execute_class')) {
-    function execute_class($class, $method, $attrs = []): bool
+    function execute_class(string $class, string $method, array $parameters = []): bool
     {
         if (class_exists($class)) {
             try {
                 $verifyClass = new ReflectionClass($class);
-                $totalParams = $verifyClass->getMethod($method)->getParameters();
+                $classParameters = $verifyClass->getMethod($method)->getParameters();
                 $initClass = new $class();
 
-                $finalAttrs = [];
-                foreach ($totalParams as $parameter) {
-                    $nameVar = $parameter->getName();
-                    if (isset($attrs[$nameVar])) {
-                        $finalAttrs[] = $attrs[$nameVar];
+                $newParameters = [];
+                foreach ($classParameters as $parameter) {
+                    $nameParameter = $parameter->getName();
+                    if (isset($parameters[$nameParameter])) {
+                        $newParameters[] = $parameters[$nameParameter];
                     } else {
-                        switch ($nameVar) {
+                        switch ($nameParameter) {
                             case 'request':
-                                $finalAttrs[] = Request::getInstance();
+                                $newParameters[] = Request::getInstance();
                                 break;
                             case 'response':
                                 $response = Response::getInstance();
                                 $response->setController($initClass);
-                                $finalAttrs[] = $response;
+                                $newParameters[] = $response;
                                 break;
                         }
                     }
                 }
 
-                $Return = call_user_func_array([$initClass, $method], $finalAttrs);
-                if ($Return instanceof View) renderView($Return);
+                $returnFunction = call_user_func_array([$initClass, $method], $newParameters);
+                if ($returnFunction instanceof View) {
+                    renderView($returnFunction);
+                }
 
                 return true;
-            } catch (ReflectionException $e) {
-
+            } catch (ReflectionException) {
                 return false;
             }
         }
@@ -363,10 +364,9 @@ if (!function_exists('execute_class')) {
 }
 
 if (!function_exists('getUriPatch')) {
-    function getUriPatch(): array|string|null
+    function getUriPatch(): array|string
     {
-        $str = str_replace_first(getConfig('base_dir'), "", $_SERVER['REQUEST_URI']);
-        return str_replace([$_SERVER['QUERY_STRING'], "?"], "", $str);
+        return str_replace([$_SERVER['QUERY_STRING'], "?", getConfig('base_dir')], "", getenv("REQUEST_URI"));
     }
 }
 
@@ -384,34 +384,13 @@ if (!function_exists('loadFilesRoute')) {
     }
 }
 
-if (!function_exists('addShortcode')) {
-    function addShortcode($name, $function): void
-    {
-        Shortcode::getInstance()->addHandlers($name, $function);
-    }
-}
-
-if (!function_exists('renderShortcode')) {
-    function renderShortcode(string $text): ?string
-    {
-        return Shortcode::getInstance()->getProcessor($text);
-    }
-}
-
 if (!function_exists('renderView')) {
-    function renderView(View $view): ?bool
+    function renderView(View $view): void
     {
         if ($view->getType() === View::HTML) {
-            Response::getInstance()->getController()->setView(
-                $view->getView(),
-                $view->getParams()
-            );
-            return true;
-        } elseif ($view->getType() === View::JSON) {
-            echo $view->toJSON();
-            return true;
+            Response::getInstance()->getController()->setView($view->getView(), $view->getParams());
         } else {
-            return null;
+            echo $view->toJSON();
         }
     }
 }
