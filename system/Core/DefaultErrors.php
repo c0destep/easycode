@@ -2,20 +2,19 @@
 
 namespace System\Core;
 
-use System\Libraries\Lang;
 use System\Libraries\Smarty;
 use System\Response;
 use System\ResponseType;
 
 class DefaultErrors
 {
-    protected static DefaultErrors $instance;
+    private static DefaultErrors $instance;
 
     public function handlerError(string $errorNo = null, string $errorStr = null, string $errorFile = null, string $errorLine = null): void
     {
-        if (ENVIRONMENT === "production") {
+        /*if (ENVIRONMENT === "production") {
             return;
-        }
+        }*/
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === ResponseType::CONTENT_JSON) {
             echo HooksRoutes::getInstance()->apiErrorCallJson(message: $errorStr . " File: " . $errorFile . " Line: " . $errorLine, responseCode: $errorNo);
@@ -30,6 +29,7 @@ class DefaultErrors
         if (!isset(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -53,16 +53,13 @@ class DefaultErrors
         Response::getInstance()->setContentType($Config['error_content_type']);
 
         if (Response::getInstance()->getResponseHeader("Content-Type") === ResponseType::CONTENT_JSON) {
-            echo HooksRoutes::getInstance()->apiErrorCallJson(Lang::get("error404"), 404);
+            echo HooksRoutes::getInstance()->apiErrorCallJson(message: "Not Found");
             exit(404);
         }
 
-        if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
-            Smarty::getInstance()->setDefaultTemplate();
-            Smarty::getInstance()->view("Error/Error404.tpl");
-        } else {
-            getViewPhp("Error/Error404.php");
-        }
+        Smarty::getInstance()->setDefaultTemplate();
+        Smarty::getInstance()->view("Error/Error404.tpl");
+
         exit(404);
     }
 
@@ -81,12 +78,9 @@ class DefaultErrors
             exit($code);
         }
 
-        if ($Config["template"] === TEMPLATE_ENGINE_SMARTY) {
-            Smarty::getInstance()->setDefaultTemplate();
-            Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Exception" => $exception]);
-        } else {
-            getViewPhp("Error/ErrorXXX.php", ["Exception" => $exception]);
-        }
+        Smarty::getInstance()->setDefaultTemplate();
+        Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Exception" => $exception]);
+
         exit($code);
     }
 }

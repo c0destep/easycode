@@ -1,13 +1,13 @@
 <?php
 
-use Controller\IndexController;
+use App\Controllers\IndexController;
 use System\Core\Routes;
 use System\Response;
 use System\ResponseType;
 
 Routes::group(Response::GET, "", [
     "" => [
-        "method" => "Index"
+        "method" => "index"
     ]
 ], [
     "controller" => IndexController::class,

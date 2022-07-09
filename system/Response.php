@@ -18,14 +18,18 @@ class Response
     const PATCH = "PATCH";
     const OPTIONS = "OPTIONS";
     const HEAD = "HEAD";
-    protected static ?Response $instance = null;
-    protected array $responseHeader = array();
-    protected ?Controller $controller = null;
+    private static Response $instance;
+    protected array $responseHeader = [];
+    protected Controller $controller;
+
+    private function __construct()
+    {
+    }
 
     /**
-     * @return null|Response
+     * @return Response
      */
-    public static function getInstance(): ?Response
+    public static function getInstance(): Response
     {
         if (!isset(self::$instance)) {
             self::$instance = new self();
@@ -106,11 +110,11 @@ class Response
     }
 
     /**
-     * @return Controller|null $controller
+     * @return Controller $controller
      */
-    public function getController(): ?Controller
+    public function getController(): Controller
     {
-        return $this->controller ?? null;
+        return $this->controller;
     }
 
     /**

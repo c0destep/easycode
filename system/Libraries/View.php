@@ -8,7 +8,7 @@ class View
     const HTML = 'html';
 
     protected string $file;
-    protected array $params = array();
+    protected array $params = [];
     protected string $message;
     protected string $status;
     protected string $type = "html";

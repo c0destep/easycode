@@ -61,7 +61,7 @@ if (!function_exists('loaderFastApp')) {
      */
     function loaderFastApp(string $class): void
     {
-        $filename = BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+        /*$filename = BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
         $filename = str_replace("//", DIRECTORY_SEPARATOR, $filename);
 
         if (file_exists($filename)) {
@@ -71,7 +71,7 @@ if (!function_exists('loaderFastApp')) {
             if (file_exists($filename)) {
                 require_once($filename);
             }
-        }
+        }*/
     }
 }
 
@@ -124,8 +124,8 @@ if (!function_exists("getViewPhp")) {
      */
     function getViewPhp(string $file, array $data = array()): void
     {
-        extract($data);
-        include BASE_PATH . "Views/" . $file;
+        //extract($data);
+        //include BASE_PATH . "Views/" . $file;
     }
 }
 

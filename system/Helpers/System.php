@@ -111,24 +111,6 @@ if (!function_exists("assets")) {
     }
 }
 
-if (!function_exists("slash_item")) {
-    /**
-     * @param string $item
-     * @return null|string
-     */
-    function slash_item(string $item): ?string
-    {
-        $Config = getConfig();
-        if (!isset($Config[$item])) {
-            return null;
-        } elseif (empty(trim($Config[$item]))) {
-            return "";
-        } else {
-            return rtrim($Config[$item], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        }
-    }
-}
-
 if (!function_exists("randomCode")) {
     /**
      * @param int $length
@@ -144,98 +126,6 @@ if (!function_exists("randomCode")) {
             $code .= str_shuffle($characters)[$rand - 1];
         }
         return $code;
-    }
-}
-
-if (!function_exists("dateToTime")) {
-    /**
-     * @param string $date
-     * @param string $format
-     * @return bool|int|null
-     */
-    function dateToTime(string $date, string $format = "YYYY-MM-DD"): bool|int|null
-    {
-        if (strlen($date) !== strlen($format)) {
-            return null;
-        } else {
-            switch ($format) {
-                case 'YYYY/MM/DD':
-                case 'YYYY-MM-DD':
-                    list($y, $m, $d) = preg_split('/[-\.\/ ]/', $date);
-                    break;
-                case 'YYYY/DD/MM':
-                case 'YYYY-DD-MM':
-                    list($y, $d, $m) = preg_split('/[-\.\/ ]/', $date);
-                    break;
-                case 'DD-MM-YYYY':
-                case 'DD/MM/YYYY':
-                    list($d, $m, $y) = preg_split('/[-\.\/ ]/', $date);
-                    break;
-
-                case 'MM-DD-YYYY':
-                case 'MM/DD/YYYY':
-                    list($m, $d, $y) = preg_split('/[-\.\/ ]/', $date);
-                    break;
-
-                case 'YYYYMMDD':
-                    $y = substr($date, 0, 4);
-                    $m = substr($date, 4, 2);
-                    $d = substr($date, 6, 2);
-                    break;
-
-                case 'YYYYDDMM':
-                    $y = substr($date, 0, 4);
-                    $d = substr($date, 4, 2);
-                    $m = substr($date, 6, 2);
-                    break;
-                default:
-                    return false;
-            }
-
-            return mktime(0, 0, 0, $m, $d, $y);
-        }
-    }
-}
-
-if (!function_exists("str_replace_first")) {
-    /**
-     * Substituir primeira ocorrencia
-     * @param $from
-     * @param $to
-     * @param $content
-     * @return null|string|string[]
-     */
-    function str_replace_first($from, $to, $content)
-    {
-        $from = '/' . preg_quote($from, '/') . '/';
-        return preg_replace($from, $to, $content, 1);
-    }
-}
-
-if (!function_exists('getConfig')) {
-    /**
-     * Get specific Config value
-     * @param string|null $key
-     * @return mixed
-     */
-    function getConfig(string $key = null): mixed
-    {
-        global $Config;
-        return is_null($key) ? $Config : $Config[$key];
-    }
-}
-
-if (!function_exists('setConfig')) {
-    /**
-     * Set specific Config value
-     * @param string $key
-     * @param mixed $value
-     * @return bool
-     */
-    function setConfig(string $key, mixed $value): bool
-    {
-        global $Config;
-        return ($Config[$key] === $value);
     }
 }
 
@@ -264,17 +154,6 @@ if (!function_exists('apiErrorCall')) {
     function apiErrorCall(array $data, string $message, int $code = 404): string
     {
         return HooksRoutes::getInstance()->apiErrorCallJson($data, $message, $code);
-    }
-}
-
-if (!function_exists('getDatetime')) {
-    /**
-     * Get date at the moment (Format for MySQL)
-     * @return false|string
-     */
-    function getDatetime(): bool|string
-    {
-        return date("Y-m-d H:i:s");
     }
 }
 
@@ -355,36 +234,20 @@ if (!function_exists('execute_class')) {
                 }
 
                 return true;
-            } catch (ReflectionException) {
-                return false;
+            } catch (ReflectionException $reflectionException) {
+                die($reflectionException);
+            } catch (SmartyException $smartyException) {
+                die($smartyException);
             }
         }
         return false;
     }
 }
 
-if (!function_exists('getUriPatch')) {
-    function getUriPatch(): array|string
-    {
-        return str_replace([$_SERVER['QUERY_STRING'], "?", getConfig('base_dir')], "", getenv("REQUEST_URI"));
-    }
-}
-
-if (!function_exists('loadFilesRoute')) {
-    function loadFilesRoute(): void
-    {
-        $Routes = getConfig("files_route");
-        foreach ($Routes as $file) {
-            if (file_exists($file)) {
-                include_once($file);
-            } else if (file_exists(BASE_PATH . "Configs/Routes/" . $file . ".php")) {
-                include_once(BASE_PATH . "Configs/Routes/" . $file . ".php");
-            }
-        }
-    }
-}
-
 if (!function_exists('renderView')) {
+    /**
+     * @throws SmartyException
+     */
     function renderView(View $view): void
     {
         if ($view->getType() === View::HTML) {
