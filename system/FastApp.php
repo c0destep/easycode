@@ -5,6 +5,7 @@ namespace System;
 use Dotenv\Dotenv;
 use Exception;
 use FilesystemIterator;
+use Mahabbat\Lang;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use System\Core\HooksRoutes;
@@ -92,6 +93,7 @@ class FastApp
         $this->loadHelpers();
         $this->loadRoutes();
 
+
         /*$Modulo = new ModuleManager();
         $Modulo->setup();*/
 
@@ -164,7 +166,7 @@ class FastApp
                 if (array_key_exists($key, self::$environments)) {
                     $temp[] = self::$environments[$key];
                 } else {
-                    $temp[] = null;
+                    throw new Exception("$env not found");
                 }
             }
 
@@ -332,6 +334,53 @@ class FastApp
         }
 
         return $this->route[$key];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function k(string $keyName, array $values = []): string
+    {
+        $l = Lang::init([
+            'dir' => '../lang',
+            'current' => $this->getClientLanguage(),
+            'available' => explode(',', self::environment('AVAILABLE_LANGUAGES')),
+            'default' => self::environment('DEFAULT_LANGUAGE'),
+            'cookie' => 'lang',
+            'cookieExpire' => time() + 86400 * 24 * 7
+        ]);
+        return $l->key($keyName, $values);
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getClientLanguage(): string
+    {
+        $httpAccept = str_replace('-', '_', getenv('HTTP_ACCEPT_LANGUAGE'));
+
+        if (strlen($httpAccept) > 1) {
+
+            $x = explode(",", $httpAccept);
+            $lang = [];
+
+            foreach ($x as $val) {
+                if (preg_match("/(.*);q=([0-1]?.d{0,4})/i", $val, $matches))
+                    $lang[$matches[1]] = (float)$matches[2];
+                else
+                    $lang[$val] = 1.0;
+            }
+
+            $val = 0.0;
+            foreach ($lang as $key => $value) {
+                if ($value > $val) {
+                    $val = (float)$value;
+                    return $key;
+                }
+            }
+        }
+
+        return self::environment('DEFAULT_LANGUAGE');
     }
 
     /**

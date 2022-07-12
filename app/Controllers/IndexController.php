@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use Exception;
 use System\Core\Controller;
 use System\Libraries\ViewHtml;
 use System\Request;
@@ -15,6 +16,7 @@ class IndexController extends Controller
      * @return ViewHtml
      * When the method has $request and $response in the parameters,
      * both will automatically assume class System\Response and System\Request
+     * @throws Exception
      */
     public function index(Response $response, Request $request): ViewHtml
     {

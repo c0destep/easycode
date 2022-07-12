@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4bc5ebb8e918cc64456d3aced20e1b14",
+    "content-hash": "99357d3288f309fc193786f10fe9396c",
     "packages": [
         {
             "name": "ausi/slug-generator",
@@ -2283,6 +2283,53 @@
             "time": "2022-06-27T17:24:16+00:00"
         },
         {
+            "name": "themahabbat/lang",
+            "version": "1.0.0.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/themahabbat/Lang-PHP.git",
+                "reference": "ca40415b825d8371dac7e1a7b19b635fd4f91fcc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/themahabbat/Lang-PHP/zipball/ca40415b825d8371dac7e1a7b19b635fd4f91fcc",
+                "reference": "ca40415b825d8371dac7e1a7b19b635fd4f91fcc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Mahabbat\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mahabbat Mammad",
+                    "email": "mahabbatmammad@gmail.com",
+                    "homepage": "http://mahabbat.eu.org",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Language changer",
+            "homepage": "https://github.com/themahabbat/Lang-PHP",
+            "keywords": [
+                "changer",
+                "language"
+            ],
+            "support": {
+                "issues": "https://github.com/themahabbat/Lang-PHP/issues",
+                "source": "https://github.com/themahabbat/Lang-PHP/tree/master"
+            },
+            "time": "2018-04-22T18:31:33+00:00"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.4.1",
             "source": {
@@ -2440,7 +2487,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "themahabbat/lang": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

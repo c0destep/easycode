@@ -1,6 +1,7 @@
 <?php
 
 use System\Core\HooksRoutes;
+use System\FastApp;
 use System\Libraries\View;
 use System\Request;
 use System\Response;
@@ -246,7 +247,7 @@ if (!function_exists('execute_class')) {
 
 if (!function_exists('renderView')) {
     /**
-     * @throws SmartyException
+     * @throws Exception
      */
     function renderView(View $view): void
     {
@@ -255,5 +256,15 @@ if (!function_exists('renderView')) {
         } else {
             echo $view->toJSON();
         }
+    }
+}
+
+if (!function_exists('__')) {
+    /**
+     * @throws Exception
+     */
+    function __(string $keyName, array $values = []): string
+    {
+        return FastApp::getInstance()->k($keyName, $values);
     }
 }
