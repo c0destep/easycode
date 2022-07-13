@@ -53,7 +53,7 @@ class Autoloader
      */
     static public function register(): void
     {
-        self::$base = dirname(__FILE__) . '/../';
+        self::$base = dirname(__FILE__) . '/easycode/';
         spl_autoload_register(array(new self, 'autoload'));
     }
 
@@ -69,7 +69,7 @@ class Autoloader
         if ($lastNsPos = strripos($className, '\\')) {
             $namespace = substr($className, 0, $lastNsPos);
             $className = substr($className, $lastNsPos + 1);
-            $fileName = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+            $fileName = Autoloader . phpstr_replace('\\', DIRECTORY_SEPARATOR, $namespace);
         }
         $fileName .= str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php';
 

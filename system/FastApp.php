@@ -368,13 +368,14 @@ class FastApp
             'cookie' => 'lang',
             'cookieExpire' => time() + 86400 * 24 * 7
         ]);
+        $l->set($this->getClientLanguage());
         return $l->key($keyName, $values);
     }
 
     /**
      * @throws Exception
      */
-    private function getClientLanguage(): string
+    public function getClientLanguage(): string
     {
         $httpAccept = str_replace('-', '_', getenv('HTTP_ACCEPT_LANGUAGE'));
 
@@ -584,6 +585,11 @@ class FastApp
     public function assets(string $file): string
     {
         return $this->baseRoute . $file;
+    }
+
+    public function route(string $uri): string
+    {
+        return $this->baseRoute . $uri;
     }
 
     private function __clone()

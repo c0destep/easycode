@@ -2,25 +2,21 @@
 
 namespace App\Controllers;
 
-use Exception;
 use System\Core\Controller;
 use System\Libraries\ViewHtml;
 use System\Request;
-use System\Response;
 
 class IndexController extends Controller
 {
     /**
-     * @param Response $response
      * @param Request $request
      * @return ViewHtml
      * When the method has $request and $response in the parameters,
      * both will automatically assume class System\Response and System\Request
-     * @throws Exception
      */
-    public function index(Response $response, Request $request): ViewHtml
+    public function index(Request $request): ViewHtml
     {
-        return $response->html()->setView("welcome");
+        return response()->html()->setView("welcome");
     }
 
     /**
@@ -31,8 +27,8 @@ class IndexController extends Controller
      * both will automatically assume class System\Response and System\Request
      * @param int $id dynamic value in url {id}
      */
-    public function findUser(Response $response, Request $request, int $id): ViewHtml
+    public function findUser(Request $request, int $id): ViewHtml
     {
-        return $response->html()->setView("welcome")->setParams(['id' => $id]);
+        return response()->html()->setView("welcome")->setParams(['id' => $id]);
     }
 }

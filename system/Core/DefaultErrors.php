@@ -58,7 +58,7 @@ class DefaultErrors
         }
 
         Smarty::getInstance()->setDefaultTemplate();
-        Smarty::getInstance()->view("Error/Error404.tpl");
+        Smarty::getInstance()->view("Error/error404.tpl");
 
         exit(404);
     }
@@ -79,7 +79,7 @@ class DefaultErrors
         }
 
         Smarty::getInstance()->setDefaultTemplate();
-        Smarty::getInstance()->view("Error/ErrorXXX.tpl", ["Exception" => $exception]);
+        Smarty::getInstance()->view("Error/errorXXX.tpl", ["Exception" => $exception]);
 
         exit($code);
     }

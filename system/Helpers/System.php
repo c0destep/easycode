@@ -41,63 +41,14 @@ if (!function_exists('redirect')) {
     }
 }
 
-if (!function_exists("_uri_string")) {
-    /**
-     * @param string|array $uri
-     * @return string
-     */
-    function _uri_string(string|array $uri): string
-    {
-        if (getConfig("enable_query_strings") === false) {
-            is_array($uri) && $uri = implode('/', $uri);
-            return ltrim($uri, '/');
-        } elseif (is_array($uri)) {
-            return http_build_query($uri);
-        } else {
-            return $uri;
-        }
-    }
-}
-
 if (!function_exists("route")) {
     /**
      * @param string $uri
-     * @param string|null $protocol
      * @return string
      */
-    function route(string $uri = "", string $protocol = null): string
+    function route(string $uri = ''): string
     {
-        $route = slash_item('route');
-        if (!empty($protocol)) {
-            $route = $protocol . substr($route, strpos($route, '://'));
-        }
-
-        return $route . _uri_string($uri);
-    }
-}
-
-if (!function_exists("getQuery")) {
-    /**
-     * @param array $removeKeys
-     * @param bool $hasGet
-     * @return string
-     */
-    function getQuery(array $removeKeys = [], bool $hasGet = false): string
-    {
-        $query = $_SERVER['QUERY_STRING'];
-        parse_str($query, $get_array);
-
-        foreach ($removeKeys as $key) {
-            if (isset($get_array[$key])) {
-                unset($get_array[$key]);
-            }
-        }
-
-        if ($hasGet) {
-            return "&" . http_build_query($get_array);
-        } else {
-            return "?" . http_build_query($get_array);
-        }
+        return FastApp::getInstance()->route(trim($uri));
     }
 }
 
@@ -108,25 +59,7 @@ if (!function_exists("assets")) {
      */
     function assets(string $file): string
     {
-        return FastApp::getInstance()->assets($file);
-    }
-}
-
-if (!function_exists("randomCode")) {
-    /**
-     * @param int $length
-     * @return string
-     */
-    function randomCode(int $length = 8): string
-    {
-        $code = "";
-        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-        $len = strlen($characters);
-        for ($n = 1; $n <= $length; $n++) {
-            $rand = mt_rand(1, $len);
-            $code .= str_shuffle($characters)[$rand - 1];
-        }
-        return $code;
+        return FastApp::getInstance()->assets(trim($file));
     }
 }
 
@@ -216,16 +149,11 @@ if (!function_exists('execute_class')) {
                     if (isset($parameters[$nameParameter])) {
                         $newParameters[] = $parameters[$nameParameter];
                     } else {
-                        switch ($nameParameter) {
-                            case 'request':
-                                $newParameters[] = Request::getInstance();
-                                break;
-                            case 'response':
-                                $response = Response::getInstance();
-                                $response->setController($initClass);
-                                $newParameters[] = $response;
-                                break;
+                        if ($nameParameter == 'request') {
+                            $newParameters[] = Request::getInstance();
                         }
+
+                        Response::getInstance()->setController($initClass);
                     }
                 }
 
@@ -237,8 +165,8 @@ if (!function_exists('execute_class')) {
                 return true;
             } catch (ReflectionException $reflectionException) {
                 die($reflectionException);
-            } catch (SmartyException $smartyException) {
-                die($smartyException);
+            } catch (Exception $e) {
+                die($e);
             }
         }
         return false;
@@ -266,5 +194,12 @@ if (!function_exists('__')) {
     function __(string $keyName, array $values = []): string
     {
         return FastApp::getInstance()->k($keyName, $values);
+    }
+}
+
+if (!function_exists('response')) {
+    function response(): Response
+    {
+        return Response::getInstance();
     }
 }

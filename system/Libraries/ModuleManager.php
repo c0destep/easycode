@@ -2,30 +2,40 @@
 
 namespace System\Libraries;
 
+use System\FastApp;
+
 class ModuleManager
 {
-    protected static mixed $modules;
+    protected static array $modules = [];
 
-    public static function getModules(): mixed
+    public function __construct()
     {
-        return self::$modules;
+        $this->setup();
     }
 
     public function setup(): void
     {
-        $GetSettings = json_decode(file_get_contents(BASE_PATH . "Modules/Settings.json"));
-        $RoutesFile = getConfig("files_route");
+        $GetSettings = json_decode(file_get_contents(FastApp::getInstance()->getModulePath() . "/settings.json"));
+        $RoutesFile = [];
         foreach ($GetSettings as $modules) {
             if ($modules->active) {
-                if (file_exists(BASE_PATH . sprintf("Modules/%s/Settings.php", $modules->key)))
-                    require_once BASE_PATH . sprintf("Modules/%s/Settings.php", $modules->key);
+                if (file_exists(FastApp::getInstance()->getModulePath() . sprintf("/%s/settings.php", $modules->key))) {
+                    require_once FastApp::getInstance()->getModulePath() . sprintf("/%s/settings.php", $modules->key);
+                }
 
-                if (file_exists(BASE_PATH . sprintf("Modules/%s/Routes.php", $modules->key)))
-                    $RoutesFile[] = BASE_PATH . sprintf("Modules/%s/Routes.php", $modules->key);
+                if (file_exists(FastApp::getInstance()->getModulePath() . sprintf("/%s/routes/web.php", $modules->key))) {
+                    $RoutesFile[] = FastApp::getInstance()->getModulePath() . sprintf("/%s/routes/web.php", $modules->key);
+                } else if (file_exists(FastApp::getInstance()->getModulePath() . sprintf("/%s/routes/api.php", $modules->key))) {
+                    $RoutesFile[] = FastApp::getInstance()->getModulePath() . sprintf("/%s/routes/api.php", $modules->key);
+                }
             }
         }
 
-        setConfig("files_route", $RoutesFile);
         self::$modules = $GetSettings;
+    }
+
+    public static function getModules(): array
+    {
+        return self::$modules;
     }
 }

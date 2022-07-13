@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="{$FastApp::environment('DEFAULT_LANGUAGE')}">
+<html lang="{$FastApp::getInstance()->getClientLanguage()}">
 <head>
     <meta charset="utf-8">
     <title>{$FastApp::environment('APP_NAME')}</title>

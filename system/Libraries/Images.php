@@ -6,7 +6,6 @@ use GdImage;
 
 class Images
 {
-
     private string $filePath;
     private mixed $image;
     private int $width;

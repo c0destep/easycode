@@ -75,7 +75,7 @@ class FileSystem implements StorageInterface
         if (!is_writable($directory)) {
             throw new InvalidArgumentException('Directory is not writable');
         }
-        $this->directory = rtrim($directory, '/') . DIRECTORY_SEPARATOR;
+        $this->directory = FileSystem . phprtrim($directory, '/');
         $this->overwrite = $overwrite;
     }
 
