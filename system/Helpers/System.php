@@ -108,7 +108,7 @@ if (!function_exists("assets")) {
      */
     function assets(string $file): string
     {
-        return route(getConfig("base_dir_assets") . $file);
+        return FastApp::getInstance()->assets($file);
     }
 }
 

@@ -1,3 +1,5 @@
 {
-  "easycode": "EF is a simple framework built with PHP 8"
+  "easycode": "EF is a simple framework built with PHP 8",
+  "version": "Version",
+  "documentation": "Documentation"
 }

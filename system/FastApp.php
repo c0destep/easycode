@@ -25,6 +25,7 @@ class FastApp
     protected string $viewPath;
     protected string $modulePath;
     protected string $routePath;
+    protected string $storagePath;
     protected string $baseRoute;
     protected string $requestURI;
     protected string $requestMethod;
@@ -49,6 +50,7 @@ class FastApp
         $this->setViewPath($this->getRootPath() . '/views');
         $this->setModulePath($this->getRootPath() . '/modules');
         $this->setRoutePath($this->getRootPath() . '/routes');
+        $this->setStoragePath($this->getRootPath() . '/storage');
 
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
         $dotenv->load();
@@ -166,7 +168,7 @@ class FastApp
                 if (array_key_exists($key, self::$environments)) {
                     $temp[] = self::$environments[$key];
                 } else {
-                    throw new Exception("$env not found");
+                    throw new Exception("$key not found");
                 }
             }
 
@@ -337,6 +339,23 @@ class FastApp
     }
 
     /**
+     * @return string
+     */
+    public function getStoragePath(): string
+    {
+        return $this->storagePath;
+    }
+
+    /**
+     * @param string $storagePath
+     * @return void
+     */
+    public function setStoragePath(string $storagePath): void
+    {
+        $this->storagePath = $storagePath;
+    }
+
+    /**
      * @throws Exception
      */
     public function k(string $keyName, array $values = []): string
@@ -374,7 +393,6 @@ class FastApp
             $val = 0.0;
             foreach ($lang as $key => $value) {
                 if ($value > $val) {
-                    $val = (float)$value;
                     return $key;
                 }
             }
@@ -561,6 +579,11 @@ class FastApp
     public function __destruct()
     {
         execute_callbacks($this->getRoute(), 'onCallFinish', $this->getRouteSetting('parameters'));
+    }
+
+    public function assets(string $file): string
+    {
+        return $this->baseRoute . $file;
     }
 
     private function __clone()
