@@ -14,7 +14,7 @@ use System\Database\EloquentDriver;
 
 class FastApp
 {
-    const VERSION = 'v0.5.7-dev';
+    const VERSION = 'v0.5.7';
     private static FastApp $instance;
     private static array $environments;
     protected string $rootPath;

@@ -1,6 +1,5 @@
 {
   "name": "easycode",
-  "version": "0.5.7",
   "description": "Framework Open-Source",
   "main": "public/js/app.js",
   "private": true,
