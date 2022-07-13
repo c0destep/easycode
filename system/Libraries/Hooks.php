@@ -4,8 +4,8 @@ namespace System\Libraries;
 
 class Hooks
 {
-    private static array $onCallBefore = array();
-    private static array $onCallAfter = array();
+    private static array $onCallBefore = [];
+    private static array $onCallAfter = [];
 
     /**
      * Add event to run before route calls
@@ -47,7 +47,6 @@ class Hooks
         foreach ($events as $class => $method) {
             self::$onCallAfter[] = array($class, $method);
         }
-
     }
 
     /**
