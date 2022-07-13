@@ -1,6 +1,5 @@
 {
   "name": "easycode",
-  "version": "0.5.6",
   "description": "Framework Open-Source",
   "main": "public/js/app.js",
   "private": true,
@@ -21,7 +20,7 @@
     "email": "codestep@codingstep.com.br",
     "url": "https://www.codingstep.com.br"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/c0destep/easycode/issues"
   },
@@ -30,7 +29,7 @@
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.2",
     "@tailwindcss/line-clamp": "^0.4.0",
-    "@tailwindcss/typography": "^0.5.2",
-    "tailwindcss": "^3.1.0"
+    "@tailwindcss/typography": "^0.5.4",
+    "tailwindcss": "^3.1.6"
   }
 }

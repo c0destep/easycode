@@ -1,8 +1,5 @@
-# IDE's
 .vscode
 .idea
-
-# Dependencies
 vendor/
-bower_components/
 node_modules/
+.env
