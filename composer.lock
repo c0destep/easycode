@@ -604,16 +604,16 @@
         },
         {
             "name": "illuminate/pagination",
-            "version": "v9.20.0",
+            "version": "v9.21.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pagination.git",
-                "reference": "850895d849c881d8a2ed0df9e335ba8c6b15b893"
+                "reference": "511d24b9a109b42c61ef9b7334b5e968f6458550"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/pagination/zipball/850895d849c881d8a2ed0df9e335ba8c6b15b893",
-                "reference": "850895d849c881d8a2ed0df9e335ba8c6b15b893",
+                "url": "https://api.github.com/repos/illuminate/pagination/zipball/511d24b9a109b42c61ef9b7334b5e968f6458550",
+                "reference": "511d24b9a109b42c61ef9b7334b5e968f6458550",
                 "shasum": ""
             },
             "require": {
@@ -650,7 +650,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2022-06-28T14:33:19+00:00"
+            "time": "2022-07-20T15:51:27+00:00"
         },
         {
             "name": "illuminate/support",
