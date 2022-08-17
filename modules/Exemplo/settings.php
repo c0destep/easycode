@@ -1,3 +1,0 @@
-<?php
-
-// Any Config...

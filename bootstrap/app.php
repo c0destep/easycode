@@ -1,7 +1,5 @@
 <?php
 
-try {
-    System\FastApp::getInstance();
-} catch (Exception $e) {
-    die($e);
-}
+use Easycode\Application\EasyApp;
+
+EasyApp::getInstance(__DIR__);

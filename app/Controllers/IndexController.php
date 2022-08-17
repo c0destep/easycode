@@ -2,9 +2,9 @@
 
 namespace App\Controllers;
 
-use System\Core\Controller;
-use System\Libraries\ViewHtml;
-use System\Request;
+use Easycode\Http\Request;
+use Easycode\Routing\Controller;
+use Easycode\View\ViewHtml;
 
 class IndexController extends Controller
 {
@@ -16,7 +16,7 @@ class IndexController extends Controller
      */
     public function index(Request $request): ViewHtml
     {
-        return response()->html()->setView("welcome");
+        return response()->html()->setView('welcome');
     }
 
     /**
@@ -29,6 +29,6 @@ class IndexController extends Controller
      */
     public function findUser(Request $request, int $id): ViewHtml
     {
-        return response()->html()->setView("welcome")->setParams(['id' => $id]);
+        return response()->html()->setView('welcome')->setParameters(['id' => $id]);
     }
 }
