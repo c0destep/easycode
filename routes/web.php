@@ -1,23 +1,8 @@
 <?php
 
 use App\Controllers\IndexController;
-use System\Core\Routes;
-use System\Response;
-use System\ResponseType;
+use Easycode\Routing\Route;
 
-Routes::group(Response::GET, "", [
-    "" => [
-        "method" => "index"
-    ]
-], [
-    "controller" => IndexController::class,
-    "headers" => [
-        "Content-Type" => ResponseType::CONTENT_HTML
-    ],
-    "requireHeaders" => [
-        "Content-Type" => ResponseType::CONTENT_HTML
-    ],
-    "onCallBefore" => [],
-    "onCallAfter" => [],
-    "onCallFinish" => []
+Route::get('/', [IndexController::class, 'index'], [
+    'Content-Type' => 'text/html charset=UTF-8'
 ]);

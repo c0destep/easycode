@@ -1,6 +1,6 @@
 {
   "name": "c0destep/easycode",
-  "description": "Codingstep Framework",
+  "description": "The Easycode Framework",
   "type": "package",
   "keywords": [
     "php8",
@@ -8,7 +8,7 @@
   ],
   "homepage": "https://www.codingstep.com.br",
   "time": "2022-06-09",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "authors": [
     {
       "name": "Lucas Alves",

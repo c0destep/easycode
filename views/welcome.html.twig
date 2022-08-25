@@ -1,15 +1,15 @@
 <!DOCTYPE HTML>
-<html lang="{$FastApp::environment('DEFAULT_LANGUAGE')}">
+<html lang="{{ app()->getClientLanguage() }}">
 <head>
     <meta charset="utf-8">
-    <title>{$FastApp::environment('APP_NAME')}</title>
+    <title>Easycode</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <link rel="apple-touch-icon" sizes="180x180" href="{assets('apple-touch-icon.png')}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{assets('favicon-32x32.png')}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{assets('favicon-16x16.png')}">
-    <link rel="icon" type="image/png" sizes="any" href="{assets('favicon.ico')}">
-    <link rel="manifest" href="{assets('site.webmanifest')}">
-    <link rel="mask-icon" href="{assets('safari-pinned-tab.svg')}" color="#5bbad5">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ assets('apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ assets('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ assets('favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="any" href="{{ assets('favicon.ico') }}">
+    <link rel="manifest" href="{{ assets('site.webmanifest') }}">
+    <link rel="mask-icon" href="{{ assets('safari-pinned-tab.svg') }}" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#f0f1fe">
     <meta name="theme-color" content="#222222">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
@@ -147,18 +147,26 @@
     </style>
 </head>
 <body>
-<div class="ptt__container">
-    <main class="ptt__main">
+<div class="code__container">
+    <header class="code__header">
+        <nav class="code__navbar">
+            <a class="code__navbar-link" href="https://github.com/c0destep/easycode" target="_blank">GitHub</a>
+        </nav>
+    </header>
+    <main class="code__main">
         <div>
-            <h1 class="ptt__title">404 ERROR - Page not found</h1>
-            <small class="ptt__subtitle">Sorry, we couldn't find the page you're looking for.</small>
+            <h1 class="code__title">Easycode Framework</h1>
+            <small class="code__subtitle">{{ __('easycode') }}</small>
         </div>
         <div>
-            <a class="ptt__button" href="#">
-                Go back home
+            <a class="code__button" href="https://github.com/c0destep/easycode/blob/main/README.md" target="_blank">
+                {{ __('documentation') }}
             </a>
         </div>
     </main>
+    <footer class="code__footer">
+        <span>{{ __('version') }}: {{ app()->getVersion() }}</span>
+    </footer>
 </div>
 
 </body>
